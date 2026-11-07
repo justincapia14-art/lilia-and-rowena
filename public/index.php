@@ -4,6 +4,7 @@
  * Front Controller & PSR-4 Router
  */
 
+date_default_timezone_set('Asia/Manila');
 session_start();
 
 // 1. PSR-4 Autoloading Setup
@@ -108,6 +109,7 @@ switch ($route) {
                 if (isset($_SESSION['admin_id'])) {
                     echo json_encode([
                         'status' => 'ok',
+                        'csrfToken' => \App\Security\Csrf::getToken(),
                         'customers' => $mapCustomers(),
                         'user' => [
                             'isLoggedIn' => true,
@@ -198,6 +200,7 @@ switch ($route) {
                         $_SESSION['user_role'] = 'admin';
                         echo json_encode([
                             'status' => 'ok',
+                            'csrfToken' => \App\Security\Csrf::getToken(),
                             'customers' => $mapCustomers(),
                             'user' => [
                                 'isLoggedIn' => true,
@@ -249,8 +252,72 @@ switch ($route) {
         }
         break;
 
-    // Admin Dashboard (Maps to Admin table & connected tables)
+    // Admin-Only JSON API Bridge for Job Orders & Deadline Management (XAMPP + MySQL)
+    case 'api_admin_job_orders':
+    case 'api_admin_update_job_order':
+        header('Content-Type: application/json; charset=utf-8');
+        if (!isset($_SESSION['admin_id']) || (int)$_SESSION['admin_id'] <= 0 || ($_SESSION['user_role'] ?? '') !== 'admin') {
+            http_response_code(403);
+            echo json_encode([
+                'status' => 'error',
+                'code'   => 403,
+                'error'  => '403 Forbidden: Only authorized administrators can access Job Orders & Deadline Management.'
+            ]);
+            exit;
+        }
+        try {
+            $jobOrderModel = new \App\Models\JobOrder();
+            if ($route === 'api_admin_update_job_order') {
+                $rawInput = file_get_contents('php://input');
+                $jsonBody = $rawInput ? (json_decode($rawInput, true) ?: []) : [];
+                $data = array_merge($_POST, $jsonBody);
+                $csrf = $data['csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+                if (!\App\Security\Csrf::verify((string)$csrf)) {
+                    http_response_code(403);
+                    echo json_encode(['status' => 'error', 'error' => 'Invalid CSRF token.']);
+                    exit;
+                }
+                $orderId = (int)($data['orderId'] ?? $data['order_id'] ?? 0);
+                $ok = $jobOrderModel->updateJobOrder($orderId, [
+                    'status'               => $data['status'] ?? 'Pending',
+                    'priority'             => $data['priority'] ?? 'Normal',
+                    'due_date'             => $data['dueDate'] ?? $data['due_date'] ?? '',
+                    'deadline_time'        => $data['deadlineTime'] ?? $data['deadline_time'] ?? '17:00:00',
+                    'assigned_employee_id' => $data['assignedEmployeeId'] ?? $data['assigned_employee_id'] ?? null,
+                    'job_notes'            => $data['jobNotes'] ?? $data['job_notes'] ?? null
+                ]);
+                echo json_encode([
+                    'status'  => $ok ? 'ok' : 'error',
+                    'summary' => $jobOrderModel->getSummaryCounts(),
+                    'orders'  => $jobOrderModel->getJobOrders(['tab' => 'all'])
+                ]);
+                exit;
+            }
+
+            echo json_encode([
+                'status'    => 'ok',
+                'csrfToken' => \App\Security\Csrf::getToken(),
+                'summary'   => $jobOrderModel->getSummaryCounts(),
+                'orders'    => $jobOrderModel->getJobOrders([
+                    'tab'             => $_GET['tab'] ?? 'all',
+                    'search'          => $_GET['search'] ?? '',
+                    'status'          => $_GET['status'] ?? 'ALL',
+                    'priority'        => $_GET['priority'] ?? 'ALL',
+                    'deadline_filter' => $_GET['deadline_filter'] ?? 'ALL',
+                    'sort'            => $_GET['sort'] ?? 'deadline_asc'
+                ])
+            ]);
+            exit;
+        } catch (\Throwable $e) {
+            http_response_code(503);
+            echo json_encode(['status' => 'db_unavailable', 'error' => $e->getMessage()]);
+            exit;
+        }
+        break;
+
+    // Admin Dashboard & Job Orders Tracking (Maps to Admin table & Customer_Order table)
     case 'admin_dashboard':
+    case 'admin_job_orders':
         (new AdminController())->dashboard();
         break;
 

@@ -76,38 +76,215 @@ var shoppingCart = [
     }
 ];
 
-var sampleOrders = {
-    '1001': {
-        orderId: '1001',
-        customer: 'Maria Teresa Santos',
-        placed: '2026-10-24',
-        due: '2026-11-08',
-        status: 'In Production',
-        stepIndex: 2,
-        carpenter: 'Master Carding Santos',
-        stage: '3rd Coat Polyurethane Curing',
-        driver: 'Rene Ocampo (0918-555-6666)',
-        address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
-        itemSummary: 'Mahogany 6-Seater Dining Set (220L × 90W × 75H cm · Warm Walnut)',
-        total: 30450,
-        downpayment: 15225
-    },
-    '1002': {
-        orderId: '1002',
-        customer: 'Atty. Roberto Mendoza',
-        placed: '2026-10-28',
-        due: '2026-11-12',
-        status: 'Confirmed',
-        stepIndex: 1,
-        carpenter: 'Master Eddie Manalo',
-        stage: 'Timber Preparation & Framing',
-        driver: 'Rene Ocampo (0918-555-6666)',
-        address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
-        itemSummary: 'Scandinavian Sky Blue Lounge Sofa (Standard Sizing)',
-        total: 34000,
-        downpayment: 17000
+// --- ASIA/MANILA TIMEZONE DATE HELPERS ---
+function getTodayManilaClient() {
+    try {
+        var fmt = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Manila',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        return fmt.format(new Date());
+    } catch (e) {
+        var d = new Date();
+        var yyyy = d.getFullYear();
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var dd = String(d.getDate()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd;
     }
-};
+}
+
+function offsetDateManilaClient(offsetDays) {
+    var todayStr = getTodayManilaClient();
+    var parts = todayStr.split('-');
+    var dt = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+    dt.setUTCDate(dt.getUTCDate() + Number(offsetDays || 0));
+    var yyyy = dt.getUTCFullYear();
+    var mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
+    var dd = String(dt.getUTCDate()).padStart(2, '0');
+    return yyyy + '-' + mm + '-' + dd;
+}
+
+function formatReadableDateManila(ymdStr) {
+    if (!ymdStr) return 'No Date';
+    var parts = String(ymdStr).slice(0, 10).split('-');
+    if (parts.length !== 3) return ymdStr;
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var mIdx = parseInt(parts[1], 10) - 1;
+    var mName = months[mIdx] || parts[1];
+    var dayNum = parseInt(parts[2], 10) || parts[2];
+    return mName + ' ' + dayNum + ', ' + parts[0];
+}
+
+function buildDefaultSampleOrders() {
+    var today = getTodayManilaClient();
+    return {
+        '1001': {
+            orderId: '1001',
+            customerId: 1,
+            customer: 'Maria Teresa Santos',
+            customerPhone: '0917-123-4567',
+            customerEmail: 'maria.santos@example.com',
+            placed: offsetDateManilaClient(-5),
+            due: today,
+            deadlineTime: '02:30 PM',
+            status: 'In Production',
+            priority: 'Urgent',
+            quantity: 1,
+            stepIndex: 2,
+            carpenter: 'Master Carding Santos',
+            stage: '3rd Coat Polyurethane Curing',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+            productName: 'Mahogany 6-Seater Dining Set',
+            itemSummary: 'Mahogany 6-Seater Dining Set (220L × 90W × 75H cm · Warm Walnut)',
+            jobNotes: 'Client requested felt floor protectors on all 6 dining chairs. Scheduled for final inspection today.',
+            total: 30450,
+            downpayment: 15225
+        },
+        '1002': {
+            orderId: '1002',
+            customerId: 2,
+            customer: 'Atty. Roberto Mendoza',
+            customerPhone: '0918-987-6543',
+            customerEmail: 'roberto.mendoza@example.com',
+            placed: offsetDateManilaClient(-3),
+            due: offsetDateManilaClient(4),
+            deadlineTime: '04:00 PM',
+            status: 'Order Confirmed',
+            priority: 'Normal',
+            quantity: 1,
+            stepIndex: 1,
+            carpenter: 'Master Eddie Manalo',
+            stage: 'Timber Preparation & Framing',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
+            productName: 'Scandinavian Sky Blue Lounge Sofa',
+            itemSummary: 'Scandinavian Sky Blue Lounge Sofa (Standard Sizing)',
+            jobNotes: 'High-density foam cushion core arrived from supplier; upholstery stitching in progress.',
+            total: 34000,
+            downpayment: 17000
+        },
+        '1003': {
+            orderId: '1003',
+            customerId: 1,
+            customer: 'Maria Teresa Santos',
+            customerPhone: '0917-123-4567',
+            customerEmail: 'maria.santos@example.com',
+            placed: offsetDateManilaClient(-7),
+            due: today,
+            deadlineTime: '10:30 AM',
+            status: 'For Delivery',
+            priority: 'High',
+            quantity: 1,
+            stepIndex: 3,
+            carpenter: 'Master Carding Santos',
+            stage: 'Loaded on Workshop Delivery Truck',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+            productName: 'Solid Acacia King Bedframe',
+            itemSummary: 'Solid Acacia King Bedframe (200L × 180W × 110H cm · Natural Teak Oil)',
+            jobNotes: 'White-glove delivery scheduled for BGC service elevator window at 10:30 AM today.',
+            total: 23500,
+            downpayment: 11750
+        },
+        '1004': {
+            orderId: '1004',
+            customerId: 2,
+            customer: 'Atty. Roberto Mendoza',
+            customerPhone: '0918-987-6543',
+            customerEmail: 'roberto.mendoza@example.com',
+            placed: today,
+            due: today,
+            deadlineTime: '05:30 PM',
+            status: 'Pending',
+            priority: 'Urgent',
+            quantity: 2,
+            stepIndex: 0,
+            carpenter: 'Master Eddie Manalo',
+            stage: 'Urgent Executive Conference Table Modification',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
+            productName: 'Mahogany 6-Seater Dining Set',
+            itemSummary: 'Mahogany 6-Seater Dining Set (240L × 100W × 75H cm · Executive Gloss)',
+            jobNotes: 'Rush Showroom Stock Release requested for law firm conference room today; awaiting 50% downpayment.',
+            total: 61800,
+            downpayment: 0
+        },
+        '1005': {
+            orderId: '1005',
+            customerId: 1,
+            customer: 'Maria Teresa Santos',
+            customerPhone: '0917-123-4567',
+            customerEmail: 'maria.santos@example.com',
+            placed: offsetDateManilaClient(-10),
+            due: offsetDateManilaClient(-2),
+            deadlineTime: '01:00 PM',
+            status: 'In Production',
+            priority: 'Urgent',
+            quantity: 1,
+            stepIndex: 2,
+            carpenter: 'Master Carding Santos',
+            stage: 'Custom Brass Leg Fitting & Final Buffing',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+            productName: 'Scandinavian Sky Blue Lounge Sofa',
+            itemSummary: 'Scandinavian Sky Blue Lounge Sofa (180L × 88W × 82H cm · Warm Walnut Trim)',
+            jobNotes: 'OVERDUE: Custom imported brass leg caps arrived 2 days late; prioritize workshop completion immediately.',
+            total: 31500,
+            downpayment: 15750
+        },
+        '1006': {
+            orderId: '1006',
+            customerId: 2,
+            customer: 'Atty. Roberto Mendoza',
+            customerPhone: '0918-987-6543',
+            customerEmail: 'roberto.mendoza@example.com',
+            placed: offsetDateManilaClient(-8),
+            due: offsetDateManilaClient(-1),
+            deadlineTime: '03:00 PM',
+            status: 'Order Confirmed',
+            priority: 'High',
+            quantity: 1,
+            stepIndex: 1,
+            carpenter: 'Master Eddie Manalo',
+            stage: 'Kiln-Dried Timber Mortise & Tenon Joinery',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
+            productName: 'Solid Acacia King Bedframe',
+            itemSummary: 'Solid Acacia King Bedframe + Pair of Floating Nightstands (Warm Walnut)',
+            jobNotes: 'OVERDUE: Follow up with client secretary regarding custom headboard outlet cutouts.',
+            total: 28900,
+            downpayment: 0
+        },
+        '1007': {
+            orderId: '1007',
+            customerId: 1,
+            customer: 'Maria Teresa Santos',
+            customerPhone: '0917-123-4567',
+            customerEmail: 'maria.santos@example.com',
+            placed: offsetDateManilaClient(-14),
+            due: offsetDateManilaClient(-5),
+            deadlineTime: '11:00 AM',
+            status: 'Completed',
+            priority: 'Normal',
+            quantity: 1,
+            stepIndex: 4,
+            carpenter: 'Master Carding Santos',
+            stage: 'Delivered & Signed Off by Client',
+            driver: 'Rene Ocampo (0918-555-6666)',
+            address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+            productName: 'Mahogany 6-Seater Dining Set',
+            itemSummary: 'Mahogany 6-Seater Dining Set (Standard 180L × 90W × 75H cm · Natural Teak Oil)',
+            jobNotes: 'Delivered and assembled on site. Full balance paid upon inspection.',
+            total: 28500,
+            downpayment: 28500
+        }
+    };
+}
+
+var sampleOrders = buildDefaultSampleOrders();
 
 // --- 2. MODAL AND DRAWER CONTROLS (Open & Close Popups) ---
 function showChatSecurityAlert(message) {
@@ -136,6 +313,9 @@ function openModal(modalId) {
             return;
         }
         renderAdminDashboard();
+        if (typeof refreshAdminJobOrdersFromServer === 'function') {
+            refreshAdminJobOrdersFromServer(true);
+        }
         if (typeof renderMessageFeeds === 'function') {
             renderMessageFeeds();
         }
@@ -156,6 +336,7 @@ function scrollToSection(sectionId) {
 
 // --- 3. AUTHENTICATION: LOGIN, REGISTER, AND LOGOUT (Customer & Admin) ---
 var currentSessionToken = null;
+var currentCsrfToken = 'lr_csrf_local_token_v1';
 var isExplicitlyLoggedOut = false;
 var LOCAL_STORAGE_DB_KEY = 'lr_furniture_db_v1';
 
@@ -163,9 +344,11 @@ function savePersistedClientDatabase() {
     try {
         if (typeof window === 'undefined' || !window.localStorage) return;
         var payload = {
+            schemaVersion: 2,
             registeredCustomers: registeredCustomers,
             currentUserSession: currentUserSession,
             currentSessionToken: currentSessionToken,
+            currentCsrfToken: currentCsrfToken,
             isExplicitlyLoggedOut: isExplicitlyLoggedOut,
             shoppingCart: shoppingCart,
             sampleOrders: sampleOrders,
@@ -217,6 +400,9 @@ function loadPersistedClientDatabase() {
         if (parsed.currentSessionToken !== undefined) {
             currentSessionToken = parsed.currentSessionToken;
         }
+        if (parsed.currentCsrfToken) {
+            currentCsrfToken = parsed.currentCsrfToken;
+        }
         if (parsed.isExplicitlyLoggedOut !== undefined) {
             isExplicitlyLoggedOut = Boolean(parsed.isExplicitlyLoggedOut);
         }
@@ -226,10 +412,11 @@ function loadPersistedClientDatabase() {
         if (Array.isArray(parsed.shoppingCart)) {
             shoppingCart = parsed.shoppingCart;
         }
-        if (parsed.sampleOrders && typeof parsed.sampleOrders === 'object') {
+        if (parsed.sampleOrders && typeof parsed.sampleOrders === 'object' && parsed.schemaVersion === 2) {
             var orderKeys = Object.keys(parsed.sampleOrders);
             for (var k = 0; k < orderKeys.length; k++) {
-                sampleOrders[orderKeys[k]] = parsed.sampleOrders[orderKeys[k]];
+                var oid = orderKeys[k];
+                sampleOrders[oid] = Object.assign({}, sampleOrders[oid] || {}, parsed.sampleOrders[oid]);
             }
         }
         if (Array.isArray(parsed.staticFallbackMessagesStore) && typeof staticFallbackMessagesStore !== 'undefined') {
@@ -292,6 +479,9 @@ function getAuthRequestHeaders() {
     if (currentSessionToken) {
         headers['x-session-token'] = String(currentSessionToken);
     }
+    if (currentCsrfToken) {
+        headers['x-csrf-token'] = String(currentCsrfToken);
+    }
     if (isExplicitlyLoggedOut) {
         headers['x-logged-out'] = '1';
     }
@@ -304,6 +494,10 @@ function renderAuthHeaderState() {
     var userNameEl = document.getElementById('headerUserName');
     var adminNavBtn = document.getElementById('headerAdminBtn');
     var openAdminChatBtn = document.getElementById('openAdminConsoleFromChatBtn');
+    var csrfInput = document.getElementById('adminCsrfTokenInput');
+    if (csrfInput && currentCsrfToken) {
+        csrfInput.value = currentCsrfToken;
+    }
 
     if (!loggedInBox || !loggedOutBox) return;
 
@@ -446,6 +640,9 @@ function tryLocalOrPhpLogin(email, password, role, openAdminOnSuccess) {
             if (Array.isArray(phpRes.data.customers)) {
                 mergeServerCustomersIntoLocal(phpRes.data.customers);
             }
+            if (phpRes.data.csrfToken) {
+                currentCsrfToken = phpRes.data.csrfToken;
+            }
             currentUserSession = phpRes.data.user;
             savePersistedClientDatabase();
             syncStaticFallbackMessages();
@@ -486,12 +683,18 @@ function performServerLogin(email, password, role, openAdminOnSuccess) {
             liveOrderMessages = [];
             adminConversationsList = [];
             currentSessionToken = result.data.sessionToken || null;
+            if (result.data.csrfToken) {
+                currentCsrfToken = result.data.csrfToken;
+            }
             currentUserSession = result.data.user;
             if (Array.isArray(result.data.customers)) {
                 mergeServerCustomersIntoLocal(result.data.customers);
             }
             if (currentUserSession.role === 'admin') {
                 selectedAdminConversationCustomerId = 1;
+                if (typeof refreshAdminJobOrdersFromServer === 'function') {
+                    refreshAdminJobOrdersFromServer(true);
+                }
             }
             savePersistedClientDatabase();
             renderAuthHeaderState();
@@ -790,58 +993,973 @@ function handleCustomerRegister(event) {
     return false;
 }
 
-// --- 4. ADMIN DASHBOARD FUNCTIONS (Table: Admin & Connected Tables) ---
+// --- 4. ADMIN JOB ORDERS TRACKING & DEADLINE MANAGEMENT (Asia/Manila Timezone) ---
+var activeAdminOmsTab = 'deadline_today';
+var selectedAdminDetailOrderId = null;
+
+function escapeAdminHtml(str) {
+    return String(str === null || str === undefined ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function isOrderFinishedStatus(statusStr) {
+    var s = String(statusStr || '').trim().toLowerCase();
+    return s === 'completed' || s === 'delivered' || s === 'cancelled';
+}
+
+function getStatusStepIndex(statusStr) {
+    var s = String(statusStr || '').trim().toLowerCase();
+    if (s === 'pending') return 0;
+    if (s === 'order confirmed' || s === 'confirmed') return 1;
+    if (s === 'in production') return 2;
+    if (s === 'for delivery' || s === 'ready') return 3;
+    if (s === 'completed' || s === 'delivered') return 4;
+    return 0;
+}
+
+function getStatusBadgeClassName(statusStr) {
+    var s = String(statusStr || '').trim().toLowerCase();
+    if (s === 'pending') return 'oms-status-pending';
+    if (s === 'order confirmed' || s === 'confirmed') return 'oms-status-confirmed';
+    if (s === 'in production') return 'oms-status-production';
+    if (s === 'for delivery' || s === 'ready') return 'oms-status-delivery';
+    if (s === 'completed' || s === 'delivered') return 'oms-status-completed';
+    if (s === 'cancelled') return 'oms-status-cancelled';
+    return 'oms-status-confirmed';
+}
+
+function getPriorityBadgeClassName(priorityStr) {
+    var p = String(priorityStr || 'Normal').trim().toLowerCase();
+    if (p === 'urgent') return 'oms-priority-urgent';
+    if (p === 'high') return 'oms-priority-high';
+    return 'oms-priority-normal';
+}
+
+function getPriorityIconText(priorityStr) {
+    var p = String(priorityStr || 'Normal').trim();
+    if (p === 'Urgent') return '🔥 Urgent';
+    if (p === 'High') return '⚡ High';
+    return '📋 Normal';
+}
+
+function getPriorityRankNumber(priorityStr) {
+    var p = String(priorityStr || 'Normal').trim();
+    if (p === 'Urgent') return 3;
+    if (p === 'High') return 2;
+    return 1;
+}
+
+function computeAdminJobOrderSummaries(todayManila) {
+    var keys = Object.keys(sampleOrders);
+    var summary = {
+        totalOrders: keys.length,
+        deadlineToday: 0,
+        ordersToday: 0,
+        overdueOrders: 0,
+        pendingOrders: 0,
+        completedOrders: 0,
+        activeOrders: 0,
+        unpaidOrders: 0
+    };
+
+    for (var i = 0; i < keys.length; i++) {
+        var ord = sampleOrders[keys[i]];
+        if (!ord) continue;
+        var dueDate = String(ord.due || '').slice(0, 10);
+        var orderDate = String(ord.placed || '').slice(0, 10);
+        var status = String(ord.status || 'Pending').trim();
+        var finished = isOrderFinishedStatus(status);
+        var totalAmt = Number(ord.total) || 0;
+        var paidAmt = Number(ord.downpayment) || 0;
+
+        if (dueDate === todayManila) {
+            summary.deadlineToday++;
+        }
+        if (orderDate === todayManila) {
+            summary.ordersToday++;
+        }
+        if (!finished && dueDate !== '' && dueDate < todayManila) {
+            summary.overdueOrders++;
+        }
+        if (status.toLowerCase() === 'pending') {
+            summary.pendingOrders++;
+        }
+        if (status.toLowerCase() === 'completed' || status.toLowerCase() === 'delivered') {
+            summary.completedOrders++;
+        }
+        if (!finished) {
+            summary.activeOrders++;
+        }
+        if (paidAmt < totalAmt && status.toLowerCase() !== 'cancelled') {
+            summary.unpaidOrders++;
+        }
+    }
+
+    return summary;
+}
+
+function switchAdminOmsTab(tabName) {
+    activeAdminOmsTab = tabName || 'deadline_today';
+    var allTabs = ['deadline_today', 'orders_today', 'overdue', 'active', 'unpaid', 'all'];
+    for (var i = 0; i < allTabs.length; i++) {
+        var tBtn = document.getElementById('omsTab_' + allTabs[i]);
+        if (tBtn) {
+            if (allTabs[i] === activeAdminOmsTab) {
+                tBtn.classList.add('active');
+            } else {
+                tBtn.classList.remove('active');
+            }
+        }
+    }
+
+    var navDue = document.getElementById('omsNavDeadlineTodayBtn');
+    var navAll = document.getElementById('omsNavAllOrdersBtn');
+    var navOvd = document.getElementById('omsNavOverdueBtn');
+    if (navDue) navDue.classList.toggle('active', activeAdminOmsTab === 'deadline_today');
+    if (navAll) navAll.classList.toggle('active', activeAdminOmsTab === 'all');
+    if (navOvd) navOvd.classList.toggle('active', activeAdminOmsTab === 'overdue');
+
+    renderAdminDashboard();
+}
+
+function filterAdminByKpiStatus(statusName) {
+    var statusSelect = document.getElementById('omsStatusFilter') || document.getElementById('adminFilterStatusSelect');
+    if (statusSelect) {
+        statusSelect.value = statusName || 'ALL';
+    }
+    switchAdminOmsTab('all');
+}
+
+function resetAdminOmsFilters() {
+    var searchIn = document.getElementById('omsSearchInput') || document.getElementById('adminSearchOrderInput');
+    var statusSel = document.getElementById('omsStatusFilter') || document.getElementById('adminFilterStatusSelect');
+    var prioSel = document.getElementById('omsPriorityFilter') || document.getElementById('adminFilterPrioritySelect');
+    var dateSel = document.getElementById('omsDeadlineFilter') || document.getElementById('adminFilterDeadlineDateInput');
+    var sortSel = document.getElementById('omsSortSelect') || document.getElementById('adminSortOrdersSelect');
+
+    if (searchIn) searchIn.value = '';
+    if (statusSel) statusSel.value = 'ALL';
+    if (prioSel) prioSel.value = 'ALL';
+    if (dateSel) dateSel.value = (dateSel.tagName === 'SELECT') ? 'ALL' : '';
+    if (sortSel) sortSel.value = 'deadline_asc';
+
+    renderAdminDashboard();
+}
+
+function scrollToAdminSection(elementId) {
+    var target = document.getElementById(elementId);
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function showAdminOmsNotice(messageText) {
+    var msgBox = document.getElementById('adminStatusNotice');
+    if (msgBox) {
+        msgBox.style.display = 'block';
+        msgBox.textContent = messageText;
+    }
+}
+
+function mergeServerJobOrdersIntoClient(serverOrders) {
+    if (!Array.isArray(serverOrders)) return;
+    for (var i = 0; i < serverOrders.length; i++) {
+        var so = serverOrders[i];
+        if (!so) continue;
+        var oid = String(so.orderId || so.OrderID || '');
+        if (!oid) continue;
+        var existing = sampleOrders[oid] || {};
+        sampleOrders[oid] = {
+            orderId: oid,
+            customerId: Number(so.customerId || so.CustomerID || existing.customerId || 1),
+            customer: so.customer || so.CustomerName || existing.customer || 'Valued Client',
+            customerPhone: so.customerPhone || so.CustomerPhone || existing.customerPhone || '0917-123-4567',
+            customerEmail: so.customerEmail || so.CustomerEmail || existing.customerEmail || 'client@example.com',
+            placed: String(so.placed || so.OrderDate || existing.placed || getTodayManilaClient()).slice(0, 10),
+            due: String(so.due || so.DueDate || existing.due || getTodayManilaClient()).slice(0, 10),
+            deadlineTime: so.deadlineTime || so.DeadlineTime || existing.deadlineTime || '05:00 PM',
+            status: so.status || so.Status || existing.status || 'Pending',
+            priority: so.priority || so.Priority || existing.priority || 'Normal',
+            quantity: Number(so.quantity || so.TotalQuantity || existing.quantity || 1),
+            stepIndex: getStatusStepIndex(so.status || so.Status || existing.status || 'Pending'),
+            carpenter: so.carpenter || so.AssignedStaff || existing.carpenter || 'Master Carding Santos',
+            stage: so.stage || existing.stage || 'Workshop Production Schedule',
+            driver: so.driver || existing.driver || 'Rene Ocampo (0918-555-6666)',
+            address: so.address || so.CustomerAddress || existing.address || 'Metro Manila Delivery',
+            productName: so.productName || so.FurnitureProduct || existing.productName || 'Custom Solid Wood Furniture',
+            itemSummary: so.itemSummary || so.FurnitureProduct || existing.itemSummary || 'Custom Solid Wood Furniture',
+            jobNotes: (so.jobNotes !== undefined) ? so.jobNotes : (so.JobNotes || existing.jobNotes || ''),
+            total: Number(so.total !== undefined ? so.total : (so.TotalAmount !== undefined ? so.TotalAmount : existing.total)) || 28500,
+            downpayment: Number(so.downpayment !== undefined ? so.downpayment : (so.PaidAmount !== undefined ? so.PaidAmount : existing.downpayment)) || 0
+        };
+    }
+    savePersistedClientDatabase();
+}
+
+function refreshAdminJobOrdersFromServer(silent) {
+    if (!currentUserSession || !currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
+        return;
+    }
+    fetch('/api/admin/job-orders', {
+        method: 'GET',
+        headers: getAuthRequestHeaders()
+    })
+    .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+    .then(function (result) {
+        if (result.status === 200 && result.data && result.data.status === 'ok') {
+            if (result.data.csrfToken) {
+                currentCsrfToken = result.data.csrfToken;
+            }
+            if (Array.isArray(result.data.orders)) {
+                mergeServerJobOrdersIntoClient(result.data.orders);
+            }
+            renderAdminDashboard();
+            if (!silent) {
+                showAdminOmsNotice('✓ Synced ' + Object.keys(sampleOrders).length + ' Job Orders with database (Asia/Manila: ' + getTodayManilaClient() + ').');
+            }
+        }
+    })
+    .catch(function () {
+        fetch('public/index.php?route=api_admin_job_orders')
+            .then(function (r) { return r.json(); })
+            .then(function (phpData) {
+                if (phpData && phpData.status === 'ok' && Array.isArray(phpData.orders)) {
+                    mergeServerJobOrdersIntoClient(phpData.orders);
+                    renderAdminDashboard();
+                }
+            })
+            .catch(function () {});
+    });
+}
+
+function syncJobOrderUpdateToServer(orderId, updateFields, noticeMsg) {
+    var record = sampleOrders[String(orderId)];
+    if (!record) return;
+
+    if (updateFields.status !== undefined) {
+        record.status = updateFields.status;
+        record.stepIndex = getStatusStepIndex(updateFields.status);
+    }
+    if (updateFields.priority !== undefined) {
+        record.priority = updateFields.priority;
+    }
+    if (updateFields.due !== undefined && updateFields.due) {
+        record.due = String(updateFields.due).slice(0, 10);
+    }
+    if (updateFields.deadlineTime !== undefined && updateFields.deadlineTime) {
+        record.deadlineTime = updateFields.deadlineTime;
+    }
+    if (updateFields.carpenter !== undefined && updateFields.carpenter) {
+        record.carpenter = updateFields.carpenter;
+    }
+    if (updateFields.downpayment !== undefined && !isNaN(Number(updateFields.downpayment))) {
+        record.downpayment = Number(updateFields.downpayment);
+    }
+    if (updateFields.jobNotes !== undefined) {
+        record.jobNotes = updateFields.jobNotes;
+    }
+
+    savePersistedClientDatabase();
+    renderAdminDashboard();
+    lookupOrderById(String(orderId));
+    if (noticeMsg) {
+        showAdminOmsNotice(noticeMsg);
+    }
+
+    var bodyPayload = {
+        orderId: String(orderId),
+        status: record.status,
+        priority: record.priority,
+        due: record.due,
+        deadlineTime: record.deadlineTime,
+        carpenter: record.carpenter,
+        downpayment: record.downpayment,
+        jobNotes: record.jobNotes,
+        csrf_token: currentCsrfToken
+    };
+
+    fetch('/api/admin/job-orders/update', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify(bodyPayload)
+    })
+    .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+    .then(function (result) {
+        if (result.status === 200 && result.data && Array.isArray(result.data.orders)) {
+            mergeServerJobOrdersIntoClient(result.data.orders);
+            renderAdminDashboard();
+        }
+    })
+    .catch(function () {
+        fetch('public/index.php?route=api_admin_update_job_order', {
+            method: 'POST',
+            headers: getAuthRequestHeaders(),
+            body: JSON.stringify(bodyPayload)
+        }).catch(function () {});
+    });
+}
+
+function quickUpdateJobOrderStatus(orderId, newStatus) {
+    syncJobOrderUpdateToServer(
+        orderId,
+        { status: newStatus },
+        '✓ Job Order #JO-' + orderId + ' status updated to "' + newStatus + '" in Customer_Order.'
+    );
+}
+
+function updateAdminOrderStatus(orderId, newStatus) {
+    quickUpdateJobOrderStatus(orderId, newStatus);
+}
+
+function quickUpdateJobOrderPriority(orderId, newPriority) {
+    syncJobOrderUpdateToServer(
+        orderId,
+        { priority: newPriority },
+        '✓ Job Order #JO-' + orderId + ' priority set to "' + newPriority + '".'
+    );
+}
+
+function quickUpdateJobOrderDeadline(orderId, newDueDate) {
+    if (!newDueDate) return;
+    syncJobOrderUpdateToServer(
+        orderId,
+        { due: newDueDate },
+        '✓ Job Order #JO-' + orderId + ' deadline updated to ' + formatReadableDateManila(newDueDate) + ' (' + newDueDate + ').'
+    );
+}
+
+function quickUpdateJobOrderStaff(orderId, newStaff) {
+    syncJobOrderUpdateToServer(
+        orderId,
+        { carpenter: newStaff },
+        '✓ Job Order #JO-' + orderId + ' assigned to ' + newStaff + '.'
+    );
+}
+
 function renderAdminDashboard() {
     var tbody = document.getElementById('adminOrdersTableBody');
     if (!tbody) return;
 
-    var statuses = ['Pending', 'Confirmed', 'In Production', 'Ready', 'Delivered'];
-    var rowsHtml = '';
+    var todayManila = getTodayManilaClient();
+    var todayChip = document.getElementById('omsTodayManilaLabel') || document.getElementById('adminTodayDateChip');
+    if (todayChip) {
+        todayChip.textContent = todayManila;
+    }
 
+    var newDueInput = document.getElementById('newJoDeadline') || document.getElementById('newJobDueDate');
+    if (newDueInput && !newDueInput.value) {
+        newDueInput.value = todayManila;
+    }
+
+    // 1. Update Top 5 Dashboard Summary Cards, Sidebar Counters & 6 Tab Counters from real sampleOrders state
+    var counts = computeAdminJobOrderSummaries(todayManila);
+
+    var elTotal = document.getElementById('kpiTotalOrders') || document.getElementById('kpiTotalOrdersCount');
+    var elDueToday = document.getElementById('kpiDeadlineToday') || document.getElementById('kpiDeadlineTodayCount');
+    var elOverdue = document.getElementById('kpiOverdueOrders') || document.getElementById('kpiOverdueOrdersCount');
+    var elPending = document.getElementById('kpiPendingOrders') || document.getElementById('kpiPendingOrdersCount');
+    var elCompleted = document.getElementById('kpiCompletedOrders') || document.getElementById('kpiCompletedOrdersCount');
+
+    if (elTotal) elTotal.textContent = counts.totalOrders;
+    if (elDueToday) elDueToday.textContent = counts.deadlineToday;
+    if (elOverdue) elOverdue.textContent = counts.overdueOrders;
+    if (elPending) elPending.textContent = counts.pendingOrders;
+    if (elCompleted) elCompleted.textContent = counts.completedOrders;
+
+    var sbDue = document.getElementById('omsSidebarDueTodayCount');
+    var sbTot = document.getElementById('omsSidebarTotalCount');
+    var sbOvd = document.getElementById('omsSidebarOverdueCount');
+    if (sbDue) sbDue.textContent = counts.deadlineToday;
+    if (sbTot) sbTot.textContent = counts.totalOrders;
+    if (sbOvd) sbOvd.textContent = counts.overdueOrders;
+
+    var bDueToday = document.getElementById('tabCount_deadline_today') || document.getElementById('tabBadgeDeadlineToday');
+    var bOrdersToday = document.getElementById('tabCount_orders_today') || document.getElementById('tabBadgeOrdersToday');
+    var bOverdue = document.getElementById('tabCount_overdue') || document.getElementById('tabBadgeOverdue');
+    var bActive = document.getElementById('tabCount_active') || document.getElementById('tabBadgeActive');
+    var bUnpaid = document.getElementById('tabCount_unpaid') || document.getElementById('tabBadgeUnpaid');
+    var bAll = document.getElementById('tabCount_all') || document.getElementById('tabBadgeAll');
+
+    if (bDueToday) bDueToday.textContent = counts.deadlineToday;
+    if (bOrdersToday) bOrdersToday.textContent = counts.ordersToday;
+    if (bOverdue) bOverdue.textContent = counts.overdueOrders;
+    if (bActive) bActive.textContent = counts.activeOrders;
+    if (bUnpaid) bUnpaid.textContent = counts.unpaidOrders;
+    if (bAll) bAll.textContent = counts.totalOrders;
+
+    var tabKickerMap = {
+        deadline_today: 'JOB ORDERS TRACKING: DEADLINE TODAY',
+        orders_today: 'JOB ORDERS TRACKING: ORDERS CREATED TODAY',
+        overdue: 'JOB ORDERS TRACKING: OVERDUE ORDERS',
+        active: 'JOB ORDERS TRACKING: ACTIVE PRODUCTION ORDERS',
+        unpaid: 'JOB ORDERS TRACKING: UNPAID / BALANCE DUE ORDERS',
+        all: 'JOB ORDERS TRACKING: ALL FURNITURE ORDERS'
+    };
+    var tabSubMap = {
+        deadline_today: counts.deadlineToday + ' deadline today orders',
+        orders_today: counts.ordersToday + ' orders created today',
+        overdue: counts.overdueOrders + ' overdue unfinished orders',
+        active: counts.activeOrders + ' active workshop orders',
+        unpaid: counts.unpaidOrders + ' orders with unpaid balance',
+        all: counts.totalOrders + ' total furniture job orders'
+    };
+
+    var kickerEl = document.getElementById('omsActiveTabKicker');
+    var subDueEl = document.getElementById('omsSubtitleDueTodayText');
+    if (kickerEl) kickerEl.textContent = tabKickerMap[activeAdminOmsTab] || tabKickerMap.deadline_today;
+    if (subDueEl) subDueEl.textContent = tabSubMap[activeAdminOmsTab] || tabSubMap.deadline_today;
+
+    // 2. Read Search, Filter, and Sort inputs
+    var searchEl = document.getElementById('omsSearchInput') || document.getElementById('adminSearchOrderInput');
+    var statusFilterEl = document.getElementById('omsStatusFilter') || document.getElementById('adminFilterStatusSelect');
+    var prioFilterEl = document.getElementById('omsPriorityFilter') || document.getElementById('adminFilterPrioritySelect');
+    var dateFilterEl = document.getElementById('omsDeadlineFilter') || document.getElementById('adminFilterDeadlineDateInput');
+    var sortEl = document.getElementById('omsSortSelect') || document.getElementById('adminSortOrdersSelect');
+
+    var q = searchEl ? searchEl.value.trim().toLowerCase() : '';
+    var statusFilter = statusFilterEl ? statusFilterEl.value : 'ALL';
+    var prioFilter = prioFilterEl ? prioFilterEl.value : 'ALL';
+    var dateFilter = dateFilterEl ? dateFilterEl.value.trim() : 'ALL';
+    var sortBy = sortEl ? sortEl.value : 'deadline_asc';
+
+    // 3. Filter Job Orders
     var keys = Object.keys(sampleOrders);
+    var filtered = [];
     for (var i = 0; i < keys.length; i++) {
         var ord = sampleOrders[keys[i]];
-        var optionsHtml = '';
-        for (var s = 0; s < statuses.length; s++) {
-            var sel = (ord.status === statuses[s]) ? 'selected' : '';
-            optionsHtml += '<option value="' + statuses[s] + '" ' + sel + '>' + statuses[s] + '</option>';
+        if (!ord) continue;
+
+        var dueDate = String(ord.due || '').slice(0, 10);
+        var orderDate = String(ord.placed || '').slice(0, 10);
+        var status = String(ord.status || 'Pending').trim();
+        var priority = String(ord.priority || 'Normal').trim();
+        var finished = isOrderFinishedStatus(status);
+        var totalAmt = Number(ord.total) || 0;
+        var paidAmt = Number(ord.downpayment) || 0;
+
+        // Tab filter
+        if (activeAdminOmsTab === 'deadline_today' && dueDate !== todayManila) continue;
+        if (activeAdminOmsTab === 'orders_today' && orderDate !== todayManila) continue;
+        if (activeAdminOmsTab === 'overdue' && (finished || !dueDate || dueDate >= todayManila)) continue;
+        if (activeAdminOmsTab === 'active' && finished) continue;
+        if (activeAdminOmsTab === 'unpaid' && (paidAmt >= totalAmt || status.toLowerCase() === 'cancelled')) continue;
+
+        // Status filter
+        if (statusFilter && statusFilter !== 'ALL') {
+            var normFilter = statusFilter.toLowerCase();
+            var normStatus = status.toLowerCase();
+            if (normFilter === 'order confirmed') {
+                if (normStatus !== 'order confirmed' && normStatus !== 'confirmed') continue;
+            } else if (normFilter === 'for delivery') {
+                if (normStatus !== 'for delivery' && normStatus !== 'ready') continue;
+            } else if (normFilter === 'completed') {
+                if (normStatus !== 'completed' && normStatus !== 'delivered') continue;
+            } else if (normStatus !== normFilter) {
+                continue;
+            }
         }
 
-        rowsHtml += '<tr style="border-bottom: 1px solid #f1f5f9;">' +
-            '<td style="padding: 0.65rem;"><strong>#' + ord.orderId + '</strong></td>' +
-            '<td style="padding: 0.65rem;">' + ord.customer + '</td>' +
-            '<td style="padding: 0.65rem;">' + ord.itemSummary + '</td>' +
-            '<td style="padding: 0.65rem;">₱' + ord.total.toLocaleString() + '</td>' +
-            '<td style="padding: 0.65rem;"><span class="btn-sm-soft">' + ord.status + '</span></td>' +
-            '<td style="padding: 0.65rem;">' +
-                '<select onchange="updateAdminOrderStatus(\'' + ord.orderId + '\', this.value)" style="padding: 0.3rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.76rem;">' +
-                    optionsHtml +
-                '</select>' +
-            '</td>' +
-        '</tr>';
+        // Priority filter
+        if (prioFilter && prioFilter !== 'ALL' && priority.toLowerCase() !== prioFilter.toLowerCase()) {
+            continue;
+        }
+
+        // Deadline dropdown or exact date filter
+        if (dateFilter && dateFilter !== 'ALL') {
+            if (dateFilter === 'DUE_TODAY') {
+                if (dueDate !== todayManila) continue;
+            } else if (dateFilter === 'OVERDUE') {
+                if (finished || !dueDate || dueDate >= todayManila) continue;
+            } else if (dateFilter === 'UPCOMING') {
+                if (finished || !dueDate || dueDate <= todayManila) continue;
+            } else if (dueDate !== dateFilter) {
+                continue;
+            }
+        }
+
+        // Search query (Job Order ID, Customer Name, Phone, Email, Product)
+        if (q) {
+            var haystack = (
+                'jo-' + ord.orderId + ' ' +
+                'jo-2026-' + ord.orderId + ' ' +
+                ord.orderId + ' ' +
+                (ord.customer || '') + ' ' +
+                (ord.customerPhone || '') + ' ' +
+                (ord.customerEmail || '') + ' ' +
+                (ord.productName || '') + ' ' +
+                (ord.itemSummary || '') + ' ' +
+                (ord.carpenter || '')
+            ).toLowerCase();
+            if (haystack.indexOf(q) === -1) continue;
+        }
+
+        filtered.push(ord);
+    }
+
+    // 4. Sort filtered Job Orders
+    filtered.sort(function (a, b) {
+        var dueA = String(a.due || '');
+        var dueB = String(b.due || '');
+        if (sortBy === 'deadline_desc') {
+            if (dueA !== dueB) return dueB.localeCompare(dueA);
+            return Number(b.orderId) - Number(a.orderId);
+        }
+        if (sortBy === 'priority_desc') {
+            var diffP = getPriorityRankNumber(b.priority) - getPriorityRankNumber(a.priority);
+            if (diffP !== 0) return diffP;
+            return dueA.localeCompare(dueB);
+        }
+        if (sortBy === 'newest' || sortBy === 'id_desc') {
+            return Number(b.orderId) - Number(a.orderId);
+        }
+        // Default: deadline_asc (earliest deadline first, then highest priority)
+        if (dueA !== dueB) return dueA.localeCompare(dueB);
+        return getPriorityRankNumber(b.priority) - getPriorityRankNumber(a.priority);
+    });
+
+    // 5. Compute Financial Strip Totals for visible rows
+    var stripTotal = 0;
+    var stripPaid = 0;
+    var stripDue = 0;
+    for (var f = 0; f < filtered.length; f++) {
+        var tAmt = Number(filtered[f].total) || 0;
+        var pAmt = Number(filtered[f].downpayment) || 0;
+        stripTotal += tAmt;
+        stripPaid += pAmt;
+        stripDue += Math.max(0, tAmt - pAmt);
+    }
+
+    var stripTotalEl = document.getElementById('omsStripTotalAmount');
+    var stripDueEl = document.getElementById('omsStripTotalDue');
+    var stripPaidEl = document.getElementById('omsStripTotalPaid');
+
+    if (stripTotalEl) stripTotalEl.textContent = '₱' + stripTotal.toLocaleString();
+    if (stripDueEl) stripDueEl.textContent = '₱' + stripDue.toLocaleString();
+    if (stripPaidEl) stripPaidEl.textContent = '₱' + stripPaid.toLocaleString();
+
+    // 6. Render 11-Column Job Orders Table Rows
+    var allowedStatuses = ['Pending', 'Order Confirmed', 'In Production', 'For Delivery', 'Completed', 'Cancelled'];
+    var allowedPriorities = ['Normal', 'High', 'Urgent'];
+    var allowedStaff = [
+        'Master Carding Santos',
+        'Master Eddie Manalo',
+        'Dante Cruz',
+        'Rene Ocampo'
+    ];
+
+    if (filtered.length === 0) {
+        tbody.innerHTML =
+            '<tr>' +
+                '<td colspan="11" style="padding:2.2rem 1rem; text-align:center; color:#64748b;">' +
+                    '<strong style="display:block; color:#0f172a; font-size:0.9rem; margin-bottom:0.3rem;">No Job Orders Match Your Current Tab or Filter</strong>' +
+                    '<span style="font-size:0.78rem;">Try switching to the <strong>All Orders</strong> tab or clicking <strong>Reset Filters</strong> on the search bar.</span>' +
+                '</td>' +
+            '</tr>';
+        return;
+    }
+
+    var rowsHtml = '';
+    for (var r = 0; r < filtered.length; r++) {
+        var item = filtered[r];
+        var oid = String(item.orderId);
+        var dueDate = String(item.due || '').slice(0, 10);
+        var orderDate = String(item.placed || '').slice(0, 10);
+        var status = String(item.status || 'Pending').trim();
+        var priority = String(item.priority || 'Normal').trim();
+        var qty = Number(item.quantity) || 1;
+        var total = Number(item.total) || 0;
+        var paid = Number(item.downpayment) || 0;
+        var balance = Math.max(0, total - paid);
+        var finished = isOrderFinishedStatus(status);
+        var isOverdue = (!finished && dueDate !== '' && dueDate < todayManila);
+        var isDueToday = (dueDate === todayManila);
+        var isOrderedToday = (orderDate === todayManila);
+
+        var rowClass = '';
+        if (isOverdue) {
+            rowClass = 'oms-row-overdue';
+        } else if (!finished && (isDueToday || priority === 'Urgent')) {
+            rowClass = 'oms-row-urgent';
+        }
+
+        // Status options
+        var statusOpts = '';
+        for (var s = 0; s < allowedStatuses.length; s++) {
+            var stOpt = allowedStatuses[s];
+            var isSel = (status.toLowerCase() === stOpt.toLowerCase() ||
+                (stOpt === 'Order Confirmed' && status.toLowerCase() === 'confirmed') ||
+                (stOpt === 'For Delivery' && status.toLowerCase() === 'ready') ||
+                (stOpt === 'Completed' && status.toLowerCase() === 'delivered'));
+            statusOpts += '<option value="' + stOpt + '" ' + (isSel ? 'selected' : '') + '>' + stOpt + '</option>';
+        }
+
+        // Priority options
+        var prioOpts = '';
+        for (var p = 0; p < allowedPriorities.length; p++) {
+            var prOpt = allowedPriorities[p];
+            prioOpts += '<option value="' + prOpt + '" ' + (priority === prOpt ? 'selected' : '') + '>' + prOpt + '</option>';
+        }
+
+        // Staff options
+        var staffOpts = '';
+        var currentStaff = item.carpenter || 'Master Carding Santos';
+        for (var stf = 0; stf < allowedStaff.length; stf++) {
+            var staffName = allowedStaff[stf];
+            var staffSel = (currentStaff.indexOf(staffName.split(' ')[1] || staffName) !== -1) ? 'selected' : '';
+            staffOpts += '<option value="' + escapeAdminHtml(staffName) + '" ' + staffSel + '>' + escapeAdminHtml(staffName) + '</option>';
+        }
+
+        // Deadline badge
+        var deadlineBadgeHtml = '';
+        if (isOverdue) {
+            deadlineBadgeHtml = '<span class="oms-deadline-tag overdue">🚨 OVERDUE</span>';
+        } else if (isDueToday && !finished) {
+            deadlineBadgeHtml = '<span class="oms-deadline-tag today">⏰ DUE TODAY</span>';
+        } else if (isDueToday && finished) {
+            deadlineBadgeHtml = '<span class="oms-deadline-tag ok">✓ DUE TODAY</span>';
+        } else if (finished) {
+            deadlineBadgeHtml = '<span class="oms-deadline-tag ok">✓ FINISHED</span>';
+        } else {
+            deadlineBadgeHtml = '<span class="oms-deadline-tag ok">📅 SCHEDULED</span>';
+        }
+
+        var prodTitle = item.productName || (item.itemSummary ? item.itemSummary.split('(')[0].trim() : 'Custom Furniture');
+        var prodSpec = item.itemSummary || prodTitle;
+        if (prodSpec.indexOf(prodTitle) === 0 && prodSpec.length > prodTitle.length) {
+            prodSpec = prodSpec.slice(prodTitle.length).trim();
+        }
+
+        rowsHtml +=
+            '<tr class="' + rowClass + '">' +
+                // 1. Job Order ID
+                '<td>' +
+                    '<span class="oms-job-id">#JO-' + escapeAdminHtml(oid) + '</span>' +
+                    '<span class="oms-job-items-sub">' + qty + ' item' + (qty > 1 ? 's' : '') + '</span>' +
+                '</td>' +
+                // 2. Customer Name
+                '<td>' +
+                    '<span class="oms-cust-name">' + escapeAdminHtml(item.customer) + '</span>' +
+                    '<span class="oms-cust-meta">📞 ' + escapeAdminHtml(item.customerPhone || '0917-123-4567') + '</span>' +
+                '</td>' +
+                // 3. Furniture Product
+                '<td>' +
+                    '<span class="oms-prod-name">' + escapeAdminHtml(prodTitle) + '</span>' +
+                    '<span class="oms-prod-notes">' + escapeAdminHtml(prodSpec) + '</span>' +
+                '</td>' +
+                // 4. Quantity
+                '<td>' +
+                    '<span style="display:inline-block; background:#f1f5f9; color:#0f172a; font-weight:800; padding:0.18rem 0.42rem; border-radius:6px; font-size:0.7rem; white-space:nowrap;">' +
+                        qty + ' pc' + (qty > 1 ? 's' : '') +
+                    '</span>' +
+                '</td>' +
+                // 5. Order Status
+                '<td>' +
+                    '<div><span class="oms-status-badge ' + getStatusBadgeClassName(status) + '">' + escapeAdminHtml(status) + '</span></div>' +
+                    '<select aria-label="Status for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.25rem; padding:0.18rem 0.25rem; font-size:0.67rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:112px;">' +
+                        statusOpts +
+                    '</select>' +
+                '</td>' +
+                // 6. Total Amount
+                '<td>' +
+                    '<span class="oms-amount-main">₱' + total.toLocaleString() + '</span>' +
+                    (balance > 0
+                        ? '<span class="oms-amount-sub due">Due: ₱' + balance.toLocaleString() + '</span>'
+                        : '<span class="oms-amount-sub paid">✓ Paid</span>') +
+                '</td>' +
+                // 7. Priority
+                '<td>' +
+                    '<div><span class="oms-priority-badge ' + getPriorityBadgeClassName(priority) + '">' + getPriorityIconText(priority) + '</span></div>' +
+                    '<select aria-label="Priority for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderPriority(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.25rem; padding:0.18rem 0.25rem; font-size:0.67rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:82px;">' +
+                        prioOpts +
+                    '</select>' +
+                '</td>' +
+                // 8. Order Date
+                '<td>' +
+                    '<strong style="display:block; color:#0f172a; font-size:0.72rem; white-space:nowrap;">' + formatReadableDateManila(orderDate) + '</strong>' +
+                    '<span style="display:block; font-size:0.64rem; color:#64748b;">' + escapeAdminHtml(orderDate) + '</span>' +
+                    (isOrderedToday ? '<div><span style="display:inline-block; margin-top:0.15rem; background:#e0f2fe; color:#0369a1; font-size:0.59rem; font-weight:800; padding:0.08rem 0.32rem; border-radius:4px;">NEW TODAY</span></div>' : '') +
+                '</td>' +
+                // 9. Assigned Staff
+                '<td>' +
+                    '<div><span class="oms-staff-chip">👷 ' + escapeAdminHtml(currentStaff) + '</span></div>' +
+                    '<select aria-label="Staff for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStaff(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.25rem; padding:0.18rem 0.25rem; font-size:0.66rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:122px;">' +
+                        staffOpts +
+                    '</select>' +
+                '</td>' +
+                // 10. Deadline
+                '<td>' +
+                    '<span class="oms-deadline-date">' + formatReadableDateManila(dueDate) + '</span>' +
+                    '<span class="oms-deadline-time">' + escapeAdminHtml(item.deadlineTime || '05:00 PM') + '</span>' +
+                    '<div>' + deadlineBadgeHtml + '</div>' +
+                    '<input type="date" aria-label="Deadline for JO-' + escapeAdminHtml(oid) + '" value="' + escapeAdminHtml(dueDate) + '" onchange="quickUpdateJobOrderDeadline(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.14rem 0.22rem; font-size:0.65rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:112px;">' +
+                '</td>' +
+                // 11. Actions
+                '<td>' +
+                    '<div style="display:flex; flex-direction:column; gap:0.25rem;">' +
+                        '<button type="button" class="btn-sm-primary" onclick="openAdminJobOrderDetail(\'' + escapeAdminHtml(oid) + '\')" style="padding:0.24rem 0.45rem; font-size:0.66rem; white-space:nowrap;">👁️ View</button>' +
+                        (!finished
+                            ? '<button type="button" class="btn-sm-outline" onclick="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', \'Completed\')" style="padding:0.2rem 0.42rem; font-size:0.64rem; white-space:nowrap; color:#15803d; border-color:#86efac;">✓ Done</button>'
+                            : '') +
+                    '</div>' +
+                '</td>' +
+            '</tr>';
     }
 
     tbody.innerHTML = rowsHtml;
+
+    if (selectedAdminDetailOrderId && sampleOrders[selectedAdminDetailOrderId]) {
+        renderAdminJobOrderDetailContent(selectedAdminDetailOrderId);
+    }
 }
 
-function updateAdminOrderStatus(orderId, newStatus) {
-    var record = sampleOrders[orderId];
-    if (!record) return;
+function renderAdminJobOrderDetailContent(orderId) {
+    var panel = document.getElementById('adminJobOrderDetailPanel') || document.getElementById('adminOrderDetailPanel');
+    var record = sampleOrders[String(orderId)];
+    if (!panel || !record) return;
 
-    var stages = ['Pending', 'Confirmed', 'In Production', 'Ready', 'Delivered'];
-    var idx = stages.indexOf(newStatus);
-    record.status = newStatus;
-    record.stepIndex = (idx !== -1) ? idx : 0;
+    var total = Number(record.total) || 0;
+    var paid = Number(record.downpayment) || 0;
+    var balance = Math.max(0, total - paid);
+
+    panel.style.display = 'block';
+    panel.innerHTML =
+        '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.85rem; padding-bottom:0.65rem; border-bottom:1px solid #bae6fd;">' +
+            '<div>' +
+                '<span class="modal-kicker" style="color:#0284c7;">DETAILED JOB ORDER VIEW & DEADLINE EDITOR</span>' +
+                '<h4 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0.15rem 0 0;">Job Order #JO-' + escapeAdminHtml(record.orderId) + ' — ' + escapeAdminHtml(record.customer) + '</h4>' +
+            '</div>' +
+            '<button type="button" class="btn-sm-outline" onclick="closeAdminJobOrderDetail()">✕ Close Detail View</button>' +
+        '</div>' +
+        '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:0.75rem; margin-bottom:0.9rem; font-size:0.78rem;">' +
+            '<div style="background:#f8fafc; padding:0.7rem; border-radius:8px; border:1px solid #e2e8f0;">' +
+                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">👤 CUSTOMER & DELIVERY INFO</strong>' +
+                '<div><strong>Name:</strong> ' + escapeAdminHtml(record.customer) + '</div>' +
+                '<div><strong>Phone:</strong> ' + escapeAdminHtml(record.customerPhone || '0917-123-4567') + '</div>' +
+                '<div><strong>Email:</strong> ' + escapeAdminHtml(record.customerEmail || 'client@example.com') + '</div>' +
+                '<div><strong>Address:</strong> ' + escapeAdminHtml(record.address || 'Metro Manila') + '</div>' +
+            '</div>' +
+            '<div style="background:#f8fafc; padding:0.7rem; border-radius:8px; border:1px solid #e2e8f0;">' +
+                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">🪑 FURNITURE SPECIFICATIONS</strong>' +
+                '<div><strong>Product:</strong> ' + escapeAdminHtml(record.productName || record.itemSummary) + '</div>' +
+                '<div><strong>Specs:</strong> ' + escapeAdminHtml(record.itemSummary) + '</div>' +
+                '<div><strong>Quantity:</strong> ' + (Number(record.quantity) || 1) + ' pc(s)</div>' +
+                '<div><strong>Order Date:</strong> ' + formatReadableDateManila(record.placed) + ' (' + escapeAdminHtml(record.placed) + ')</div>' +
+            '</div>' +
+            '<div style="background:#f8fafc; padding:0.7rem; border-radius:8px; border:1px solid #e2e8f0;">' +
+                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">💳 FINANCIAL SUMMARY</strong>' +
+                '<div><strong>Total Amount:</strong> ₱' + total.toLocaleString() + '</div>' +
+                '<div><strong>Paid / Downpayment:</strong> ₱' + paid.toLocaleString() + '</div>' +
+                '<div><strong>Remaining Balance:</strong> <span style="color:' + (balance > 0 ? '#dc2626' : '#15803d') + '; font-weight:800;">₱' + balance.toLocaleString() + '</span></div>' +
+                '<div><strong>Workshop Stage:</strong> ' + escapeAdminHtml(record.stage || 'In Progress') + '</div>' +
+            '</div>' +
+        '</div>' +
+        '<form onsubmit="return saveAdminJobOrderDetail(event, \'' + escapeAdminHtml(record.orderId) + '\')" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:0.65rem; align-items:end; background:#f0f9ff; padding:0.85rem; border-radius:8px; border:1px solid #bae6fd;">' +
+            '<div>' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Order Status</label>' +
+                '<select id="detailEditStatus" style="width:100%; padding:0.42rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+                    '<option value="Pending" ' + (record.status === 'Pending' ? 'selected' : '') + '>Pending</option>' +
+                    '<option value="Order Confirmed" ' + ((record.status === 'Order Confirmed' || record.status === 'Confirmed') ? 'selected' : '') + '>Order Confirmed</option>' +
+                    '<option value="In Production" ' + (record.status === 'In Production' ? 'selected' : '') + '>In Production</option>' +
+                    '<option value="For Delivery" ' + ((record.status === 'For Delivery' || record.status === 'Ready') ? 'selected' : '') + '>For Delivery</option>' +
+                    '<option value="Completed" ' + ((record.status === 'Completed' || record.status === 'Delivered') ? 'selected' : '') + '>Completed</option>' +
+                    '<option value="Cancelled" ' + (record.status === 'Cancelled' ? 'selected' : '') + '>Cancelled</option>' +
+                '</select>' +
+            '</div>' +
+            '<div>' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Priority Level</label>' +
+                '<select id="detailEditPriority" style="width:100%; padding:0.42rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+                    '<option value="Normal" ' + (record.priority === 'Normal' ? 'selected' : '') + '>Normal</option>' +
+                    '<option value="High" ' + (record.priority === 'High' ? 'selected' : '') + '>High</option>' +
+                    '<option value="Urgent" ' + (record.priority === 'Urgent' ? 'selected' : '') + '>Urgent</option>' +
+                '</select>' +
+            '</div>' +
+            '<div>' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Deadline Date</label>' +
+                '<input type="date" id="detailEditDueDate" value="' + escapeAdminHtml(String(record.due || '').slice(0, 10)) + '" required style="width:100%; padding:0.4rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+            '</div>' +
+            '<div>' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Deadline Time</label>' +
+                '<input type="text" id="detailEditDeadlineTime" value="' + escapeAdminHtml(record.deadlineTime || '05:00 PM') + '" style="width:100%; padding:0.4rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+            '</div>' +
+            '<div>' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Assigned Staff</label>' +
+                '<select id="detailEditStaff" style="width:100%; padding:0.42rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+                    '<option value="Master Carding Santos" ' + (String(record.carpenter).indexOf('Carding') !== -1 ? 'selected' : '') + '>Master Carding Santos</option>' +
+                    '<option value="Master Eddie Manalo" ' + (String(record.carpenter).indexOf('Eddie') !== -1 ? 'selected' : '') + '>Master Eddie Manalo</option>' +
+                    '<option value="Dante Cruz" ' + (String(record.carpenter).indexOf('Dante') !== -1 ? 'selected' : '') + '>Dante Cruz</option>' +
+                    '<option value="Rene Ocampo" ' + (String(record.carpenter).indexOf('Rene') !== -1 ? 'selected' : '') + '>Rene Ocampo</option>' +
+                '</select>' +
+            '</div>' +
+            '<div>' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Paid Amount (₱)</label>' +
+                '<input type="number" id="detailEditPaidAmount" value="' + paid + '" min="0" style="width:100%; padding:0.4rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+            '</div>' +
+            '<div style="grid-column: 1 / -1;">' +
+                '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Workshop Production & Delivery Notes</label>' +
+                '<input type="text" id="detailEditJobNotes" value="' + escapeAdminHtml(record.jobNotes || '') + '" placeholder="Add carpentry, finish, or delivery notes..." style="width:100%; padding:0.42rem 0.6rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
+            '</div>' +
+            '<div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; gap:0.5rem;">' +
+                '<button type="submit" class="btn-sm-primary" style="padding:0.48rem 1rem;">💾 Save Job Order Changes</button>' +
+            '</div>' +
+        '</form>';
+}
+
+function openAdminJobOrderDetail(orderId) {
+    selectedAdminDetailOrderId = String(orderId);
+    renderAdminJobOrderDetailContent(selectedAdminDetailOrderId);
+    var panel = document.getElementById('adminJobOrderDetailPanel') || document.getElementById('adminOrderDetailPanel');
+    if (panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+function closeAdminJobOrderDetail() {
+    selectedAdminDetailOrderId = null;
+    var panel = document.getElementById('adminJobOrderDetailPanel') || document.getElementById('adminOrderDetailPanel');
+    if (panel) {
+        panel.style.display = 'none';
+        panel.innerHTML = '';
+    }
+}
+
+function saveAdminJobOrderDetail(event, orderId) {
+    event.preventDefault();
+    var statusEl = document.getElementById('detailEditStatus');
+    var prioEl = document.getElementById('detailEditPriority');
+    var dueEl = document.getElementById('detailEditDueDate');
+    var timeEl = document.getElementById('detailEditDeadlineTime');
+    var staffEl = document.getElementById('detailEditStaff');
+    var paidEl = document.getElementById('detailEditPaidAmount');
+    var notesEl = document.getElementById('detailEditJobNotes');
+
+    syncJobOrderUpdateToServer(
+        orderId,
+        {
+            status: statusEl ? statusEl.value : 'In Production',
+            priority: prioEl ? prioEl.value : 'Normal',
+            due: dueEl ? dueEl.value : getTodayManilaClient(),
+            deadlineTime: timeEl ? timeEl.value.trim() : '05:00 PM',
+            carpenter: staffEl ? staffEl.value : 'Master Carding Santos',
+            downpayment: paidEl ? Number(paidEl.value) : 0,
+            jobNotes: notesEl ? notesEl.value.trim() : ''
+        },
+        '✓ Saved full Job Order #JO-' + orderId + ' details, deadline, and priority.'
+    );
+    return false;
+}
+
+function toggleNewJobOrderForm() {
+    var box = document.getElementById('newJobOrderFormCard') || document.getElementById('adminNewJobOrderFormBox');
+    if (!box) return;
+    if (box.style.display === 'none' || !box.style.display) {
+        box.style.display = 'block';
+        var dueIn = document.getElementById('newJoDeadline') || document.getElementById('newJobDueDate');
+        if (dueIn && !dueIn.value) {
+            dueIn.value = getTodayManilaClient();
+        }
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function handleCreateNewJobOrder(event) {
+    event.preventDefault();
+    if (!currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
+        showChatSecurityAlert('403 Forbidden: Only Admin accounts can create Job Orders.');
+        return false;
+    }
+
+    var custNameEl = document.getElementById('newJoCustomer') || document.getElementById('newJobCustomerName');
+    var prodNameEl = document.getElementById('newJoProduct') || document.getElementById('newJobProductSelect');
+    var qtyEl = document.getElementById('newJoQty') || document.getElementById('newJobQty');
+    var totalEl = document.getElementById('newJoTotal') || document.getElementById('newJobTotal');
+    var prioEl = document.getElementById('newJoPriority') || document.getElementById('newJobPriority');
+    var dueEl = document.getElementById('newJoDeadline') || document.getElementById('newJobDueDate');
+    var staffEl = document.getElementById('newJoStaff') || document.getElementById('newJobStaffSelect');
+
+    var custName = custNameEl ? custNameEl.value.trim() : 'Showroom Client';
+    var prodName = prodNameEl ? prodNameEl.value.trim() : 'Custom Solid Wood Furniture';
+    var qty = qtyEl ? (parseInt(qtyEl.value, 10) || 1) : 1;
+    var total = totalEl ? (parseFloat(totalEl.value) || 28500) : 28500;
+    var paid = Math.round(total * 0.5);
+    var status = 'Pending';
+    var priority = prioEl ? prioEl.value : 'Urgent';
+    var due = (dueEl && dueEl.value) ? dueEl.value : getTodayManilaClient();
+    var deadlineTime = '05:00 PM';
+    var staff = staffEl ? staffEl.value : 'Master Carding Santos';
+    var notes = 'Created by Admin in Job Orders Console.';
+
+    var maxId = 1007;
+    var keys = Object.keys(sampleOrders);
+    for (var i = 0; i < keys.length; i++) {
+        var n = Number(keys[i]);
+        if (n > maxId) maxId = n;
+    }
+    var newId = String(maxId + 1);
+    var today = getTodayManilaClient();
+
+    sampleOrders[newId] = {
+        orderId: newId,
+        customerId: 1,
+        customer: custName || 'Walk-in Showroom Client',
+        customerPhone: '0917-555-0199',
+        customerEmail: 'showroom.client@example.com',
+        placed: today,
+        due: due,
+        deadlineTime: deadlineTime,
+        status: status,
+        priority: priority,
+        quantity: qty,
+        stepIndex: getStatusStepIndex(status),
+        carpenter: staff,
+        stage: 'Scheduled via Admin Job Orders Console',
+        driver: 'Rene Ocampo (0918-555-6666)',
+        address: 'Metro Manila Delivery',
+        productName: prodName,
+        itemSummary: prodName + ' (Custom Workshop Order)',
+        jobNotes: notes,
+        total: total,
+        downpayment: paid
+    };
 
     savePersistedClientDatabase();
+    toggleNewJobOrderForm();
     renderAdminDashboard();
-    lookupOrderById(orderId);
+    showAdminOmsNotice('✓ Created new Job Order #JO-' + newId + ' for ' + custName + ' (Deadline: ' + formatReadableDateManila(due) + ').');
 
-    var msgBox = document.getElementById('adminStatusNotice');
-    if (msgBox) {
-        msgBox.style.display = 'block';
-        msgBox.textContent = '✓ Order #' + orderId + ' status updated to "' + newStatus + '" in Customer_Order table.';
-    }
+    fetch('/api/admin/job-orders/create', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({
+            customer: custName,
+            productName: prodName,
+            itemSummary: sampleOrders[newId].itemSummary,
+            quantity: qty,
+            total: total,
+            downpayment: paid,
+            status: status,
+            priority: priority,
+            due: due,
+            deadlineTime: deadlineTime,
+            carpenter: staff,
+            jobNotes: sampleOrders[newId].jobNotes,
+            csrf_token: currentCsrfToken
+        })
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+        if (data && data.status === 'ok' && Array.isArray(data.orders)) {
+            mergeServerJobOrdersIntoClient(data.orders);
+            renderAdminDashboard();
+        }
+    })
+    .catch(function () {});
+
+    return false;
 }
 
 // --- 5. CATALOG CATEGORY FILTER ---
@@ -1103,29 +2221,66 @@ function submitLiveOrder(event) {
     if (errBox) errBox.style.display = 'none';
 
     var subtotal = 0;
+    var totalQty = 0;
     for (var i = 0; i < shoppingCart.length; i++) {
         subtotal += (shoppingCart[i].basePrice + shoppingCart[i].extraCost) * shoppingCart[i].qty;
+        totalQty += (Number(shoppingCart[i].qty) || 1);
     }
     var grandTotal = subtotal + (subtotal >= 15000 ? 0 : 850);
     var dp = Math.round(grandTotal * 0.5);
+    var firstProdName = shoppingCart[0] ? shoppingCart[0].name : 'Custom Furniture Order';
     var firstItemName = shoppingCart[0] ? (shoppingCart[0].name + ' (' + shoppingCart[0].specs + ')') : 'Custom Furniture Order';
 
-    var newOrderId = '1003';
+    var maxId = 1007;
+    var keys = Object.keys(sampleOrders);
+    for (var k = 0; k < keys.length; k++) {
+        var num = Number(keys[k]);
+        if (num > maxId) maxId = num;
+    }
+    var newOrderId = String(maxId + 1);
+    var todayManila = getTodayManilaClient();
+    var targetDue = offsetDateManilaClient(14);
+
     sampleOrders[newOrderId] = {
         orderId: newOrderId,
+        customerId: currentUserSession.isLoggedIn ? (Number(currentUserSession.id) || 1) : 1,
         customer: nameIn.value.trim(),
-        placed: '2026-11-07',
-        due: '2026-11-21',
+        customerPhone: phoneIn.value.trim(),
+        customerEmail: currentUserSession.email || 'client@example.com',
+        placed: todayManila,
+        due: targetDue,
+        deadlineTime: '04:00 PM',
         status: 'Pending',
+        priority: 'Normal',
+        quantity: totalQty || 1,
         stepIndex: 0,
         carpenter: 'Master Carding Santos',
         stage: 'Timber Selection & Grain Matching',
         driver: 'Rene Ocampo (0918-555-6666)',
         address: addrIn.value.trim(),
+        productName: firstProdName,
         itemSummary: firstItemName,
+        jobNotes: 'Online Storefront Order — 50% Downpayment Recorded.',
         total: grandTotal,
         downpayment: dp
     };
+
+    fetch('/api/orders/create', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({
+            customerName: nameIn.value.trim(),
+            customerPhone: phoneIn.value.trim(),
+            customerEmail: currentUserSession.email || 'client@example.com',
+            address: addrIn.value.trim(),
+            productName: firstProdName,
+            itemSummary: firstItemName,
+            quantity: totalQty || 1,
+            total: grandTotal,
+            downpayment: dp,
+            due: targetDue
+        })
+    }).catch(function () {});
 
     shoppingCart = [];
     savePersistedClientDatabase();
@@ -1790,9 +2945,15 @@ function initRealTimeMessaging() {
                     }
 
                     currentSessionToken = data.sessionToken || null;
+                    if (data.csrfToken) {
+                        currentCsrfToken = data.csrfToken;
+                    }
                     currentUserSession = data.user;
                     savePersistedClientDatabase();
                     renderAuthHeaderState();
+                    if (currentUserSession.role === 'admin' && typeof refreshAdminJobOrdersFromServer === 'function') {
+                        refreshAdminJobOrdersFromServer(true);
+                    }
                     return fetchAuthorizedConversationMessages();
                 }
             }

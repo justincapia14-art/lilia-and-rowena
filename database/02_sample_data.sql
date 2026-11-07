@@ -59,24 +59,43 @@ INSERT INTO Admin (AdminID, Email, Password, ProductID, CategoryID, MaterialID, 
 ON DUPLICATE KEY UPDATE Email = VALUES(Email), Password = VALUES(Password);
 
 -- 7. Insert Sample Customers (Table: Customer)
--- Default Password for both Customer accounts is: password123
+-- Default Password for all Customer accounts is: password123
 -- Hash generated via PHP password_hash('password123', PASSWORD_DEFAULT)
 INSERT INTO Customer (CustomerID, FullName, Email, PasswordHash, PhoneNumber, Address) VALUES
 (1, 'Maria Teresa Santos', 'maria.santos@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0917-123-4567', 'Unit 14B, Tower 2, Serendra, BGC, Taguig City'),
-(2, 'Atty. Roberto Mendoza', 'roberto.mendoza@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-987-6543', '88 Narra Avenue, Ayala Alabang Village, Muntinlupa')
+(2, 'Atty. Roberto Mendoza', 'roberto.mendoza@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-987-6543', '88 Narra Avenue, Ayala Alabang Village, Muntinlupa'),
+(3, 'Engr. Danica Gomez', 'danica.gomez@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0917-542-8810', 'One Serendra, Bonifacio Global City, Taguig'),
+(4, 'Dr. Ronald & Elena Ramos', 'ronald.ramos@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-334-9012', 'Villa Barosa, San Fernando, Pampanga'),
+(5, 'Arch. Marco & Patricia Villanueva', 'marco.villanueva@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0922-719-4401', 'Beverly Hills Subdivision, Antipolo, Rizal')
 ON DUPLICATE KEY UPDATE FullName = VALUES(FullName), PasswordHash = VALUES(PasswordHash);
 
--- 8. Insert Sample Customer Orders
-INSERT INTO Customer_Order (OrderID, CustomerID, OrderDate, DueDate, Status) VALUES
-(1001, 1, '2026-10-24', '2026-11-08', 'In Production'),
-(1002, 2, '2026-10-28', '2026-11-12', 'Confirmed')
-ON DUPLICATE KEY UPDATE Status = VALUES(Status);
+-- 8. Insert Sample Customer Job Orders (Deadline Today, Orders Today, Overdue, Active, Unpaid, Completed)
+INSERT INTO Customer_Order (OrderID, CustomerID, OrderDate, DueDate, DeadlineTime, Status, Priority, AssignedEmployeeID, JobNotes) VALUES
+(1001, 1, DATE_SUB(CURRENT_DATE, INTERVAL 10 DAY), CURRENT_DATE, '08:00:00', 'In Production', 'Urgent', 1, 'Custom 220cm length Mahogany 6-Seater Dining Set — Final walnut topcoat curing for delivery today.'),
+(1002, 2, CURRENT_DATE, DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY), '14:00:00', 'Order Confirmed', 'High', 2, 'Scandinavian Sky Blue Lounge Sofa + 2 matching bolster pillows.'),
+(1003, 3, DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY), CURRENT_DATE, '10:30:00', 'For Delivery', 'High', 3, 'White-glove delivery to BGC Taguig scheduled before noon today.'),
+(1004, 5, DATE_SUB(CURRENT_DATE, INTERVAL 12 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 3 DAY), '13:30:00', 'Pending', 'Urgent', 1, 'Awaiting final brass hardware fitting and custom stain approval.'),
+(1005, 1, DATE_SUB(CURRENT_DATE, INTERVAL 10 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 2 DAY), '15:00:00', 'In Production', 'High', 4, 'Second polyurethane clear coat drying in Pampanga workshop.'),
+(1006, 4, CURRENT_DATE, CURRENT_DATE, '17:30:00', 'In Production', 'Urgent', 2, 'Showroom stock table custom-trimmed to 100x100cm for same-day Pampanga pickup.'),
+(1007, 4, DATE_SUB(CURRENT_DATE, INTERVAL 18 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), '11:00:00', 'Completed', 'Normal', 3, 'Delivered and inspected by Dr. Ronald Ramos in San Fernando, Pampanga.')
+ON DUPLICATE KEY UPDATE
+    DueDate = VALUES(DueDate),
+    DeadlineTime = VALUES(DeadlineTime),
+    Status = VALUES(Status),
+    Priority = VALUES(Priority),
+    AssignedEmployeeID = VALUES(AssignedEmployeeID),
+    JobNotes = VALUES(JobNotes);
 
 -- 9. Insert Order Items
 INSERT INTO Order_Item (OrderItemID, OrderID, ProductID, ItemType, Quantity, UnitPrice) VALUES
 (2001, 1001, 1, 'Customized', 1, 30450.00),
-(2002, 1002, 2, 'Standard', 1, 34000.00)
-ON DUPLICATE KEY UPDATE UnitPrice = VALUES(UnitPrice);
+(2002, 1002, 2, 'Standard',   1, 34000.00),
+(2003, 1003, 3, 'Customized', 1, 44000.00),
+(2004, 1004, 5, 'Customized', 2, 24500.00),
+(2005, 1005, 4, 'Standard',   2, 12800.00),
+(2006, 1006, 6, 'Customized', 1, 18900.00),
+(2007, 1007, 1, 'Standard',   1, 28500.00)
+ON DUPLICATE KEY UPDATE Quantity = VALUES(Quantity), UnitPrice = VALUES(UnitPrice);
 
 -- 10. Insert Customization specs for OrderItem 2001 (Order #1001)
 INSERT INTO Customization (CustomizationID, OrderItemID, Length, Width, Height, ColorFinish, Notes, ExtraCost) VALUES
@@ -91,16 +110,22 @@ INSERT INTO Production_Task (TaskID, OrderItemID, EmployeeID, Stage, StartDate, 
 (4, 2001, 4, 'Finishing', '2026-11-04', NULL, 'In Progress')
 ON DUPLICATE KEY UPDATE TaskStatus = VALUES(TaskStatus);
 
--- 12. Insert Payments (50% Downpayment)
+-- 12. Insert Payments (50% Downpayment & Completed Full Payments)
 INSERT INTO Payment (PaymentID, OrderID, PaymentType, Amount, PaymentDate) VALUES
 (1, 1001, 'Downpayment', 15225.00, '2026-10-24'),
-(2, 1002, 'Downpayment', 17000.00, '2026-10-28')
+(2, 1002, 'Downpayment', 17000.00, CURRENT_DATE),
+(3, 1003, 'Downpayment', 22000.00, DATE_SUB(CURRENT_DATE, INTERVAL 6 DAY)),
+(4, 1004, 'Downpayment', 24500.00, DATE_SUB(CURRENT_DATE, INTERVAL 12 DAY)),
+(5, 1007, 'Downpayment', 14250.00, DATE_SUB(CURRENT_DATE, INTERVAL 18 DAY)),
+(6, 1007, 'Final',       14250.00, DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY))
 ON DUPLICATE KEY UPDATE Amount = VALUES(Amount);
 
 -- 13. Insert Delivery
 INSERT INTO Delivery (DeliveryID, OrderID, DriverID, ReceiverName, DeliveryAddress, ScheduledDate, DeliveryStatus) VALUES
-(1, 1001, 3, 'Maria Teresa Santos', 'Unit 14B, Tower 2, Serendra, BGC, Taguig City', '2026-11-09', 'Scheduled'),
-(2, 1002, 3, 'Atty. Roberto Mendoza', '88 Narra Avenue, Ayala Alabang Village, Muntinlupa', '2026-11-13', 'Scheduled')
+(1, 1001, 3, 'Maria Teresa Santos', 'Unit 14B, Tower 2, Serendra, BGC, Taguig City', CURRENT_DATE, 'Scheduled'),
+(2, 1002, 3, 'Atty. Roberto Mendoza', '88 Narra Avenue, Ayala Alabang Village, Muntinlupa', DATE_ADD(CURRENT_DATE, INTERVAL 5 DAY), 'Scheduled'),
+(3, 1003, 3, 'Engr. Danica Gomez', 'One Serendra, Bonifacio Global City, Taguig', CURRENT_DATE, 'Out for Delivery'),
+(4, 1007, 3, 'Dr. Ronald & Elena Ramos', 'Villa Barosa, San Fernando, Pampanga', DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), 'Delivered')
 ON DUPLICATE KEY UPDATE DeliveryStatus = VALUES(DeliveryStatus);
 
 -- 14. Insert Order_Message (Private 1-on-1 Customer-Admin Conversations per CustomerID)
