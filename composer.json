@@ -1,0 +1,19 @@
+{
+    "name": "lilia-and-rowena/furniture-shop",
+    "description": "Lilia and Rowena Furniture Shop Management and E-Commerce System with PSR-4 Autoloading",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Lilia and Rowena Furniture Team",
+            "email": "info@liliaandrowenafurniture.com"
+        }
+    ]
+}

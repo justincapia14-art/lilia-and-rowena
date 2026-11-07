@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lilia and Rowena Furniture | Handcrafted Fine Furniture</title>
+    <meta name="description" content="Handcrafted solid wood furniture, bespoke custom carpentry, and timeless designs by Lilia and Rowena Furniture." />
+    <meta property="og:title" content="Lilia and Rowena Furniture | Handcrafted Fine Furniture" />
+    <meta property="og:description" content="Handcrafted solid wood furniture, bespoke custom carpentry, and timeless designs by Lilia and Rowena Furniture." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Pure CSS Stylesheet (Light Blue + Crisp White Palette) -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+
+    <!-- TOP ANNOUNCEMENT BAR -->
+    <div class="top-announcement">
+      <strong>Solid Wood Guarantee</strong>
+      <span class="sep" aria-hidden="true">·</span>
+      <span>100% Kiln-Dried Mahogany &amp; Teak</span>
+      <span class="sep" aria-hidden="true">·</span>
+      <span>Free White-Glove Metro Delivery for Orders ₱15,000+</span>
+      <button type="button" class="btn-top-zip" onclick="openModal('projectHubModal')">
+        <span>📦 PHP Project ZIP &amp; Guide</span>
+      </button>
+    </div>
+
+    <!-- 3-ZONE NAVIGATION HEADER -->
+    <header class="main-header">
+      <div class="header-container">
+        <!-- Zone 1: Brand Wordmark -->
+        <button type="button" class="brand-logo" onclick="scrollToSection('hero')">
+          <span class="brand-title">LILIA &amp; ROWENA</span>
+          <span class="brand-tagline">Handcrafted Fine Furniture</span>
+        </button>
+
+        <!-- Zone 2: Navigation Links -->
+        <nav class="nav-links" aria-label="Main Navigation">
+          <button type="button" onclick="scrollToSection('hero')">Home</button>
+          <button type="button" onclick="scrollToSection('catalog')">Furniture Catalog</button>
+          <button type="button" onclick="scrollToSection('services')">Custom Carpentry</button>
+          <button type="button" onclick="scrollToSection('benefits')">Why Choose Us</button>
+          <button type="button" onclick="openModal('trackOrderModal')">Track Order</button>
+          <button type="button" style="color: #0284c7; font-weight: 700;" onclick="openLiveChatModal()">
+            💬 Message Admin (<span id="headerMsgCount">3</span>)
+          </button>
+        </nav>
+
+        <!-- Zone 3: User Account (Login / Admin / Logout) & Shopping Cart -->
+        <div class="header-actions">
+          <!-- Visible when logged in as Customer or Admin -->
+          <div id="headerLoggedInBox" class="user-greeting" style="display: flex; align-items: center; gap: 0.65rem;">
+            <span id="headerUserName" style="font-weight: 700; color: #0f172a;">Hello, Maria</span>
+            <button type="button" id="headerAdminBtn" class="btn-sm-soft" style="display: none;" onclick="openModal('adminModal')">
+              🔑 Admin Panel
+            </button>
+            <button type="button" class="btn-link-sm" style="color: #dc2626; font-weight: 700;" onclick="handleUserLogout()">
+              Logout
+            </button>
+          </div>
+
+          <!-- Visible when logged out -->
+          <div id="headerLoggedOutBox" style="display: none; align-items: center; gap: 0.5rem;">
+            <button type="button" class="btn-sm-soft" onclick="openModal('authModal')">
+              Sign In / Admin
+            </button>
+          </div>
+
+          <button type="button" class="cart-btn" aria-label="View Shopping Cart" onclick="openModal('cartDrawerBackdrop')">
+            <span>Cart</span>
+            <span class="cart-badge" id="headerCartCount">1</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- 1. HERO SECTION (Above the Fold) -->
+      <section id="hero" class="hero-section">
+        <div class="hero-container">
+          <div class="hero-content">
+            <span class="hero-kicker">✦ Workshop-Direct Artisanal Craftsmanship</span>
+            <h1 class="hero-title">Heirloom Furniture, Handcrafted for Generations</h1>
+            <p class="hero-subtitle">
+              Custom solid wood dining sets, living room suites, and bedroom sanctuaries built to your exact room dimensions by master carpenters in Pampanga &amp; Manila.
+            </p>
+
+            <div class="hero-cta-group">
+              <button type="button" class="btn-primary" onclick="scrollToSection('catalog')">
+                <span>Explore 2026 Collection →</span>
+              </button>
+              <button type="button" class="btn-secondary" onclick="scrollToSection('services')">
+                <span>Request Bespoke Sizing</span>
+              </button>
+            </div>
+
+            <div class="hero-trust-row">
+              <div class="trust-item">
+                <span class="trust-icon">✓</span>
+                <span>100% Solid Kiln-Dried Wood</span>
+              </div>
+              <div class="trust-item">
+                <span class="trust-icon">✓</span>
+                <span>5-Year Structural Warranty</span>
+              </div>
+              <div class="trust-item">
+                <span class="trust-icon">✓</span>
+                <span>50% Downpayment Terms</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-image-card">
+              <img src="/images/hero_furniture_showroom.jpg" alt="Lilia and Rowena Furniture Showroom" class="hero-image" />
+              <div class="hero-floating-card">
+                <div>
+                  <strong>Solid Mahogany, Teak &amp; Ash</strong>
+                  <span>Direct from our Pampanga Workshop • Zero Retail Markup</span>
+                </div>
+                <span class="hero-est-tag">Est. 1998</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. TRUST & CREDIBILITY STRIP -->
+      <section class="trust-strip">
+        <div class="trust-strip-container">
+          <div class="stat-box">
+            <span class="stat-number">28+</span>
+            <span class="stat-label">Years Master Carpentry</span>
+            <span class="stat-sub">Founded in San Fernando, Pampanga</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number">2,400+</span>
+            <span class="stat-label">Homes Furnished</span>
+            <span class="stat-sub">Across Luzon &amp; Metro Manila</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Solid Hardwood Timber</span>
+            <span class="stat-sub">Zero MDF, Veneer Core, or Plastic</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number">4.9 / 5</span>
+            <span class="stat-label">Client Satisfaction</span>
+            <span class="stat-sub">Verified Homeowner Reviews</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. SERVICES OVERVIEW SECTION -->
+      <section id="services" class="services-section">
+        <div class="section-container">
+          <div class="section-header">
+            <span class="section-kicker">Workshop Capabilities</span>
+            <h2 class="section-title">Comprehensive Artisanal Woodworking Services</h2>
+            <p class="section-subtitle">
+              From precision floorplan sizing to in-home placement, our master workshop handles every step without middlemen.
+            </p>
+          </div>
+
+          <div class="services-grid">
+            <div class="service-card">
+              <div>
+                <div class="service-icon-wrap">🪵</div>
+                <h3 class="service-title">Bespoke Custom Carpentry</h3>
+                <p class="service-text">
+                  Have unique room dimensions? We adjust length, width, and height down to the centimeter using hand-cut mortise &amp; tenon joints.
+                </p>
+              </div>
+              <div class="service-footer">
+                <span class="service-highlight">Tailored to your floorplan</span>
+                <button type="button" class="card-link" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, '/images/product_dining_table.jpg', 180, 90, 75)">Configure →</button>
+              </div>
+            </div>
+
+            <div class="service-card">
+              <div>
+                <div class="service-icon-wrap">🎨</div>
+                <h3 class="service-title">Master Finishes &amp; Upholstery</h3>
+                <p class="service-text">
+                  Choose between Natural Teak Oil, Warm Walnut, Light Scandinavian Ash, or water-resistant polyurethane clear coats.
+                </p>
+              </div>
+              <div class="service-footer">
+                <span class="service-highlight">5 Stain &amp; Gloss Options</span>
+                <button type="button" class="card-link" onclick="scrollToSection('catalog')">Explore →</button>
+              </div>
+            </div>
+
+            <div class="service-card">
+              <div>
+                <div class="service-icon-wrap">🚚</div>
+                <h3 class="service-title">In-House White Glove Delivery</h3>
+                <p class="service-text">
+                  Our own trusted shop drivers deliver, carry upstairs, assemble, and position your furniture with zero third-party courier handling.
+                </p>
+              </div>
+              <div class="service-footer">
+                <span class="service-highlight">Own Driver Dispatch Fleet</span>
+                <button type="button" class="card-link" onclick="openModal('trackOrderModal')">Track Fleet →</button>
+              </div>
+            </div>
+
+            <div class="service-card">
+              <div>
+                <div class="service-icon-wrap">🪑</div>
+                <h3 class="service-title">Heirloom Restoration &amp; Repair</h3>
+                <p class="service-text">
+                  Breathe new life into your cherished family treasures. We sand, reinforce loose joinery, and apply fresh protective lacquer.
+                </p>
+              </div>
+              <div class="service-footer">
+                <span class="service-highlight">Expert Craft Revival</span>
+                <button type="button" class="card-link" onclick="scrollToSection('faq')">Learn More →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. CORE BENEFITS SECTION -->
+      <section id="benefits" class="benefits-section">
+        <div class="section-container">
+          <div class="benefits-split">
+            <div class="benefits-text">
+              <span class="section-kicker">The Lilia &amp; Rowena Advantage</span>
+              <h2 class="section-title">Why Discerning Homeowners Choose Solid Hardwood Over Flat-Pack</h2>
+              <p class="benefits-desc">
+                Commercial flat-pack furniture sags and chips after 2 years of Philippine tropical humidity. Our pieces are crafted from seasoned hardwood built to last over 30+ years.
+              </p>
+
+              <div class="benefits-list">
+                <div class="benefit-item">
+                  <div class="benefit-check">₱</div>
+                  <div>
+                    <h4>Direct-from-Workshop Pricing</h4>
+                    <p>Zero retail middleman or mall showroom overhead. You invest purely in master woodcutters, joinery, and seasoned timber.</p>
+                  </div>
+                </div>
+
+                <div class="benefit-item">
+                  <div class="benefit-check">📐</div>
+                  <div>
+                    <h4>Perfect Spatial Fit Guarantee</h4>
+                    <p>Never worry about standard tables blocking condo hallways or bedframes overhanging electrical outlets. We adjust dimensions to the centimeter.</p>
+                  </div>
+                </div>
+
+                <div class="benefit-item">
+                  <div class="benefit-check">🛡️</div>
+                  <div>
+                    <h4>Safe 50% Downpayment Model</h4>
+                    <p>Start with a 50% downpayment for timber milling. You only pay the remaining balance after you personally inspect the finished piece upon home delivery.</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="btn-primary" onclick="scrollToSection('catalog')">
+                <span>Browse Handcrafted Pieces →</span>
+              </button>
+            </div>
+
+            <div class="benefits-image-box">
+              <img src="/images/product_dining_table.jpg" alt="Solid oak dining table showing fine joinery" class="benefits-img" />
+              <div class="benefits-img-caption">
+                <small>Authentic Joinery</small>
+                <strong>Hand-Cut Mortise &amp; Tenon Assembly</strong>
+                <span>Zero staple guns, particleboard, or plastic veneer.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. FEATURED CATALOG SECTION -->
+      <section id="catalog" class="featured-section">
+        <div class="section-container">
+          <div class="section-header-row">
+            <div>
+              <span class="section-kicker">Signature Collection</span>
+              <h2 class="section-title">Handcrafted Solid Hardwood Catalog</h2>
+              <p class="section-subtitle">
+                Each piece is custom-milled from kiln-dried mahogany, teak, and ash. Select standard dimensions or adjust sizing to fit your room.
+              </p>
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b;">
+              Showing <strong id="catalogCountText" style="color: #0f172a;">6</strong> pieces
+            </div>
+          </div>
+
+          <!-- Category Filter Buttons -->
+          <div class="category-filter-bar">
+            <button type="button" class="cat-pill active" onclick="filterCatalog('ALL', this)">All Furniture (6)</button>
+            <button type="button" class="cat-pill" onclick="filterCatalog('Living Room', this)">Living Room (2)</button>
+            <button type="button" class="cat-pill" onclick="filterCatalog('Dining Sets', this)">Dining Sets (2)</button>
+            <button type="button" class="cat-pill" onclick="filterCatalog('Bedroom Suite', this)">Bedroom Suite (1)</button>
+            <button type="button" class="cat-pill" onclick="filterCatalog('Home Office', this)">Home Office (1)</button>
+          </div>
+
+          <!-- 6-Product Grid (Matches Database `Product` Table) -->
+          <div class="product-grid">
+            <!-- Product 1 -->
+            <div class="product-card" data-category="Dining Sets">
+              <div class="product-image-wrap">
+                <img src="/images/product_dining_table.jpg" alt="Mahogany 6-Seater Dining Set" class="product-image" />
+                <span class="custom-tag">Custom Sizing Available</span>
+              </div>
+              <div class="product-info">
+                <div class="product-meta-line">
+                  <span class="product-category">Dining Sets</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Solid Hardwood</span>
+                  <span aria-hidden="true">·</span>
+                  <span>10-14 Days</span>
+                </div>
+                <h3 class="product-name">Mahogany 6-Seater Dining Set</h3>
+                <p class="product-desc">
+                  Handcrafted from 100% kiln-dried solid mahogany with mortise &amp; tenon joinery. Includes 6 ergonomic slatted-back chairs.
+                </p>
+                <div class="product-price-row">
+                  <div>
+                    <span class="price-label">Base Price</span>
+                    <span class="product-price">₱28,500</span>
+                  </div>
+                  <div class="product-card-actions">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, '/images/product_dining_table.jpg', 180, 90, 75)">
+                      Customize
+                    </button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Mahogany 6-Seater Dining Set to cart" onclick="quickAddToCart(1, 'Mahogany 6-Seater Dining Set', 28500, '/images/product_dining_table.jpg')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="product-card" data-category="Living Room">
+              <div class="product-image-wrap">
+                <img src="/images/product_lounge_sofa.jpg" alt="Scandinavian Sky Blue Lounge Sofa" class="product-image" />
+                <span class="custom-tag">Custom Sizing Available</span>
+              </div>
+              <div class="product-info">
+                <div class="product-meta-line">
+                  <span class="product-category">Living Room</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Solid Hardwood</span>
+                  <span aria-hidden="true">·</span>
+                  <span>10-14 Days</span>
+                </div>
+                <h3 class="product-name">Scandinavian Sky Blue Lounge Sofa</h3>
+                <p class="product-desc">
+                  Contemporary 3-seater living room sofa with soft woven sky blue upholstery and a solid kiln-dried ash wood base frame.
+                </p>
+                <div class="product-price-row">
+                  <div>
+                    <span class="price-label">Base Price</span>
+                    <span class="product-price">₱34,000</span>
+                  </div>
+                  <div class="product-card-actions">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(2, 'Scandinavian Sky Blue Lounge Sofa', 'Living Room', 34000, '/images/product_lounge_sofa.jpg', 210, 85, 80)">
+                      Customize
+                    </button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Scandinavian Sky Blue Lounge Sofa to cart" onclick="quickAddToCart(2, 'Scandinavian Sky Blue Lounge Sofa', 34000, '/images/product_lounge_sofa.jpg')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="product-card" data-category="Bedroom Suite">
+              <div class="product-image-wrap">
+                <img src="/images/product_wooden_bedframe.jpg" alt="Minimalist Teak King Bedframe" class="product-image" />
+                <span class="custom-tag">Custom Sizing Available</span>
+              </div>
+              <div class="product-info">
+                <div class="product-meta-line">
+                  <span class="product-category">Bedroom Suite</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Solid Hardwood</span>
+                  <span aria-hidden="true">·</span>
+                  <span>10-14 Days</span>
+                </div>
+                <h3 class="product-name">Minimalist Teak King Bedframe</h3>
+                <p class="product-desc">
+                  Master bedroom platform bedframe with floating bedside drawers. Hand-finished with natural teak oil for a rich organic grain.
+                </p>
+                <div class="product-price-row">
+                  <div>
+                    <span class="price-label">Base Price</span>
+                    <span class="product-price">₱42,500</span>
+                  </div>
+                  <div class="product-card-actions">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(3, 'Minimalist Teak King Bedframe', 'Bedroom Suite', 42500, '/images/product_wooden_bedframe.jpg', 200, 190, 95)">
+                      Customize
+                    </button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Minimalist Teak King Bedframe to cart" onclick="quickAddToCart(3, 'Minimalist Teak King Bedframe', 42500, '/images/product_wooden_bedframe.jpg')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="product-card" data-category="Living Room">
+              <div class="product-image-wrap">
+                <img src="/images/product_dining_table.jpg" alt="Solid Acacia Round Coffee Table" class="product-image" />
+                <span class="custom-tag">Custom Sizing Available</span>
+              </div>
+              <div class="product-info">
+                <div class="product-meta-line">
+                  <span class="product-category">Living Room</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Solid Hardwood</span>
+                  <span aria-hidden="true">·</span>
+                  <span>10-14 Days</span>
+                </div>
+                <h3 class="product-name">Solid Acacia Round Coffee Table</h3>
+                <p class="product-desc">
+                  Organic tree slab coffee table featuring natural live edges, mortise bracing, and water-resistant protective clear finish.
+                </p>
+                <div class="product-price-row">
+                  <div>
+                    <span class="price-label">Base Price</span>
+                    <span class="product-price">₱12,800</span>
+                  </div>
+                  <div class="product-card-actions">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(4, 'Solid Acacia Round Coffee Table', 'Living Room', 12800, '/images/product_dining_table.jpg', 90, 90, 45)">
+                      Customize
+                    </button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Solid Acacia Round Coffee Table to cart" onclick="quickAddToCart(4, 'Solid Acacia Round Coffee Table', 12800, '/images/product_dining_table.jpg')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 5 -->
+            <div class="product-card" data-category="Home Office">
+              <div class="product-image-wrap">
+                <img src="/images/product_dining_table.jpg" alt="Executive Ergonomic Oak Desk" class="product-image" />
+                <span class="custom-tag">Custom Sizing Available</span>
+              </div>
+              <div class="product-info">
+                <div class="product-meta-line">
+                  <span class="product-category">Home Office</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Solid Hardwood</span>
+                  <span aria-hidden="true">·</span>
+                  <span>10-14 Days</span>
+                </div>
+                <h3 class="product-name">Executive Ergonomic Oak Desk</h3>
+                <p class="product-desc">
+                  Substantial home office work desk with 3 soft-closing dovetail drawers and built-in hidden cable management grommets.
+                </p>
+                <div class="product-price-row">
+                  <div>
+                    <span class="price-label">Base Price</span>
+                    <span class="product-price">₱24,500</span>
+                  </div>
+                  <div class="product-card-actions">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(5, 'Executive Ergonomic Oak Desk', 'Home Office', 24500, '/images/product_dining_table.jpg', 150, 75, 75)">
+                      Customize
+                    </button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Executive Ergonomic Oak Desk to cart" onclick="quickAddToCart(5, 'Executive Ergonomic Oak Desk', 24500, '/images/product_dining_table.jpg')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 6 -->
+            <div class="product-card" data-category="Dining Sets">
+              <div class="product-image-wrap">
+                <img src="/images/product_dining_table.jpg" alt="Compact 4-Seater Breakfast Nook Set" class="product-image" />
+                <span class="custom-tag">Custom Sizing Available</span>
+              </div>
+              <div class="product-info">
+                <div class="product-meta-line">
+                  <span class="product-category">Dining Sets</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Solid Hardwood</span>
+                  <span aria-hidden="true">·</span>
+                  <span>10-14 Days</span>
+                </div>
+                <h3 class="product-name">Compact 4-Seater Breakfast Nook Set</h3>
+                <p class="product-desc">
+                  Space-saving solid wood square table with 4 stackable tapered-leg chairs designed for modern apartments and condominiums.
+                </p>
+                <div class="product-price-row">
+                  <div>
+                    <span class="price-label">Base Price</span>
+                    <span class="product-price">₱18,900</span>
+                  </div>
+                  <div class="product-card-actions">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(6, 'Compact 4-Seater Breakfast Nook Set', 'Dining Sets', 18900, '/images/product_dining_table.jpg', 100, 100, 75)">
+                      Customize
+                    </button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Compact 4-Seater Breakfast Nook Set to cart" onclick="quickAddToCart(6, 'Compact 4-Seater Breakfast Nook Set', 18900, '/images/product_dining_table.jpg')">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. SOCIAL PROOF & TESTIMONIALS SECTION -->
+      <section class="testimonials-section">
+        <div class="section-container">
+          <div class="section-header">
+            <span class="section-kicker">Social Proof &amp; Client Stories</span>
+            <h2 class="section-title">Trusted by Over 2,400 Philippine Families &amp; Interior Architects</h2>
+            <p class="section-subtitle">
+              Read how custom hardwood furniture transformed our clients' spaces with generational durability.
+            </p>
+          </div>
+
+          <div class="testimonials-grid">
+            <div class="testimonial-card">
+              <div>
+                <div class="star-rating">★★★★★</div>
+                <p class="testimonial-quote">
+                  "We needed an 8-seater dining table for our Antipolo home that could withstand our three active kids. Lilia &amp; Rowena customized the length to 220cm and the kiln-dried mahogany finish is immaculate. Delivered and set up directly by their own driver!"
+                </p>
+              </div>
+              <div class="client-meta">
+                <strong>Atty. Patricia &amp; Marco Mendoza</strong>
+                <span>Homeowners · Antipolo, Rizal</span>
+                <small>Custom 220cm Mahogany Dining Set</small>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div>
+                <div class="star-rating">★★★★★</div>
+                <p class="testimonial-quote">
+                  "As an interior decorator in BGC, finding workshops that truly use seasoned solid wood without hidden particleboard cores is rare. Lilia &amp; Rowena built a custom king teak bedframe with integrated floating nightstands on time. Superb mortise and tenon joinery!"
+                </p>
+              </div>
+              <div class="client-meta">
+                <strong>Engr. Danica Gomez, IDr</strong>
+                <span>Interior Designer · Taguig City</span>
+                <small>Master Bedroom Teak Suite</small>
+              </div>
+            </div>
+
+            <div class="testimonial-card">
+              <div>
+                <div class="star-rating">★★★★★</div>
+                <p class="testimonial-quote">
+                  "The 50% downpayment terms gave our family complete peace of mind. Their workshop sent photos while the carpenters were cutting and sanding in Pampanga. When it arrived in San Fernando, the finish was silky smooth and the proportions fit our room perfectly."
+                </p>
+              </div>
+              <div class="client-meta">
+                <strong>Dr. Ronald &amp; Elena Ramos</strong>
+                <span>Homeowners · San Fernando, Pampanga</span>
+                <small>Scandinavian Lounge Suite</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. OBJECTION-BUSTING FAQ SECTION -->
+      <section id="faq" class="faq-section">
+        <div class="section-container">
+          <div class="section-header">
+            <span class="section-kicker">Got Questions?</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-subtitle">
+              Everything you need to know about our hardwood, bespoke sizing, and white-glove delivery.
+            </p>
+          </div>
+
+          <div class="faq-accordion">
+            <details class="faq-item" open>
+              <summary class="faq-question">What wood species do you use for your furniture?</summary>
+              <div class="faq-answer">
+                We exclusively work with kiln-dried, seasoned Philippine and imported hardwoods including Mahogany, Teak, Ash, and Narra. We NEVER use particleboard, hollow veneer cores, or low-grade MDF that deteriorate under Philippine humidity.
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-question">How does custom dimension ordering work?</summary>
+              <div class="faq-answer">
+                When you select any customizable piece, you can specify your target Length, Width, Height, and wood stain finish. Our system calculates the material surcharge transparently, and our master carpenters construct it according to your exact room floorplan.
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-question">What are your payment and downpayment terms?</summary>
+              <div class="faq-answer">
+                We operate on a secure 50% downpayment model to source your selected hardwood and assign master carpenters. The remaining 50% balance is payable in Cash on Delivery (COD) or online transfer only after your piece has arrived and passed your in-home inspection.
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-question">How long does custom production and delivery take?</summary>
+              <div class="faq-answer">
+                Catalog items in stock are dispatched within 3 to 5 business days. Bespoke pieces with customized dimensions take 10 to 14 business days to allow proper wood curing, assembly, and 3-coat hand-rubbed protective finishing.
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary class="faq-question">What is covered under your 5-Year Structural Warranty?</summary>
+              <div class="faq-answer">
+                All our furniture is backed by a 5-Year Structural Warranty covering timber warping, joinery splits, and frame integrity. If any joint becomes loose under normal domestic use, our workshop technician will repair or replace it free of charge.
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. FINAL HIGH-IMPACT CTA SECTION -->
+      <section class="final-cta-section">
+        <div class="final-cta-container">
+          <span class="final-cta-kicker">Transform Your Living Space</span>
+          <h2 class="final-cta-title">Ready to Furnish Your Home with Heirloom Hardwood?</h2>
+          <p class="final-cta-subtitle">
+            Order signature ready-to-mill pieces online, or consult directly with our master carpenter for custom room floorplans.
+          </p>
+          <div class="final-cta-buttons">
+            <button type="button" class="btn-primary-white" onclick="scrollToSection('catalog')">
+              Browse Furniture Catalog →
+            </button>
+            <a href="tel:+639178894211" class="btn-secondary-white">
+              <span>📞 Call Workshop: 0917-889-4211</span>
+            </a>
+          </div>
+          <p class="final-cta-note">
+            Workshop Address: MacArthur Highway, San Fernando, Pampanga · Direct Dispatch to Metro Manila &amp; Luzon
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+      <div class="footer-container">
+        <div class="footer-col">
+          <h3>LILIA &amp; ROWENA</h3>
+          <p class="footer-desc">
+            Heirloom-grade solid wood furniture handcrafted by master carpenters in Pampanga &amp; Manila. Custom dimensions, bespoke stains, and direct workshop prices.
+          </p>
+          <div class="footer-badges">
+            <span>✓ 100% Solid Kiln-Dried Hardwood</span>
+            <span>✓ 5-Year Structural Frame Warranty</span>
+            <span>✓ 50% Downpayment &amp; COD Balance Terms</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Collections</h4>
+          <ul>
+            <li><button type="button" onclick="scrollToSection('catalog')">Living Room Suites</button></li>
+            <li><button type="button" onclick="scrollToSection('catalog')">Solid Mahogany Dining</button></li>
+            <li><button type="button" onclick="scrollToSection('catalog')">Teak King Bedframes</button></li>
+            <li><button type="button" onclick="scrollToSection('catalog')">Executive Desks</button></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Workshop Services</h4>
+          <ul>
+            <li><button type="button" onclick="scrollToSection('services')">Custom Sizing &amp; Mortise Joinery</button></li>
+            <li><button type="button" onclick="scrollToSection('services')">Wood Stains &amp; Polyurethane Finishing</button></li>
+            <li><button type="button" onclick="openModal('trackOrderModal')">White-Glove Delivery Fleet</button></li>
+            <li><button type="button" style="color: #38bdf8; font-weight: 700;" onclick="openModal('projectHubModal')">📦 Team Project Hub &amp; ZIP Download</button></li>
+          </ul>
+        </div>
+
+        <div class="footer-col contact-col">
+          <h4>Showroom &amp; Workshop</h4>
+          <p><strong>Main Workshop:</strong> MacArthur Highway, San Fernando, Pampanga</p>
+          <p><strong>Manila Dispatch:</strong> Quezon City, Metro Manila</p>
+          <p><strong>Direct Line:</strong> (045) 961-4288 / 0917-889-4211</p>
+          <p><strong>Hours:</strong> Mon - Sat: 8:00 AM - 6:00 PM</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Lilia and Rowena Furniture. All rights reserved. Database-backed PHP PSR-4 Shop Management System.</p>
+        <a href="/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" style="color: #38bdf8; font-weight: 600;">
+          Download Full PHP Project (.zip)
+        </a>
+      </div>
+    </footer>
+
+    <!-- =====================================================================
+         INTERACTIVE MODALS & DRAWERS (HTML + CSS + SIMPLE VANILLA JS)
+         ===================================================================== -->
+
+    <!-- 1. CUSTOM SIZING & PRODUCT DETAIL MODAL -->
+    <div id="customizerModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="custModalTitle">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div>
+            <span id="custModalCategory" class="modal-kicker">Dining Sets · Custom Sizing Studio</span>
+            <h3 id="custModalTitle" class="modal-title">Mahogany 6-Seater Dining Set</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close customizer" onclick="closeModal('customizerModal')">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="customizer-split">
+            <div>
+              <img id="custModalImg" src="/images/product_dining_table.jpg" alt="Selected Furniture Piece" style="width: 100%; border-radius: 10px; aspect-ratio: 4/3; object-fit: cover; border: 1px solid #e2e8f0; margin-bottom: 1rem;" />
+              <div style="background: #f0f7ff; padding: 0.9rem; border-radius: 8px; border: 1px solid #bae6fd; font-size: 0.78rem; color: #0f172a;">
+                <p style="margin-bottom: 0.35rem;">✓ 100% Seasoned Kiln-Dried Hardwood</p>
+                <p style="margin-bottom: 0.35rem;">✓ Hand-Cut Mortise &amp; Tenon Joinery</p>
+                <p>✓ 5-Year Structural Frame Warranty</p>
+              </div>
+            </div>
+
+            <div>
+              <div class="price-banner-box">
+                <div>
+                  <span class="price-label">Configured Unit Price</span>
+                  <strong id="displayTotal" style="font-size: 1.5rem; color: #075985;">₱28,500</strong>
+                </div>
+                <div style="text-align: right; font-size: 0.75rem; color: #475569;">
+                  <span>Base: ₱<span id="basePrice">28500</span></span><br />
+                  <span style="color: #0369a1; font-weight: 700;">+₱<span id="extraCost">0</span> Custom Surcharge</span>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 700;">
+                <input type="checkbox" id="isCustomCheckbox" checked />
+                <label for="isCustomCheckbox">Enable Custom Room Dimensions &amp; Wood Finish</label>
+              </div>
+
+              <div id="dimensionInputs" class="dimensions-grid-3">
+                <div class="form-group">
+                  <label for="customLength">Length (cm)</label>
+                  <input type="number" id="customLength" value="180" min="60" max="350" step="5" />
+                </div>
+                <div class="form-group">
+                  <label for="customWidth">Width (cm)</label>
+                  <input type="number" id="customWidth" value="90" min="40" max="220" step="5" />
+                </div>
+                <div class="form-group">
+                  <label for="customHeight">Height (cm)</label>
+                  <input type="number" id="customHeight" value="75" min="30" max="120" step="5" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="colorFinish">Select Wood Stain &amp; Protective Finish</label>
+                <select id="colorFinish">
+                  <option value="Natural Teak Oil">Natural Teak Oil (Clean Wood Grain)</option>
+                  <option value="Warm Walnut Stain">Warm Walnut Stain (+₱1,500 Premium)</option>
+                  <option value="Scandinavian Light Ash">Scandinavian Light Ash</option>
+                  <option value="Matte Off-White Lacquer">Matte Off-White Lacquer (+₱1,200)</option>
+                  <option value="Deep Espresso Mahogany">Deep Espresso Mahogany</option>
+                </select>
+              </div>
+
+              <div class="form-row-2" style="align-items: flex-end; margin-top: 1rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="customQty">Quantity</label>
+                  <input type="number" id="customQty" value="1" min="1" max="10" />
+                </div>
+                <button type="button" class="btn-primary" onclick="addCustomizedToCart()">
+                  <span>Add Configured Piece to Cart 🛒</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SLIDE-OVER SHOPPING CART DRAWER -->
+    <div id="cartDrawerBackdrop" class="drawer-backdrop" role="dialog" aria-modal="true" aria-label="Shopping Cart">
+      <div class="cart-drawer">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Workshop Order Summary</span>
+            <h3 class="modal-title">Your Furniture Cart (<span id="drawerCartCount">1</span>)</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close cart" onclick="closeModal('cartDrawerBackdrop')">✕</button>
+        </div>
+
+        <div id="cartItemsContainer" class="cart-drawer-body">
+          <!-- Populated by simple main.js -->
+        </div>
+
+        <div class="cart-drawer-footer">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.35rem; color: #475569;">
+            <span>Furniture Subtotal</span>
+            <strong id="cartSubtotalText" style="color: #0f172a;">₱30,450</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.65rem; color: #475569;">
+            <span>In-House Driver Delivery</span>
+            <strong style="color: #15803d;">FREE</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 700; padding-top: 0.5rem; border-top: 1px solid #e2e8f0; margin-bottom: 0.85rem;">
+            <span>Total Purchase Value</span>
+            <span id="cartGrandTotalText" style="color: #075985;">₱30,450</span>
+          </div>
+
+          <div style="background: #e0f2fe; border: 1px solid #bae6fd; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.9rem; font-size: 0.76rem; color: #075985;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700;">
+              <span>Required 50% Downpayment:</span>
+              <span id="cartDownpaymentText">₱15,225</span>
+            </div>
+            <span style="font-size: 0.7rem;">Remaining 50% balance paid via Cash on Delivery after inspection.</span>
+          </div>
+
+          <button type="button" class="btn-primary btn-block" onclick="proceedToCheckoutModal()">
+            <span>Proceed to Checkout →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. DIRECT WORKSHOP CHECKOUT MODAL -->
+    <div id="checkoutModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="chkModalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Direct Workshop Checkout</span>
+            <h3 id="chkModalTitle" class="modal-title">Delivery &amp; Order Confirmation</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close checkout" onclick="closeModal('checkoutModal')">✕</button>
+        </div>
+
+        <form class="modal-body" onsubmit="return submitLiveOrder(event)">
+          <div class="price-banner-box">
+            <div style="font-size: 0.8rem;">
+              <strong>Total Purchase: <span id="checkoutTotalText">₱30,450 (1 pcs)</span></strong><br />
+              <span>Due Today (50% Downpayment): <strong id="checkoutDpText" style="color: #075985;">₱15,225</strong></span>
+            </div>
+            <span class="hero-est-tag" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">COD Approved</span>
+          </div>
+
+          <div id="checkoutErrorMsg" style="display: none; background: #fef2f2; color: #dc2626; padding: 0.65rem; border-radius: 6px; font-size: 0.78rem; margin-bottom: 0.85rem; border: 1px solid #fecaca;"></div>
+
+          <div class="form-group">
+            <label for="chkFullName">1. Recipient Full Name *</label>
+            <input type="text" id="chkFullName" required value="Maria Teresa Santos" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="chkEmail">Email Address *</label>
+              <input type="email" id="chkEmail" required value="maria.santos@example.com" />
+            </div>
+            <div class="form-group">
+              <label for="chkPhone">Mobile Number *</label>
+              <input type="tel" id="chkPhone" required value="0917-123-4567" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="chkAddress">2. Complete Delivery Destination (House #, Street, Brgy, City) *</label>
+            <textarea id="chkAddress" rows="2" required>Unit 14B, Tower 2, Serendra, BGC, Taguig City</textarea>
+          </div>
+
+          <div style="padding: 0.85rem; border: 1px solid #bae6fd; background: #f0f7ff; border-radius: 8px; margin-bottom: 1.15rem; font-size: 0.76rem;">
+            <strong>✓ 50% Downpayment + 50% Balance Upon In-Home Inspection</strong>
+            <p style="color: #475569; margin-top: 0.2rem;">
+              Pay 50% downpayment to initiate wood milling and carpenter assignment. Pay remaining 50% in Cash on Delivery after inspecting the furniture.
+            </p>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">
+            <span>Confirm Order · <span id="checkoutBtnDpText">₱15,225</span> Downpayment</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. LIVE ORDER TRACKING MODAL -->
+    <div id="trackOrderModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="trkModalTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Live Workshop Status Tracker</span>
+            <h3 id="trkModalTitle" class="modal-title">Track Your Bespoke Furniture</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close tracker" onclick="closeModal('trackOrderModal')">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <input type="text" id="trackOrderInput" value="1001" placeholder="Enter Order # (e.g. 1001, 1002)" style="flex: 1; padding: 0.6rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;" />
+            <button type="button" class="btn-sm-primary" onclick="lookupOrderById()">Lookup Status</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #64748b; margin-bottom: 1.25rem;">
+            <span>Sample Database Orders:</span>
+            <button type="button" class="btn-sm-soft" onclick="lookupOrderById('1001')">#1001 (In Production)</button>
+            <button type="button" class="btn-sm-soft" onclick="lookupOrderById('1002')">#1002 (Confirmed)</button>
+          </div>
+
+          <div id="trackResultContainer">
+            <!-- Populated by lookupOrderById() in main.js -->
+          </div>
+
+          <div style="margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <span style="font-size: 0.76rem; color: #475569;">Need to follow up on this order or add extra chairs/pillows?</span>
+            <button type="button" class="btn-sm-primary" onclick="openFollowUpFromTracker()">
+              💬 Message Admin About This Order →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. CUSTOMER & ADMIN SIGN IN / REGISTRATION MODAL -->
+    <div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+      <div class="modal-card modal-sm">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Database Authentication (Customer &amp; Admin)</span>
+            <h3 id="authModalTitle" class="modal-title">Account Sign In &amp; Register</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close sign in" onclick="closeModal('authModal')">✕</button>
+        </div>
+
+        <div class="tab-bar">
+          <button type="button" class="tab-btn active" onclick="switchAuthTab('authLoginPane', this)">Sign In (Customer / Admin)</button>
+          <button type="button" class="tab-btn" onclick="switchAuthTab('authRegisterPane', this)">New Customer Register</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="authErrorBox" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.65rem; border-radius: 6px; font-size: 0.76rem; margin-bottom: 0.85rem;"></div>
+
+          <!-- TAB 1: SIGN IN (Customer or Admin) -->
+          <div id="authLoginPane" class="auth-tab-pane">
+            <form onsubmit="return handleCustomerLogin(event)">
+              <div class="form-group">
+                <label for="loginRoleInput">Account Role</label>
+                <select id="loginRoleInput">
+                  <option value="auto">Auto-Detect (Customer or Admin)</option>
+                  <option value="customer">Customer Account (Table: Customer)</option>
+                  <option value="admin">Workshop Admin (Table: Admin)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="loginEmailInput">Email Address</label>
+                <input type="email" id="loginEmailInput" required value="maria.santos@example.com" />
+              </div>
+              <div class="form-group">
+                <label for="loginPassInput">Password</label>
+                <input type="password" id="loginPassInput" required value="password123" />
+              </div>
+              <button type="submit" class="btn-primary btn-block" style="margin-bottom: 1rem;">
+                Sign In to Account
+              </button>
+            </form>
+
+            <div style="padding: 0.85rem; background: #f0f7ff; border: 1px solid #bae6fd; border-radius: 8px; font-size: 0.74rem; color: #334155;">
+              <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">Database Preset Accounts (1-Click Fill):</strong>
+              <div style="display: flex; gap: 0.4rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn-sm-soft" style="flex: 1; justify-content: center;" onclick="fillPresetLogin('customer1')">
+                  👤 Customer #1
+                </button>
+                <button type="button" class="btn-sm-soft" style="flex: 1; justify-content: center;" onclick="fillPresetLogin('customer2')">
+                  👤 Customer #2
+                </button>
+                <button type="button" class="btn-sm-soft" style="flex: 1; justify-content: center;" onclick="fillPresetLogin('admin')">
+                  🔑 Admin
+                </button>
+              </div>
+              <div><strong>Customer #1:</strong> <code>maria.santos@example.com</code> / <code>password123</code></div>
+              <div><strong>Customer #2:</strong> <code>roberto.mendoza@example.com</code> / <code>password123</code></div>
+              <div><strong>Admin:</strong> <code>admin@liliaandrowena.com</code> / <code>admin123</code></div>
+            </div>
+          </div>
+
+          <!-- TAB 2: REGISTER NEW CUSTOMER -->
+          <div id="authRegisterPane" class="auth-tab-pane" style="display: none;">
+            <form onsubmit="return handleCustomerRegister(event)">
+              <div class="form-group">
+                <label for="regFullName">Full Name *</label>
+                <input type="text" id="regFullName" required placeholder="e.g. Juan Dela Cruz" />
+              </div>
+              <div class="form-group">
+                <label for="regEmail">Email Address *</label>
+                <input type="email" id="regEmail" required placeholder="juan@example.com" />
+              </div>
+              <div class="form-group">
+                <label for="regPassword">Password *</label>
+                <input type="password" id="regPassword" required placeholder="Create password" />
+              </div>
+              <div class="form-group">
+                <label for="regPhone">Mobile Number *</label>
+                <input type="tel" id="regPhone" required placeholder="0917-123-4567" />
+              </div>
+              <div class="form-group">
+                <label for="regAddress">Delivery Address *</label>
+                <textarea id="regAddress" rows="2" required placeholder="House #, Street, Barangay, City"></textarea>
+              </div>
+              <button type="submit" class="btn-primary btn-block">
+                Create Customer Account
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5B. ADMIN WORKSHOP MANAGEMENT MODAL (Maps to Table: Admin) -->
+    <div id="adminModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Admin Management Console (Database Table: Admin)</span>
+            <h3 id="adminModalTitle" class="modal-title">Lilia &amp; Rowena Workshop Administration</h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button type="button" class="btn-sm-primary" style="background-color: #dc2626;" onclick="handleUserLogout()">Logout Admin</button>
+            <button type="button" class="modal-close-btn" aria-label="Close admin panel" onclick="closeModal('adminModal')">✕</button>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <div class="price-banner-box">
+            <div style="font-size: 0.78rem;">
+              <strong>Logged in Admin Record (Table: <code>Admin</code>):</strong> <code>AdminID: 1</code> · <code>admin@liliaandrowena.com</code><br />
+              <span style="color: #475569;">Foreign Keys Linked: <code>ProductID</code>, <code>CategoryID</code>, <code>MaterialID</code>, <code>EmployeeID</code>, <code>SupplierID</code></span>
+            </div>
+            <span class="hero-est-tag">Active Session</span>
+          </div>
+
+          <div id="adminStatusNotice" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1rem;"></div>
+
+          <h4 style="font-family: 'Playfair Display', serif; font-size: 1.05rem; margin-bottom: 0.6rem;">1. Customer Orders &amp; Production Status (Table: <code>Customer_Order</code>)</h4>
+          <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1.25rem;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem;">
+              <thead>
+                <tr style="background: #f0f7ff; text-align: left; border-bottom: 1px solid #bae6fd;">
+                  <th style="padding: 0.65rem;">Order #</th>
+                  <th style="padding: 0.65rem;">Customer</th>
+                  <th style="padding: 0.65rem;">Ordered Piece</th>
+                  <th style="padding: 0.65rem;">Total</th>
+                  <th style="padding: 0.65rem;">Current Status</th>
+                  <th style="padding: 0.65rem;">Change Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTableBody">
+                <!-- Populated by renderAdminDashboard() in main.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 2. PRIVATE CUSTOMER CONVERSATIONS IN ADMIN CONSOLE -->
+          <div style="border: 1px solid #bae6fd; border-radius: 10px; padding: 1rem; background: #f0f7ff; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.05rem; margin: 0;">2. Private Customer-Admin Conversations (Table: <code>Order_Message</code>)</h4>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid #bbf7d0;">
+                ● Separate 1-on-1 Customer Threads
+              </span>
+            </div>
+            <p id="adminActiveThreadLabel" style="font-size: 0.75rem; color: #075985; margin-bottom: 0.5rem;">
+              Active Private Conversation: <strong>Maria Teresa Santos (Customer #1)</strong> ↔ <strong>Workshop Admin</strong>
+            </p>
+
+            <!-- Admin Customer Conversation Switcher List -->
+            <div id="adminConversationListInConsole" style="display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+              <!-- Populated by buildAdminConversationListHtml() in main.js -->
+            </div>
+
+            <div id="adminChatFeed" class="chat-feed-box" style="height: 210px; background: #f8fafc;">
+              <!-- Populated in real time by renderMessageFeeds() in main.js -->
+            </div>
+
+            <form onsubmit="return handleAdminReplySubmit(event)" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <select id="adminReplyTargetOrder" onchange="selectAdminConversation(this.value.split('|')[0])" style="padding: 0.5rem 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.76rem; background: #ffffff;">
+                <option value="1|1001|Order Follow-Up (#1001)">Reply Privately to Maria Teresa Santos (Customer #1)</option>
+                <option value="2|1002|Add Custom Request (#1002)">Reply Privately to Atty. Roberto Mendoza (Customer #2)</option>
+              </select>
+              <input type="text" id="adminReplyInput" required placeholder="Type official Admin reply (visible only to selected customer)..." style="flex: 1; min-width: 220px; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;" />
+              <button type="submit" class="btn-sm-primary">Send Private Reply →</button>
+            </form>
+          </div>
+
+          <div class="form-row-2" style="font-size: 0.76rem;">
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #f8fafc;">
+              <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">🪵 Raw Materials &amp; Suppliers (Tables: <code>Material</code> &amp; <code>Supplier</code>)</strong>
+              <p>• <strong>Kiln-Dried Mahogany Planks:</strong> 850 Board Feet (Pampanga Hardwoods Inc.)</p>
+              <p>• <strong>Seasoned Teak Timber:</strong> 420 Board Feet (Pampanga Hardwoods Inc.)</p>
+              <p>• <strong>American White Ash Planks:</strong> 310 Board Feet (Luzon Timber Mill)</p>
+              <p>• <strong>Sky Blue Woven Linen Fabric:</strong> 120 Meters (Artisan Upholstery Co.)</p>
+            </div>
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #f8fafc;">
+              <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">👷 Workshop Employees (Table: <code>Employee</code>)</strong>
+              <p>• <strong>Master Carding Santos:</strong> Master Carpenter (Active)</p>
+              <p>• <strong>Master Eddie Manalo:</strong> Master Carpenter (Active)</p>
+              <p>• <strong>Dante Cruz:</strong> Master Finisher (Active)</p>
+              <p>• <strong>Rene Ocampo:</strong> In-House Delivery Driver (Active)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5C. REAL-TIME PRIVATE 1-ON-1 CUSTOMER <-> ADMIN MESSENGER MODAL -->
+    <div id="liveChatModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="liveChatModalTitle">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Private 1-on-1 Workshop Messenger (Database Table: Order_Message)</span>
+            <h3 id="liveChatModalTitle" class="modal-title">Message Admin · Private Order Follow-Up &amp; Custom Add-Ons</h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <span id="liveSocketStatusBadge" style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid #bbf7d0;">
+              ● Private Real-Time Connected
+            </span>
+            <button type="button" class="modal-close-btn" aria-label="Close live chat" onclick="closeModal('liveChatModal')">✕</button>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <div class="price-banner-box" style="margin-bottom: 0.85rem; flex-direction: column; align-items: stretch; gap: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div id="chatCurrentViewerLabel" style="font-size: 0.78rem; color: #0f172a;">
+                🔒 Private Conversation: <strong>Maria Teresa Santos</strong> (<code>CustomerID: 1</code>) ↔ <strong>Workshop Admin</strong> — Only you and the Admin can see this chat.
+              </div>
+              <div style="display: flex; gap: 0.45rem; align-items: center;">
+                <button type="button" class="btn-sm-soft" onclick="closeModal('liveChatModal'); openModal('authModal');">
+                  🔐 Sign In / Switch Account
+                </button>
+                <button type="button" id="openAdminConsoleFromChatBtn" class="btn-sm-soft" style="display: none;" onclick="openModal('adminModal')">
+                  🔑 Open Full Admin Console
+                </button>
+              </div>
+            </div>
+
+            <!-- Security Alert Box (Displayed if an unauthorized 403 Forbidden action is attempted) -->
+            <div id="chatSecurityAlertBox" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 0.55rem 0.8rem; border-radius: 6px; font-size: 0.76rem; font-weight: 600;"></div>
+
+            <!-- Visible ONLY when Admin is logged in: Separate Customer Conversation List -->
+            <div id="adminConversationSelectorBox" style="display: none; padding-top: 0.55rem; border-top: 1px dashed #7dd3fc;">
+              <strong style="font-size: 0.74rem; color: #075985; display: block; margin-bottom: 0.4rem;">📂 Select Customer Conversation (Admin 1-on-1 Inbox):</strong>
+              <div id="adminConversationListInChat" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                <!-- Populated by buildAdminConversationListHtml() in main.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick 1-Click Follow-Up & Add-On Prompt Chips (Scoped to active customer's order) -->
+          <div style="font-size: 0.72rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Quick Follow-Up &amp; Add-On Templates:</div>
+          <div id="chatQuickChipsContainer" class="chat-quick-chips">
+            <button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt('1001', 'Order Follow-Up (#1001)', 'Hello Admin! I would like to follow up on the production status of Order #1001 (Mahogany Dining Set). How is the finishing progressing?')">
+              📋 Follow up Order #1001 status
+            </button>
+            <button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt('1001', 'Add Custom Request (#1001)', 'Hello Admin! Can we add 2 extra matching solid mahogany dining chairs to our Order #1001?')">
+              ➕ Add 2 extra chairs to Order #1001
+            </button>
+            <button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt('1001', 'Delivery Schedule (#1001)', 'Good day! Could you please confirm the estimated delivery arrival window for Order #1001?')">
+              🚚 Confirm Order #1001 delivery time
+            </button>
+          </div>
+
+          <!-- Live Scrolling Private Message Feed -->
+          <div id="customerChatFeed" class="chat-feed-box">
+            <!-- Populated in real time by renderMessageFeeds() in main.js -->
+          </div>
+
+          <!-- Send Live Private Message Form -->
+          <form onsubmit="return handleCustomerChatSubmit(event)" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.9rem;">
+            <div class="form-row-2" style="margin-bottom: 0.65rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="chatOrderSelect">Related Order #</label>
+                <select id="chatOrderSelect">
+                  <option value="1001">Order #1001 — Mahogany 6-Seater Dining Set</option>
+                  <option value="">General Inquiry / New Custom Quote</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="chatTopicSelect">Message Purpose</label>
+                <select id="chatTopicSelect">
+                  <option value="Order Follow-Up (#1001)">Order Status Follow-Up</option>
+                  <option value="Add Custom Request (#1001)">Add Extra Item / Modify Custom Spec</option>
+                  <option value="Delivery Coordination">Delivery Schedule Coordination</option>
+                  <option value="Workshop Inquiry">General Workshop Inquiry</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.55rem;">
+              <input type="text" id="customerChatInput" required placeholder="Send a private message to Workshop Admin..." style="flex: 1; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.83rem; background: #ffffff;" />
+              <button type="submit" class="btn-primary">
+                <span>Send Private Message →</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOATING REAL-TIME CHAT BUTTON (Bottom-Right) -->
+    <button type="button" id="floatingChatBtn" class="floating-chat-launcher" onclick="openLiveChatModal()">
+      <span class="live-dot"></span>
+      <span>💬 Message Admin · Follow-Up / Add Item (<span id="floatingMsgCount">2</span>)</span>
+    </button>
+
+    <!-- 6. PHP PROJECT ZIP & STEP-BY-STEP GUIDE MODAL -->
+    <div id="projectHubModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="hubModalTitle">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Final Project Package &amp; Team Deliverables</span>
+            <h3 id="hubModalTitle" class="modal-title">Lilia &amp; Rowena Furniture — Pure PHP (PSR-4), HTML, CSS &amp; Minimal JS</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close project hub" onclick="closeModal('projectHubModal')">✕</button>
+        </div>
+
+        <div class="tab-bar">
+          <button type="button" class="tab-btn active" onclick="switchHubTab('hubDownloadPane', this)">📥 Download ZIP Package</button>
+          <button type="button" class="tab-btn" onclick="switchHubTab('hubSetupPane', this)">🛠️ Step-by-Step XAMPP Guide</button>
+          <button type="button" class="tab-btn" onclick="switchHubTab('hubBlueprintPane', this)">📐 Conversion Homepage Strategy</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Pane 1: Download ZIP -->
+          <div id="hubDownloadPane" class="hub-tab-pane">
+            <div style="background: linear-gradient(135deg, #0284c7, #075985); color: #ffffff; padding: 2rem; border-radius: 12px; text-align: center; margin-bottom: 1.25rem;">
+              <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: #bae6fd; font-weight: 700;">100% Pure PHP, HTML, CSS, SQL &amp; Minimal JS (Zero .tsx)</span>
+              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.65rem; margin: 0.4rem 0 0.75rem;">lilia_and_rowena_furniture_php_project.zip</h4>
+              <p style="font-size: 0.84rem; color: #e0f2fe; max-width: 540px; margin: 0 auto 1.25rem;">
+                Complete Composer PSR-4 folder structure (`src/Config`, `src/Models`, `src/Controllers`), HTML5 `views/`, Light Blue + White `style.css`, simple vanilla `main.js`, and MySQL `.sql` scripts.
+              </p>
+              <a href="/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" class="btn-primary-white" style="display: inline-block;">
+                ⬇ Download Complete PHP Project (.zip)
+              </a>
+            </div>
+
+            <div class="form-row-2" style="font-size: 0.78rem;">
+              <div style="padding: 0.9rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                <strong style="color: #075985; display: block; margin-bottom: 0.3rem;">📁 PSR-4 PHP Backend (`src/` &amp; `config/`)</strong>
+                <p>• <code>composer.json</code> (PSR-4 <code>App\</code> namespace)</p>
+                <p>• <code>config/database.php</code> &amp; <code>src/Config/Database.php</code></p>
+                <p>• <code>src/Models/</code>: Admin, Category, Product, Customer, Order, Message</p>
+                <p>• <code>src/Controllers/</code>: Home, Auth, Admin, Message, Cart, Order</p>
+              </div>
+              <div style="padding: 0.9rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+                <strong style="color: #075985; display: block; margin-bottom: 0.3rem;">📁 Frontend Views &amp; SQL (`views/`, `public/`, `database/`)</strong>
+                <p>• <code>views/*.php</code> (Header, Footer, Home, Catalog, Cart, Login, Admin, Messages)</p>
+                <p>• <code>public/css/style.css</code> (Light Blue + White CSS)</p>
+                <p>• <code>public/js/main.js</code> (Simple Vanilla JS with clear comments)</p>
+                <p>• <code>database/01_furniture_shop_schema.sql</code> &amp; <code>02_sample_data.sql</code></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pane 2: Step-by-Step XAMPP Guide -->
+          <div id="hubSetupPane" class="hub-tab-pane" style="display: none; font-size: 0.82rem; line-height: 1.65;">
+            <h4 style="font-family: 'Playfair Display', serif; font-size: 1.15rem; margin-bottom: 0.75rem;">Step-by-Step Setup in XAMPP &amp; phpMyAdmin:</h4>
+            <ol style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.65rem;">
+              <li><strong>Extract to htdocs:</strong> Extract the downloaded ZIP archive into <code>C:\xampp\htdocs\lilia_and_rowena_furniture\</code>.</li>
+              <li><strong>Start XAMPP:</strong> Open the XAMPP Control Panel and start both <strong>Apache</strong> and <strong>MySQL</strong>.</li>
+              <li><strong>Import SQL Database:</strong> Open <code>http://localhost/phpmyadmin</code>, click the <strong>Import</strong> tab, and import <code>database/01_furniture_shop_schema.sql</code> first, followed by <code>database/02_sample_data.sql</code>.</li>
+              <li><strong>Run Composer (Optional):</strong> Run <code>composer dump-autoload</code> in the project root terminal. (A native PSR-4 fallback autoloader is also included in <code>public/index.php</code> so it works out of the box even without Composer).</li>
+              <li><strong>Open in Browser:</strong> Visit <code>http://localhost/lilia_and_rowena_furniture/public/</code>.</li>
+            </ol>
+          </div>
+
+          <!-- Pane 3: Conversion Strategy -->
+          <div id="hubBlueprintPane" class="hub-tab-pane" style="display: none; font-size: 0.8rem; line-height: 1.6;">
+            <p style="margin-bottom: 0.75rem; color: #475569;">Every homepage section is intentionally structured to convert visitors into paying clients:</p>
+            <p><strong>01. Hero Section:</strong> Clear value proposition, dual call-to-action buttons, and solid wood guarantee badges.</p>
+            <p><strong>02. Trust Strip:</strong> 28+ years of master carpentry and 2,400+ homes furnished to establish instant credibility.</p>
+            <p><strong>03. Services Overview:</strong> Highlights bespoke dimension sizing (length, width, height) and custom wood stains.</p>
+            <p><strong>04. Core Benefits:</strong> Contrasts kiln-dried solid hardwood durability against commercial flat-pack particleboard.</p>
+            <p><strong>05. Featured Catalog:</strong> Transparent base pricing paired with an interactive custom sizing calculator.</p>
+            <p><strong>06. Testimonials &amp; FAQs:</strong> Verified homeowner social proof and clear answers on 50% downpayment &amp; COD terms.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plain Minimal Vanilla JavaScript (No React, No TypeScript/TSX) -->
+    <script src="/js/main.js"></script>
+  </body>
+</html>

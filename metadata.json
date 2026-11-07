@@ -1,0 +1,8 @@
+{
+  "name": "Lilia and Rowena Furniture",
+  "description": "Conversion-focused furniture storefront and complete PHP PSR-4 project with database integration, light blue & white palette, cart, and order tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
