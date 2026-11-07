@@ -78,28 +78,28 @@
 
         <div class="services-grid">
             <div class="service-card">
-                <div class="service-icon-wrap">🪵</div>
+                <div class="service-icon-wrap">01</div>
                 <h3 class="service-title">Bespoke Custom Carpentry</h3>
                 <p class="service-text">Have unusual room dimensions? We adjust length, width, and height to the centimeter using mortise & tenon joints.</p>
                 <a href="index.php?route=catalog" class="card-link">Configure Your Sizing →</a>
             </div>
 
             <div class="service-card">
-                <div class="service-icon-wrap">🎨</div>
+                <div class="service-icon-wrap">02</div>
                 <h3 class="service-title">Master Finishes & Upholstery</h3>
                 <p class="service-text">Choose between Natural Matte, Warm Walnut, Light Scandinavian Ash, or hand-rubbed polyurethane coats resistant to scratches.</p>
                 <a href="index.php?route=catalog" class="card-link">Explore Finishes →</a>
             </div>
 
             <div class="service-card">
-                <div class="service-icon-wrap">🚚</div>
+                <div class="service-icon-wrap">03</div>
                 <h3 class="service-title">In-House White Glove Delivery</h3>
                 <p class="service-text">Our own trained drivers deliver, carry upstairs, assemble, and position your furniture with zero third-party courier handling.</p>
                 <a href="index.php?route=track" class="card-link">Track Delivery Fleet →</a>
             </div>
 
             <div class="service-card">
-                <div class="service-icon-wrap">🪑</div>
+                <div class="service-icon-wrap">04</div>
                 <h3 class="service-title">Restoration & Refinishing</h3>
                 <p class="service-text">Breathe new life into your family heirlooms. We sand, repair, and apply fresh protective lacquer to aged wooden treasures.</p>
                 <a href="index.php?route=home#faq" class="card-link">Learn More →</a>

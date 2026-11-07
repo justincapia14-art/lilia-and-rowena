@@ -3,49 +3,114 @@
     {
       "CustomerID": 1,
       "FullName": "Maria Teresa Santos",
+      "Username": "maria.santos",
       "Email": "maria.santos@example.com",
       "Password": "password123",
       "PhoneNumber": "0917-123-4567",
-      "Address": "Unit 14B, Tower 2, Serendra, BGC, Taguig City",
+      "Gender": "Female",
+      "Birthday": "1991-05-14",
+      "ProfileImage": null,
+      "Address": "Unit 14B, Tower 2, Serendra, Fort Bonifacio, Taguig City, Metro Manila 1634",
       "DefaultOrderID": 1001
     },
     {
       "CustomerID": 2,
       "FullName": "Atty. Roberto Mendoza",
+      "Username": "atty.roberto",
       "Email": "roberto.mendoza@example.com",
       "Password": "password123",
       "PhoneNumber": "0918-987-6543",
-      "Address": "88 Narra Avenue, Ayala Alabang Village, Muntinlupa",
+      "Gender": "Male",
+      "Birthday": "1983-11-22",
+      "ProfileImage": null,
+      "Address": "88 Narra Avenue, Ayala Alabang Village, Ayala Alabang, Muntinlupa City, Metro Manila 1780",
       "DefaultOrderID": 1002
     },
     {
       "CustomerID": 3,
       "FullName": "Engr. Danica Gomez",
+      "Username": "danica.gomez",
       "Email": "danica.gomez@example.com",
       "Password": "password123",
       "PhoneNumber": "0917-542-8810",
+      "Gender": "Female",
+      "Birthday": "1994-02-09",
+      "ProfileImage": null,
       "Address": "One Serendra, Bonifacio Global City, Taguig",
       "DefaultOrderID": 1003
     },
     {
       "CustomerID": 4,
       "FullName": "Dr. Ronald & Elena Ramos",
+      "Username": "dr.ronald.ramos",
       "Email": "ronald.ramos@example.com",
       "Password": "password123",
       "PhoneNumber": "0918-334-9012",
+      "Gender": "Male",
+      "Birthday": "1979-08-19",
+      "ProfileImage": null,
       "Address": "Villa Barosa, San Fernando, Pampanga",
       "DefaultOrderID": 1006
     },
     {
       "CustomerID": 5,
       "FullName": "Arch. Marco & Patricia Villanueva",
+      "Username": "arch.marco",
       "Email": "marco.villanueva@example.com",
       "Password": "password123",
       "PhoneNumber": "0922-719-4401",
+      "Gender": "Male",
+      "Birthday": "1987-04-03",
+      "ProfileImage": null,
       "Address": "Beverly Hills Subdivision, Antipolo, Rizal",
       "DefaultOrderID": 1004
     }
   ],
+  "customerAddresses": [
+    {
+      "AddressID": 101,
+      "CustomerID": 1,
+      "AddressLabel": "Home",
+      "RecipientName": "Maria Teresa Santos",
+      "PhoneNumber": "0917-123-4567",
+      "HouseStreet": "Unit 14B, Tower 2, Serendra",
+      "Barangay": "Fort Bonifacio",
+      "City": "Taguig City",
+      "Province": "Metro Manila",
+      "PostalCode": "1634",
+      "DeliveryNotes": "Service elevator pass required at lobby",
+      "IsDefault": 1
+    },
+    {
+      "AddressID": 102,
+      "CustomerID": 1,
+      "AddressLabel": "Work",
+      "RecipientName": "Maria Teresa Santos (Office)",
+      "PhoneNumber": "0917-123-4567",
+      "HouseStreet": "18F One Ayala West Tower, Ayala Ave",
+      "Barangay": "San Lorenzo",
+      "City": "Makati City",
+      "Province": "Metro Manila",
+      "PostalCode": "1223",
+      "DeliveryNotes": "Deliver between 10AM and 4PM weekdays",
+      "IsDefault": 0
+    },
+    {
+      "AddressID": 103,
+      "CustomerID": 2,
+      "AddressLabel": "Home",
+      "RecipientName": "Atty. Roberto Mendoza",
+      "PhoneNumber": "0918-987-6543",
+      "HouseStreet": "88 Narra Avenue, Ayala Alabang Village",
+      "Barangay": "Ayala Alabang",
+      "City": "Muntinlupa City",
+      "Province": "Metro Manila",
+      "PostalCode": "1780",
+      "DeliveryNotes": "Notify village security gate upon arrival",
+      "IsDefault": 1
+    }
+  ],
+  "nextAddressId": 104,
   "jobOrders": [
     {
       "orderId": 1001,
@@ -58,7 +123,7 @@
       "itemSummary": "Mahogany 6-Seater Dining Set (220L × 90W × 75H cm · Warm Walnut)",
       "quantity": 1,
       "status": "In Production",
-      "priority": "High",
+      "priority": "Urgent",
       "placed": "2026-10-28",
       "due": "2026-11-07",
       "deadlineTime": "08:00",
@@ -129,7 +194,7 @@
       "address": "Beverly Hills Subdivision, Antipolo, Rizal",
       "itemSummary": "Executive Ergonomic Oak Desk (Dovetail Drawers)",
       "quantity": 2,
-      "status": "Order Confirmed",
+      "status": "Pending",
       "priority": "Urgent",
       "placed": "2026-10-26",
       "due": "2026-11-04",
@@ -178,7 +243,7 @@
       "itemSummary": "Compact 4-Seater Breakfast Nook Set (100×100cm Custom)",
       "quantity": 1,
       "status": "In Production",
-      "priority": "High",
+      "priority": "Urgent",
       "placed": "2026-11-07",
       "due": "2026-11-07",
       "deadlineTime": "17:30",
@@ -201,7 +266,7 @@
       "address": "Villa Barosa, San Fernando, Pampanga",
       "itemSummary": "Mahogany 6-Seater Dining Set (Standard Catalog Dimensions)",
       "quantity": 1,
-      "status": "Pending",
+      "status": "Completed",
       "priority": "Normal",
       "placed": "2026-10-20",
       "due": "2026-11-02",
@@ -227,6 +292,8 @@
       "SenderName": "Maria Teresa Santos",
       "Topic": "Order Follow-Up (#1001)",
       "MessageText": "Good day! I would like to follow up on Order #1001 (220cm Mahogany Dining Set). Can we also add 2 extra matching dining chairs and felt floor protectors to our order?",
+      "IsRead": 1,
+      "ReadAt": "2026-11-06 09:20:00",
       "CreatedAt": "2026-11-06 09:15:00"
     },
     {
@@ -238,7 +305,9 @@
       "SenderRole": "Admin",
       "SenderName": "Rowena & Lilia (Workshop Admin)",
       "Topic": "Order Follow-Up (#1001)",
-      "MessageText": "Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers on Nov 9!",
+      "MessageText": "Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers!",
+      "IsRead": 0,
+      "ReadAt": null,
       "CreatedAt": "2026-11-06 09:22:00"
     },
     {
@@ -251,6 +320,8 @@
       "SenderName": "Atty. Roberto Mendoza",
       "Topic": "Add Custom Request (#1002)",
       "MessageText": "Hello Admin, for my Order #1002 (Scandinavian Sky Blue Lounge Sofa), can we include 2 extra bolster throw pillows in the same sky blue linen fabric?",
+      "IsRead": 1,
+      "ReadAt": "2026-11-07 12:11:35",
       "CreatedAt": "2026-11-06 10:05:00"
     },
     {
@@ -263,16 +334,32 @@
       "SenderName": "Rowena & Lilia (Workshop Admin)",
       "Topic": "Add Custom Request (#1002)",
       "MessageText": "Good morning Atty. Roberto! We have reserved the extra Sky Blue Woven Linen fabric from Artisan Upholstery Co. and will hand-stitch 2 matching bolster pillows (+₱1,800) for your Order #1002.",
+      "IsRead": 0,
+      "ReadAt": null,
       "CreatedAt": "2026-11-06 10:14:00"
+    },
+    {
+      "MessageID": 5,
+      "CustomerID": 1,
+      "OrderID": 1001,
+      "AdminID": 1,
+      "SenderID": 1,
+      "SenderRole": "Admin",
+      "SenderName": "Rowena & Lilia (Workshop Admin)",
+      "Topic": "Order Follow-Up (#1001)",
+      "MessageText": "Hello Maria! Your table is ready for final inspection.",
+      "IsRead": 0,
+      "ReadAt": null,
+      "CreatedAt": "2026-11-07 12:45:09"
     }
   ],
-  "nextMessageId": 5,
+  "nextMessageId": 6,
   "sessions": [
     [
-      "d09001be9c031c4736b0cddb6bbcb5d3b892df339f1c3856",
+      "77958d3ea7bbda31806e25d31158e8a59531d32a642a3b6e",
       {
-        "token": "d09001be9c031c4736b0cddb6bbcb5d3b892df339f1c3856",
-        "csrfToken": "76c9e58e6eb9ca31995d9f3a28f3fdada73e3a98270c35f2",
+        "token": "77958d3ea7bbda31806e25d31158e8a59531d32a642a3b6e",
+        "csrfToken": "592d8d60efc853e4b85ca4022c77aedaae5d53d03506e702",
         "isAuthenticated": true,
         "role": "admin",
         "userId": 1,
@@ -284,70 +371,10 @@
       }
     ],
     [
-      "21a2b5c7e435781cf105a8c0fb19811be026beaffd826007",
+      "62c425c211571b1396acd133778718ae489b156028d1db6c",
       {
-        "token": "21a2b5c7e435781cf105a8c0fb19811be026beaffd826007",
-        "csrfToken": "e75ca07a2bb0eaae05eb4cf67c4332f8c8d55acb2a70c826",
-        "isAuthenticated": true,
-        "role": "admin",
-        "userId": 1,
-        "name": "Rowena & Lilia (Workshop Admin)",
-        "email": "admin@liliaandrowena.com",
-        "phone": "0917-889-4211",
-        "address": "MacArthur Highway, San Fernando, Pampanga",
-        "activeCustomerId": 1
-      }
-    ],
-    [
-      "f1b4d928972ad5947552a39fb84d1a0840a06b4f8b7efc68",
-      {
-        "token": "f1b4d928972ad5947552a39fb84d1a0840a06b4f8b7efc68",
-        "csrfToken": "4239e474f16a29378622b7ae7d16c546ab2eb4cd012170aa",
-        "isAuthenticated": true,
-        "role": "admin",
-        "userId": 1,
-        "name": "Rowena & Lilia (Workshop Admin)",
-        "email": "admin@liliaandrowena.com",
-        "phone": "0917-889-4211",
-        "address": "MacArthur Highway, San Fernando, Pampanga",
-        "activeCustomerId": 1
-      }
-    ],
-    [
-      "824c65324fb043d74418b1ac780055166e0987cd20ecbf75",
-      {
-        "token": "824c65324fb043d74418b1ac780055166e0987cd20ecbf75",
-        "csrfToken": "1668df327d6b960f6c8a3980b392f201fb088e685fe7de41",
-        "isAuthenticated": true,
-        "role": "admin",
-        "userId": 1,
-        "name": "Rowena & Lilia (Workshop Admin)",
-        "email": "admin@liliaandrowena.com",
-        "phone": "0917-889-4211",
-        "address": "MacArthur Highway, San Fernando, Pampanga",
-        "activeCustomerId": 1
-      }
-    ],
-    [
-      "5ff80e717c61625f5345ffdc193e9085f53189ba116428f6",
-      {
-        "token": "5ff80e717c61625f5345ffdc193e9085f53189ba116428f6",
-        "csrfToken": "1c33726bf76ea2b1f59159196813de396dc72911a7de3062",
-        "isAuthenticated": true,
-        "role": "admin",
-        "userId": 1,
-        "name": "Rowena & Lilia (Workshop Admin)",
-        "email": "admin@liliaandrowena.com",
-        "phone": "0917-889-4211",
-        "address": "MacArthur Highway, San Fernando, Pampanga",
-        "activeCustomerId": 4
-      }
-    ],
-    [
-      "9b019c72e5b35a9122fed00d3fa5abd3035f4b0a1628cdd2",
-      {
-        "token": "9b019c72e5b35a9122fed00d3fa5abd3035f4b0a1628cdd2",
-        "csrfToken": "9eb3387bdfd5e4ecff5fc384463a75d84984f393af53643d",
+        "token": "62c425c211571b1396acd133778718ae489b156028d1db6c",
+        "csrfToken": "0ee02e5465ea7c06c723352147b9d78e2e1fd72926768486",
         "isAuthenticated": true,
         "role": "admin",
         "userId": 1,

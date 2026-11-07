@@ -61,13 +61,20 @@ ON DUPLICATE KEY UPDATE Email = VALUES(Email), Password = VALUES(Password);
 -- 7. Insert Sample Customers (Table: Customer)
 -- Default Password for all Customer accounts is: password123
 -- Hash generated via PHP password_hash('password123', PASSWORD_DEFAULT)
-INSERT INTO Customer (CustomerID, FullName, Email, PasswordHash, PhoneNumber, Address) VALUES
-(1, 'Maria Teresa Santos', 'maria.santos@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0917-123-4567', 'Unit 14B, Tower 2, Serendra, BGC, Taguig City'),
-(2, 'Atty. Roberto Mendoza', 'roberto.mendoza@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-987-6543', '88 Narra Avenue, Ayala Alabang Village, Muntinlupa'),
-(3, 'Engr. Danica Gomez', 'danica.gomez@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0917-542-8810', 'One Serendra, Bonifacio Global City, Taguig'),
-(4, 'Dr. Ronald & Elena Ramos', 'ronald.ramos@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-334-9012', 'Villa Barosa, San Fernando, Pampanga'),
-(5, 'Arch. Marco & Patricia Villanueva', 'marco.villanueva@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0922-719-4401', 'Beverly Hills Subdivision, Antipolo, Rizal')
-ON DUPLICATE KEY UPDATE FullName = VALUES(FullName), PasswordHash = VALUES(PasswordHash);
+INSERT INTO Customer (CustomerID, FullName, Username, Email, PasswordHash, PhoneNumber, Gender, Birthday, ProfileImage, Address) VALUES
+(1, 'Maria Teresa Santos', 'mariateresa_s', 'maria.santos@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0917-123-4567', 'Female', '1992-05-14', NULL, 'Unit 14B, Tower 2, Serendra, Brgy. Fort Bonifacio, Taguig City, Metro Manila, 1634'),
+(2, 'Atty. Roberto Mendoza', 'atty_roberto', 'roberto.mendoza@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-987-6543', 'Male', '1985-11-22', NULL, '88 Narra Avenue, Ayala Alabang Village, Brgy. Ayala Alabang, Muntinlupa City, Metro Manila, 1780'),
+(3, 'Engr. Danica Gomez', 'danica_gomez', 'danica.gomez@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0917-542-8810', 'Female', '1994-08-03', NULL, 'One Serendra, Bonifacio Global City, Brgy. Fort Bonifacio, Taguig City, Metro Manila, 1634'),
+(4, 'Dr. Ronald & Elena Ramos', 'dr_ronald_ramos', 'ronald.ramos@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0918-334-9012', 'Male', '1979-02-19', NULL, 'Villa Barosa, Brgy. Dolores, San Fernando, Pampanga, 2000'),
+(5, 'Arch. Marco & Patricia Villanueva', 'arch_marco', 'marco.villanueva@example.com', '$2y$10$abcdefghijklmnopqrstuu0SYq8twpcthS10uxQ26rv0s3Obj8Ufu', '0922-719-4401', 'Male', '1988-07-09', NULL, 'Beverly Hills Subdivision, Brgy. Beverly Hills, Antipolo, Rizal, 1870')
+ON DUPLICATE KEY UPDATE FullName = VALUES(FullName), Username = VALUES(Username), PasswordHash = VALUES(PasswordHash);
+
+-- 7B. Insert Saved Customer Delivery Addresses (Table: Customer_Address)
+INSERT INTO Customer_Address (AddressID, CustomerID, RecipientName, PhoneNumber, HouseStreet, Barangay, City, Province, PostalCode, DeliveryInstructions, AddressLabel, IsDefault) VALUES
+(101, 1, 'Maria Teresa Santos', '0917-123-4567', 'Unit 14B, Tower 2, Serendra, 11th Ave', 'Fort Bonifacio', 'Taguig City', 'Metro Manila', '1634', 'Coordinate with Tower 2 service elevator guard.', 'Home', 1),
+(102, 1, 'Maria Teresa Santos (Office)', '0917-123-4567', '18F One Corporate Centre, Julia Vargas Ave', 'San Antonio', 'Pasig City', 'Metro Manila', '1605', 'Weekdays 9AM-5PM reception desk.', 'Work', 0),
+(103, 2, 'Atty. Roberto Mendoza', '0918-987-6543', '88 Narra Avenue, Ayala Alabang Village', 'Ayala Alabang', 'Muntinlupa City', 'Metro Manila', '1780', 'Present delivery gate pass at Acacia Gate.', 'Home', 1)
+ON DUPLICATE KEY UPDATE RecipientName = VALUES(RecipientName), IsDefault = VALUES(IsDefault);
 
 -- 8. Insert Sample Customer Job Orders (Deadline Today, Orders Today, Overdue, Active, Unpaid, Completed)
 INSERT INTO Customer_Order (OrderID, CustomerID, OrderDate, DueDate, DeadlineTime, Status, Priority, AssignedEmployeeID, JobNotes) VALUES
@@ -128,12 +135,13 @@ INSERT INTO Delivery (DeliveryID, OrderID, DriverID, ReceiverName, DeliveryAddre
 (4, 1007, 3, 'Dr. Ronald & Elena Ramos', 'Villa Barosa, San Fernando, Pampanga', DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), 'Delivered')
 ON DUPLICATE KEY UPDATE DeliveryStatus = VALUES(DeliveryStatus);
 
--- 14. Insert Order_Message (Private 1-on-1 Customer-Admin Conversations per CustomerID)
-INSERT INTO Order_Message (MessageID, CustomerID, OrderID, AdminID, SenderRole, SenderName, Topic, MessageText, CreatedAt) VALUES
-(1, 1, 1001, NULL, 'Customer', 'Maria Teresa Santos', 'Order Follow-Up (#1001)', 'Good day! I would like to follow up on Order #1001 (220cm Mahogany Dining Set). Can we also add 2 extra matching dining chairs and felt floor protectors to our order?', '2026-11-06 09:15:00'),
-(2, 1, 1001, 1, 'Admin', 'Rowena & Lilia (Workshop Admin)', 'Order Follow-Up (#1001)', 'Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers on Nov 9!', '2026-11-06 09:22:00'),
-(3, 2, 1002, NULL, 'Customer', 'Atty. Roberto Mendoza', 'Add Custom Request (#1002)', 'Hello Admin, for my Order #1002 (Scandinavian Sky Blue Lounge Sofa), can we include 2 extra bolster throw pillows in the same sky blue linen fabric?', '2026-11-06 10:05:00'),
-(4, 2, 1002, 1, 'Admin', 'Rowena & Lilia (Workshop Admin)', 'Add Custom Request (#1002)', 'Good morning Atty. Roberto! We have reserved the extra Sky Blue Woven Linen fabric from Artisan Upholstery Co. and will hand-stitch 2 matching bolster pillows (+₱1,800) for your Order #1002.', '2026-11-06 10:14:00')
-ON DUPLICATE KEY UPDATE MessageText = VALUES(MessageText);
+-- 14. Insert Order_Message (Private 1-on-1 Customer-Admin Conversations per CustomerID with IsRead tracking)
+INSERT INTO Order_Message (MessageID, CustomerID, OrderID, AdminID, SenderRole, SenderName, Topic, MessageText, IsRead, CreatedAt) VALUES
+(1, 1, 1001, NULL, 'Customer', 'Maria Teresa Santos', 'Order Follow-Up (#1001)', 'Good day! I would like to follow up on Order #1001 (220cm Mahogany Dining Set). Can we also add 2 extra matching dining chairs and felt floor protectors to our order?', 0, '2026-11-06 09:15:00'),
+(2, 1, 1001, 1, 'Admin', 'Rowena & Lilia (Workshop Admin)', 'Order Follow-Up (#1001)', 'Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers on Nov 9!', 0, '2026-11-06 09:22:00'),
+(3, 2, 1002, NULL, 'Customer', 'Atty. Roberto Mendoza', 'Add Custom Request (#1002)', 'Hello Admin, for my Order #1002 (Scandinavian Sky Blue Lounge Sofa), can we include 2 extra bolster throw pillows in the same sky blue linen fabric?', 0, '2026-11-06 10:05:00'),
+(4, 2, 1002, 1, 'Admin', 'Rowena & Lilia (Workshop Admin)', 'Add Custom Request (#1002)', 'Good morning Atty. Roberto! We have reserved the extra Sky Blue Woven Linen fabric from Artisan Upholstery Co. and will hand-stitch 2 matching bolster pillows (+₱1,800) for your Order #1002.', 0, '2026-11-06 10:14:00')
+ON DUPLICATE KEY UPDATE MessageText = VALUES(MessageText), IsRead = VALUES(IsRead);
+
 
 

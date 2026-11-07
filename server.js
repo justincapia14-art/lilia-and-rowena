@@ -33,49 +33,115 @@ const customers = [
   {
     CustomerID: 1,
     FullName: 'Maria Teresa Santos',
+    Username: 'maria.santos',
     Email: 'maria.santos@example.com',
     Password: 'password123',
     PhoneNumber: '0917-123-4567',
-    Address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+    Gender: 'Female',
+    Birthday: '1991-05-14',
+    ProfileImage: null,
+    Address: 'Unit 14B, Tower 2, Serendra, Fort Bonifacio, Taguig City, Metro Manila 1634',
     DefaultOrderID: 1001
   },
   {
     CustomerID: 2,
     FullName: 'Atty. Roberto Mendoza',
+    Username: 'atty.roberto',
     Email: 'roberto.mendoza@example.com',
     Password: 'password123',
     PhoneNumber: '0918-987-6543',
-    Address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
+    Gender: 'Male',
+    Birthday: '1983-11-22',
+    ProfileImage: null,
+    Address: '88 Narra Avenue, Ayala Alabang Village, Ayala Alabang, Muntinlupa City, Metro Manila 1780',
     DefaultOrderID: 1002
   },
   {
     CustomerID: 3,
     FullName: 'Engr. Danica Gomez',
+    Username: 'danica.gomez',
     Email: 'danica.gomez@example.com',
     Password: 'password123',
     PhoneNumber: '0917-542-8810',
+    Gender: 'Female',
+    Birthday: '1994-02-09',
+    ProfileImage: null,
     Address: 'One Serendra, Bonifacio Global City, Taguig',
     DefaultOrderID: 1003
   },
   {
     CustomerID: 4,
     FullName: 'Dr. Ronald & Elena Ramos',
+    Username: 'dr.ronald.ramos',
     Email: 'ronald.ramos@example.com',
     Password: 'password123',
     PhoneNumber: '0918-334-9012',
+    Gender: 'Male',
+    Birthday: '1979-08-19',
+    ProfileImage: null,
     Address: 'Villa Barosa, San Fernando, Pampanga',
     DefaultOrderID: 1006
   },
   {
     CustomerID: 5,
     FullName: 'Arch. Marco & Patricia Villanueva',
+    Username: 'arch.marco',
     Email: 'marco.villanueva@example.com',
     Password: 'password123',
     PhoneNumber: '0922-719-4401',
+    Gender: 'Male',
+    Birthday: '1987-04-03',
+    ProfileImage: null,
     Address: 'Beverly Hills Subdivision, Antipolo, Rizal',
     DefaultOrderID: 1004
   }
 ];
+
+let customerAddresses = [
+  {
+    AddressID: 101,
+    CustomerID: 1,
+    AddressLabel: 'Home',
+    RecipientName: 'Maria Teresa Santos',
+    PhoneNumber: '0917-123-4567',
+    HouseStreet: 'Unit 14B, Tower 2, Serendra',
+    Barangay: 'Fort Bonifacio',
+    City: 'Taguig City',
+    Province: 'Metro Manila',
+    PostalCode: '1634',
+    DeliveryNotes: 'Service elevator pass required at lobby',
+    IsDefault: 1
+  },
+  {
+    AddressID: 102,
+    CustomerID: 1,
+    AddressLabel: 'Work',
+    RecipientName: 'Maria Teresa Santos (Office)',
+    PhoneNumber: '0917-123-4567',
+    HouseStreet: '18F One Ayala West Tower, Ayala Ave',
+    Barangay: 'San Lorenzo',
+    City: 'Makati City',
+    Province: 'Metro Manila',
+    PostalCode: '1223',
+    DeliveryNotes: 'Deliver between 10AM and 4PM weekdays',
+    IsDefault: 0
+  },
+  {
+    AddressID: 103,
+    CustomerID: 2,
+    AddressLabel: 'Home',
+    RecipientName: 'Atty. Roberto Mendoza',
+    PhoneNumber: '0918-987-6543',
+    HouseStreet: '88 Narra Avenue, Ayala Alabang Village',
+    Barangay: 'Ayala Alabang',
+    City: 'Muntinlupa City',
+    Province: 'Metro Manila',
+    PostalCode: '1780',
+    DeliveryNotes: 'Notify village security gate upon arrival',
+    IsDefault: 1
+  }
+];
+let nextAddressId = 104;
 
 function getTodayManila() {
   return new Intl.DateTimeFormat('en-CA', {
@@ -291,6 +357,8 @@ const orderMessages = [
     SenderName: 'Maria Teresa Santos',
     Topic: 'Order Follow-Up (#1001)',
     MessageText: 'Good day! I would like to follow up on Order #1001 (220cm Mahogany Dining Set). Can we also add 2 extra matching dining chairs and felt floor protectors to our order?',
+    IsRead: 1,
+    ReadAt: '2026-11-06 09:20:00',
     CreatedAt: '2026-11-06 09:15:00'
   },
   {
@@ -302,7 +370,9 @@ const orderMessages = [
     SenderRole: 'Admin',
     SenderName: 'Rowena & Lilia (Workshop Admin)',
     Topic: 'Order Follow-Up (#1001)',
-    MessageText: 'Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers on Nov 9!',
+    MessageText: 'Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers!',
+    IsRead: 0,
+    ReadAt: null,
     CreatedAt: '2026-11-06 09:22:00'
   },
   {
@@ -315,6 +385,8 @@ const orderMessages = [
     SenderName: 'Atty. Roberto Mendoza',
     Topic: 'Add Custom Request (#1002)',
     MessageText: 'Hello Admin, for my Order #1002 (Scandinavian Sky Blue Lounge Sofa), can we include 2 extra bolster throw pillows in the same sky blue linen fabric?',
+    IsRead: 0,
+    ReadAt: null,
     CreatedAt: '2026-11-06 10:05:00'
   },
   {
@@ -327,6 +399,8 @@ const orderMessages = [
     SenderName: 'Rowena & Lilia (Workshop Admin)',
     Topic: 'Add Custom Request (#1002)',
     MessageText: 'Good morning Atty. Roberto! We have reserved the extra Sky Blue Woven Linen fabric from Artisan Upholstery Co. and will hand-stitch 2 matching bolster pillows (+₱1,800) for your Order #1002.',
+    IsRead: 0,
+    ReadAt: null,
     CreatedAt: '2026-11-06 10:14:00'
   }
 ];
@@ -338,6 +412,117 @@ let nextMessageId = 5;
 // Never trusts client-submitted customer_id or conversation_id for authorization.
 // ============================================================================
 const activeSessions = new Map();
+
+function formatSavedAddressObj(addr) {
+  if (!addr) return '';
+  const parts = [
+    addr.HouseStreet,
+    addr.Barangay ? `Brgy. ${addr.Barangay}` : '',
+    addr.City,
+    addr.Province,
+    addr.PostalCode
+  ].map((s) => String(s || '').trim()).filter(Boolean);
+  let base = parts.join(', ');
+  if (addr.DeliveryNotes && String(addr.DeliveryNotes).trim()) {
+    base += ` (${String(addr.DeliveryNotes).trim()})`;
+  }
+  return base;
+}
+
+function getAddressesForCustomer(customerId) {
+  const cid = Number(customerId);
+  const cust = customers.find((c) => Number(c.CustomerID) === cid);
+  let list = customerAddresses.filter((a) => Number(a.CustomerID) === cid);
+  if (list.length === 0 && cust) {
+    const seeded = {
+      AddressID: nextAddressId++,
+      CustomerID: cid,
+      AddressLabel: 'Home',
+      RecipientName: cust.FullName || 'Valued Customer',
+      PhoneNumber: cust.PhoneNumber || '0917-000-0000',
+      HouseStreet: cust.Address || 'Metro Manila',
+      Barangay: 'Poblacion',
+      City: 'Metro Manila',
+      Province: 'Metro Manila',
+      PostalCode: '1000',
+      DeliveryNotes: '',
+      IsDefault: 1
+    };
+    customerAddresses.push(seeded);
+    list = [seeded];
+  }
+  return list.sort((a, b) => Number(b.IsDefault) - Number(a.IsDefault) || Number(b.AddressID) - Number(a.AddressID));
+}
+
+function getUnreadCountForCustomer(customerId) {
+  const cid = Number(customerId);
+  if (!cid || cid <= 0) return 0;
+  return orderMessages.filter(
+    (m) =>
+      Number(m.CustomerID) === cid &&
+      String(m.SenderRole || '').toLowerCase() === 'admin' &&
+      Number(m.IsRead ?? 0) === 0
+  ).length;
+}
+
+function getUnreadCountForAdmin(customerId = null) {
+  return orderMessages.filter((m) => {
+    if (String(m.SenderRole || '').toLowerCase() !== 'customer') return false;
+    if (Number(m.IsRead ?? 0) !== 0) return false;
+    if (customerId !== null && customerId !== undefined && Number(customerId) > 0) {
+      return Number(m.CustomerID) === Number(customerId);
+    }
+    return true;
+  }).length;
+}
+
+function getUnreadByCustomerMapForAdmin() {
+  const map = {};
+  for (const c of customers) {
+    map[Number(c.CustomerID)] = getUnreadCountForAdmin(c.CustomerID);
+  }
+  return map;
+}
+
+function markMessagesReadForCustomer(customerId) {
+  const cid = Number(customerId);
+  if (!cid || cid <= 0) return 0;
+  let updated = 0;
+  const now = formatTimestamp();
+  for (const m of orderMessages) {
+    if (
+      Number(m.CustomerID) === cid &&
+      String(m.SenderRole || '').toLowerCase() === 'admin' &&
+      Number(m.IsRead ?? 0) === 0
+    ) {
+      m.IsRead = 1;
+      m.ReadAt = now;
+      updated++;
+    }
+  }
+  if (updated > 0) savePersistentStore();
+  return updated;
+}
+
+function markMessagesReadForAdmin(customerId) {
+  const cid = Number(customerId);
+  if (!cid || cid <= 0) return 0;
+  let updated = 0;
+  const now = formatTimestamp();
+  for (const m of orderMessages) {
+    if (
+      Number(m.CustomerID) === cid &&
+      String(m.SenderRole || '').toLowerCase() === 'customer' &&
+      Number(m.IsRead ?? 0) === 0
+    ) {
+      m.IsRead = 1;
+      m.ReadAt = now;
+      updated++;
+    }
+  }
+  if (updated > 0) savePersistentStore();
+  return updated;
+}
 
 function loadPersistentStore() {
   try {
@@ -354,9 +539,13 @@ function loadPersistentStore() {
           customers.push({
             CustomerID: Number(savedCust.CustomerID) || customers.length + 1,
             FullName: String(savedCust.FullName || ''),
+            Username: String(savedCust.Username || ''),
             Email: String(savedCust.Email || '').toLowerCase(),
             Password: String(savedCust.Password || ''),
             PhoneNumber: String(savedCust.PhoneNumber || ''),
+            Gender: String(savedCust.Gender || 'Prefer not to say'),
+            Birthday: savedCust.Birthday || null,
+            ProfileImage: savedCust.ProfileImage || null,
             Address: String(savedCust.Address || ''),
             DefaultOrderID: savedCust.DefaultOrderID || null
           });
@@ -368,9 +557,17 @@ function loadPersistentStore() {
         }
       }
     }
+    if (Array.isArray(parsed.customerAddresses) && parsed.customerAddresses.length > 0) {
+      customerAddresses = parsed.customerAddresses;
+      const maxAddrId = customerAddresses.reduce((max, a) => Math.max(max, Number(a.AddressID) || 100), 103);
+      nextAddressId = Math.max(Number(parsed.nextAddressId) || 104, maxAddrId + 1);
+    }
     if (Array.isArray(parsed.orderMessages) && parsed.orderMessages.length > 0) {
       orderMessages.length = 0;
       for (const m of parsed.orderMessages) {
+        if (m.IsRead === undefined) {
+          m.IsRead = Number(m.MessageID) === 1 ? 1 : 0;
+        }
         orderMessages.push(m);
       }
       const maxId = orderMessages.reduce((max, m) => Math.max(max, Number(m.MessageID) || 0), 4);
@@ -402,6 +599,8 @@ function savePersistentStore() {
     }
     const payload = {
       customers,
+      customerAddresses,
+      nextAddressId,
       jobOrders,
       orderMessages,
       nextMessageId,
@@ -417,8 +616,12 @@ function getPublicCustomersList() {
   return customers.map((c) => ({
     id: Number(c.CustomerID),
     fullName: c.FullName,
+    username: c.Username || '',
     email: c.Email,
     phone: c.PhoneNumber || '',
+    gender: c.Gender || 'Prefer not to say',
+    birthday: c.Birthday || '',
+    profileImage: c.ProfileImage || null,
     address: c.Address || ''
   }));
 }
@@ -532,7 +735,7 @@ function getConversationMessages(customerId) {
   return orderMessages.filter((m) => Number(m.CustomerID) === cid);
 }
 
-// Build Admin conversation list summary across all customers
+// Build Admin conversation list summary across all customers (including UnreadCount)
 function getCustomerConversationsSummary() {
   return customers.map((c) => {
     const msgs = getConversationMessages(c.CustomerID);
@@ -543,6 +746,7 @@ function getCustomerConversationsSummary() {
       Email: c.Email,
       DefaultOrderID: c.DefaultOrderID,
       MessageCount: msgs.length,
+      UnreadCount: getUnreadCountForAdmin(c.CustomerID),
       LastMessageText: lastMsg ? lastMsg.MessageText : 'No messages yet',
       LastMessageAt: lastMsg ? lastMsg.CreatedAt : null
     };
@@ -669,8 +873,8 @@ function detectCustomerIdTampering(authenticatedCustomerId, req, routeConversati
 
 async function startServer() {
   const app = express();
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '5mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
   const server = http.createServer(app);
 
@@ -949,6 +1153,8 @@ async function startServer() {
             SenderName: senderName,
             Topic: String(packet.Topic || packet.topic || 'Order Follow-Up').trim(),
             MessageText: text,
+            IsRead: 0,
+            ReadAt: null,
             CreatedAt: formatTimestamp()
           };
 
@@ -981,19 +1187,37 @@ async function startServer() {
       if (!session.csrfToken) {
         session.csrfToken = crypto.randomBytes(24).toString('hex');
       }
+      const custRecord = session.role === 'customer' ? findCustomerById(session.userId) : null;
+      if (custRecord) {
+        session.name = custRecord.FullName;
+        session.email = custRecord.Email;
+        session.phone = custRecord.PhoneNumber || '';
+        session.address = custRecord.Address || '';
+      }
+      const unreadCount =
+        session.role === 'customer'
+          ? getUnreadCountForCustomer(session.userId)
+          : getUnreadCountForAdmin();
       return res.json({
         status: 'ok',
         sessionToken: session.token,
         csrfToken: session.csrfToken,
         todayManila: getTodayManila(),
+        unreadCount,
+        unreadByCustomer: session.role === 'admin' ? getUnreadByCustomerMapForAdmin() : {},
         customers: getPublicCustomersList(),
+        addresses: session.role === 'customer' ? getAddressesForCustomer(session.userId) : [],
         user: {
           isLoggedIn: session.isAuthenticated,
           id: session.userId,
           role: session.role,
           name: session.name,
+          username: custRecord ? (custRecord.Username || '') : 'admin',
           email: session.email,
           phone: session.phone,
+          gender: custRecord ? (custRecord.Gender || 'Prefer not to say') : '',
+          birthday: custRecord ? (custRecord.Birthday || '') : '',
+          profileImage: custRecord ? (custRecord.ProfileImage || null) : null,
           address: session.address
         }
       });
@@ -1006,7 +1230,9 @@ async function startServer() {
         sessionToken: null,
         csrfToken: null,
         todayManila: getTodayManila(),
+        unreadCount: 0,
         customers: getPublicCustomersList(),
+        addresses: [],
         user: {
           isLoggedIn: false,
           id: null,
@@ -1027,14 +1253,20 @@ async function startServer() {
       sessionToken: defaultSession.token,
       csrfToken: defaultSession.csrfToken,
       todayManila: getTodayManila(),
+      unreadCount: getUnreadCountForCustomer(defaultSession.userId),
       customers: getPublicCustomersList(),
+      addresses: getAddressesForCustomer(defaultSession.userId),
       user: {
         isLoggedIn: true,
         id: defaultSession.userId,
         role: defaultSession.role,
         name: defaultSession.name,
+        username: customers[0].Username || 'maria.santos',
         email: defaultSession.email,
         phone: defaultSession.phone,
+        gender: customers[0].Gender || 'Female',
+        birthday: customers[0].Birthday || '1991-05-14',
+        profileImage: customers[0].ProfileImage || null,
         address: defaultSession.address
       }
     });
@@ -1070,7 +1302,10 @@ async function startServer() {
           sessionToken: session.token,
           csrfToken: session.csrfToken,
           todayManila: getTodayManila(),
+          unreadCount: getUnreadCountForAdmin(),
+          unreadByCustomer: getUnreadByCustomerMapForAdmin(),
           customers: getPublicCustomersList(),
+          addresses: [],
           user: {
             isLoggedIn: true,
             id: session.userId,
@@ -1095,14 +1330,20 @@ async function startServer() {
           sessionToken: session.token,
           csrfToken: session.csrfToken,
           todayManila: getTodayManila(),
+          unreadCount: getUnreadCountForCustomer(session.userId),
           customers: getPublicCustomersList(),
+          addresses: getAddressesForCustomer(session.userId),
           user: {
             isLoggedIn: true,
             id: session.userId,
             role: 'customer',
             name: session.name,
+            username: cust.Username || '',
             email: session.email,
             phone: session.phone,
+            gender: cust.Gender || 'Prefer not to say',
+            birthday: cust.Birthday || '',
+            profileImage: cust.ProfileImage || null,
             address: session.address
           }
         });
@@ -1139,16 +1380,22 @@ async function startServer() {
     }
 
     const maxCustomerId = customers.reduce((max, c) => Math.max(max, Number(c.CustomerID) || 0), 0);
+    const defaultUsername = email.split('@')[0].replace(/[^a-z0-9._-]/gi, '').toLowerCase();
     const newCustomer = {
       CustomerID: maxCustomerId + 1,
       FullName: fullName,
+      Username: defaultUsername,
       Email: email,
       Password: password,
       PhoneNumber: phone,
+      Gender: 'Prefer not to say',
+      Birthday: null,
+      ProfileImage: null,
       Address: address,
       DefaultOrderID: null
     };
     customers.push(newCustomer);
+    getAddressesForCustomer(newCustomer.CustomerID);
     savePersistentStore();
 
     const session = createCustomerSession(newCustomer);
@@ -1157,14 +1404,21 @@ async function startServer() {
     return res.json({
       status: 'ok',
       sessionToken: session.token,
+      csrfToken: session.csrfToken,
+      unreadCount: 0,
       customers: getPublicCustomersList(),
+      addresses: getAddressesForCustomer(newCustomer.CustomerID),
       user: {
         isLoggedIn: true,
         id: session.userId,
         role: 'customer',
         name: session.name,
+        username: newCustomer.Username,
         email: session.email,
         phone: session.phone,
+        gender: newCustomer.Gender,
+        birthday: '',
+        profileImage: null,
         address: session.address
       }
     });
@@ -1209,9 +1463,13 @@ async function startServer() {
 
       // Derive CustomerID strictly from the authenticated server session
       const ownCustomerId = Number(session.userId);
+      if (String(req.query.mark_read || '') === '1') {
+        markMessagesReadForCustomer(ownCustomerId);
+      }
       return res.json({
         status: 'ok',
         customer_id: ownCustomerId,
+        unreadCount: getUnreadCountForCustomer(ownCustomerId),
         messages: getConversationMessages(ownCustomerId)
       });
     }
@@ -1236,10 +1494,15 @@ async function startServer() {
     }
 
     session.activeCustomerId = targetCustomerId;
+    if (String(req.query.mark_read || '') === '1') {
+      markMessagesReadForAdmin(targetCustomerId);
+    }
 
     return res.json({
       status: 'ok',
       customer_id: targetCustomerId,
+      unreadCount: getUnreadCountForAdmin(),
+      unreadByCustomer: getUnreadByCustomerMapForAdmin(),
       messages: getConversationMessages(targetCustomerId),
       conversations: getCustomerConversationsSummary()
     });
@@ -1329,6 +1592,8 @@ async function startServer() {
       SenderName: senderName,
       Topic: String(body.topic || body.Topic || 'Order Follow-Up').trim(),
       MessageText: text,
+      IsRead: 0,
+      ReadAt: null,
       CreatedAt: formatTimestamp()
     };
 
@@ -1340,6 +1605,8 @@ async function startServer() {
       status: 'ok',
       customer_id: customerId,
       message: newMsg,
+      unreadCount: session.role === 'customer' ? getUnreadCountForCustomer(customerId) : getUnreadCountForAdmin(),
+      unreadByCustomer: session.role === 'admin' ? getUnreadByCustomerMapForAdmin() : {},
       messages: getConversationMessages(customerId),
       conversations: session.role === 'admin' ? getCustomerConversationsSummary() : []
     });
@@ -1421,12 +1688,399 @@ async function startServer() {
     }
     return res.json({
       status: 'ok',
+      unreadCount: getUnreadCountForAdmin(),
+      unreadByCustomer: getUnreadByCustomerMapForAdmin(),
       conversations: getCustomerConversationsSummary()
     });
   });
 
   // ==========================================================================
-  // ADMIN-ONLY JOB ORDERS & DEADLINE MANAGEMENT ENDPOINTS (/api/admin/job-orders*)
+  // UNREAD MESSAGE NOTIFICATION & MARK-AS-READ ENDPOINTS
+  // ==========================================================================
+  app.get('/api/notifications/unread', (req, res) => {
+    const session = resolveAuthenticatedSession(req);
+    if (!session.isAuthenticated || session.userId <= 0) {
+      return res.json({ status: 'ok', unreadCount: 0, unreadByCustomer: {} });
+    }
+    if (session.role === 'customer') {
+      return res.json({
+        status: 'ok',
+        role: 'customer',
+        unreadCount: getUnreadCountForCustomer(session.userId)
+      });
+    }
+    return res.json({
+      status: 'ok',
+      role: 'admin',
+      unreadCount: getUnreadCountForAdmin(),
+      unreadByCustomer: getUnreadByCustomerMapForAdmin()
+    });
+  });
+
+  app.post('/api/messages/mark-read', (req, res) => {
+    const session = resolveAuthenticatedSession(req);
+    if (!session.isAuthenticated || session.userId <= 0) {
+      return res.status(401).json({ status: 'error', error: 'Authentication required.' });
+    }
+    const body = req.body || {};
+    if (session.role === 'customer') {
+      const marked = markMessagesReadForCustomer(session.userId);
+      return res.json({
+        status: 'ok',
+        marked,
+        unreadCount: getUnreadCountForCustomer(session.userId)
+      });
+    }
+    const targetCustomerId = Number(body.customer_id || body.customerId || session.activeCustomerId || 1);
+    const marked = markMessagesReadForAdmin(targetCustomerId);
+    return res.json({
+      status: 'ok',
+      marked,
+      customer_id: targetCustomerId,
+      unreadCount: getUnreadCountForAdmin(),
+      unreadByCustomer: getUnreadByCustomerMapForAdmin(),
+      conversations: getCustomerConversationsSummary()
+    });
+  });
+
+  // ==========================================================================
+  // CUSTOMER MY PROFILE, MY ADDRESSES & CHANGE PASSWORD ENDPOINTS
+  // Strictly scoped to authenticated Customer session (Anti-IDOR)
+  // ==========================================================================
+  function requireCustomerSessionApi(req, res) {
+    const session = resolveAuthenticatedSession(req);
+    if (!session || !session.isAuthenticated || session.role !== 'customer' || session.userId <= 0) {
+      res.status(401).json({
+        status: 'error',
+        code: 401,
+        error: 'Please sign in with a Customer account to manage your profile and addresses.'
+      });
+      return null;
+    }
+    const cust = findCustomerById(session.userId);
+    if (!cust) {
+      res.status(404).json({ status: 'error', error: 'Customer profile not found.' });
+      return null;
+    }
+    return { session, cust };
+  }
+
+  app.get('/api/profile', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    const { cust } = ctx;
+    const cid = Number(cust.CustomerID);
+    const custOrders = jobOrders.filter(
+      (o) => Number(o.customerId) === cid || String(o.customerEmail || '').toLowerCase() === String(cust.Email).toLowerCase()
+    );
+    return res.json({
+      status: 'ok',
+      profile: {
+        id: cid,
+        fullName: cust.FullName,
+        username: cust.Username || '',
+        email: cust.Email,
+        phone: cust.PhoneNumber || '',
+        gender: cust.Gender || 'Prefer not to say',
+        birthday: cust.Birthday || '',
+        profileImage: cust.ProfileImage || null,
+        address: cust.Address || ''
+      },
+      addresses: getAddressesForCustomer(cid),
+      orders: custOrders,
+      unreadCount: getUnreadCountForCustomer(cid)
+    });
+  });
+
+  app.post('/api/profile/update', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    const { session, cust } = ctx;
+    const body = req.body || {};
+
+    const fullName = String(body.fullName ?? body.full_name ?? cust.FullName).trim();
+    const username = String(body.username ?? cust.Username ?? '').trim();
+    const email = String(body.email ?? cust.Email).trim().toLowerCase();
+    const phone = String(body.phone ?? body.phone_number ?? cust.PhoneNumber).trim();
+    const gender = String(body.gender ?? cust.Gender ?? 'Prefer not to say').trim();
+    const birthday = String(body.birthday ?? cust.Birthday ?? '').trim();
+    const address = String(body.address ?? body.default_address ?? cust.Address).trim();
+    const profileImage = body.profileImage !== undefined ? body.profileImage : cust.ProfileImage;
+
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Full Name, Email Address, and Mobile Number are required.'
+      });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Please enter a valid email address.'
+      });
+    }
+
+    const emailConflict = customers.find(
+      (c) => c.Email.toLowerCase() === email && Number(c.CustomerID) !== Number(cust.CustomerID)
+    );
+    if (emailConflict) {
+      return res.status(409).json({
+        status: 'error',
+        error: 'That email address is already registered to another customer account.'
+      });
+    }
+
+    if (profileImage && typeof profileImage === 'string' && profileImage.startsWith('data:')) {
+      if (!/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(profileImage)) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Only JPG, PNG, and WEBP image files are allowed.'
+        });
+      }
+      if (profileImage.length > 3 * 1024 * 1024) {
+        return res.status(400).json({
+          status: 'error',
+          error: 'Profile image must be 2MB or smaller.'
+        });
+      }
+    }
+
+    cust.FullName = fullName;
+    cust.Username = username;
+    cust.Email = email;
+    cust.PhoneNumber = phone;
+    cust.Gender = ['Female', 'Male', 'Other', 'Prefer not to say'].includes(gender) ? gender : 'Prefer not to say';
+    cust.Birthday = birthday || null;
+    cust.Address = address;
+    cust.ProfileImage = profileImage || null;
+
+    session.name = fullName;
+    session.email = email;
+    session.phone = phone;
+    session.address = address;
+
+    savePersistentStore();
+
+    return res.json({
+      status: 'ok',
+      message: 'Your profile has been updated.',
+      profile: {
+        id: Number(cust.CustomerID),
+        fullName: cust.FullName,
+        username: cust.Username || '',
+        email: cust.Email,
+        phone: cust.PhoneNumber,
+        gender: cust.Gender,
+        birthday: cust.Birthday || '',
+        profileImage: cust.ProfileImage || null,
+        address: cust.Address
+      },
+      addresses: getAddressesForCustomer(cust.CustomerID)
+    });
+  });
+
+  app.post('/api/profile/password', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    const { cust } = ctx;
+    const body = req.body || {};
+
+    const currentPassword = String(body.currentPassword ?? body.current_password ?? '');
+    const newPassword = String(body.newPassword ?? body.new_password ?? '');
+    const confirmPassword = String(body.confirmPassword ?? body.confirm_password ?? '');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ status: 'error', error: 'All password fields are required.' });
+    }
+    if (cust.Password !== currentPassword) {
+      return res.status(400).json({ status: 'error', error: 'Your current password is incorrect.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ status: 'error', error: 'New password must be at least 6 characters long.' });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ status: 'error', error: 'New password and confirmation do not match.' });
+    }
+
+    cust.Password = newPassword;
+    savePersistentStore();
+    return res.json({ status: 'ok', message: 'Your password has been securely updated.' });
+  });
+
+  app.get('/api/addresses', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    return res.json({
+      status: 'ok',
+      addresses: getAddressesForCustomer(ctx.cust.CustomerID)
+    });
+  });
+
+  app.post('/api/addresses/save', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    const { session, cust } = ctx;
+    const cid = Number(cust.CustomerID);
+    const body = req.body || {};
+
+    const addressId = Number(body.addressId || body.address_id || 0);
+    const recipientName = String(body.recipientName || body.recipient_name || '').trim();
+    const phoneNumber = String(body.phoneNumber || body.phone_number || '').trim();
+    const houseStreet = String(body.houseStreet || body.house_street || '').trim();
+    const barangay = String(body.barangay || '').trim();
+    const city = String(body.city || '').trim();
+    const province = String(body.province || '').trim();
+    const postalCode = String(body.postalCode || body.postal_code || '').trim();
+    const deliveryNotes = String(body.deliveryNotes || body.delivery_notes || '').trim();
+    const addressLabel = ['Home', 'Work'].includes(body.addressLabel || body.address_label)
+      ? (body.addressLabel || body.address_label)
+      : 'Home';
+
+    if (!recipientName || !phoneNumber || !houseStreet || !barangay || !city || !province || !postalCode) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Please complete all required delivery address fields.'
+      });
+    }
+
+    const existingList = customerAddresses.filter((a) => Number(a.CustomerID) === cid);
+    let isDefault = Boolean(body.isDefault || body.is_default || existingList.length === 0);
+
+    let targetAddr = null;
+    if (addressId > 0) {
+      targetAddr = customerAddresses.find(
+        (a) => Number(a.AddressID) === addressId && Number(a.CustomerID) === cid
+      );
+      if (!targetAddr) {
+        return res.status(403).json({
+          status: 'error',
+          error: 'Forbidden: Address not found or does not belong to your account.'
+        });
+      }
+    }
+
+    if (isDefault) {
+      for (const a of customerAddresses) {
+        if (Number(a.CustomerID) === cid) a.IsDefault = 0;
+      }
+    }
+
+    if (targetAddr) {
+      targetAddr.RecipientName = recipientName;
+      targetAddr.PhoneNumber = phoneNumber;
+      targetAddr.HouseStreet = houseStreet;
+      targetAddr.Barangay = barangay;
+      targetAddr.City = city;
+      targetAddr.Province = province;
+      targetAddr.PostalCode = postalCode;
+      targetAddr.DeliveryNotes = deliveryNotes;
+      targetAddr.AddressLabel = addressLabel;
+      if (isDefault) targetAddr.IsDefault = 1;
+    } else {
+      targetAddr = {
+        AddressID: nextAddressId++,
+        CustomerID: cid,
+        AddressLabel: addressLabel,
+        RecipientName: recipientName,
+        PhoneNumber: phoneNumber,
+        HouseStreet: houseStreet,
+        Barangay: barangay,
+        City: city,
+        Province: province,
+        PostalCode: postalCode,
+        DeliveryNotes: deliveryNotes,
+        IsDefault: isDefault ? 1 : 0
+      };
+      customerAddresses.push(targetAddr);
+    }
+
+    // Ensure at least one default address exists for this customer
+    const updatedList = getAddressesForCustomer(cid);
+    if (!updatedList.some((a) => Number(a.IsDefault) === 1) && updatedList.length > 0) {
+      updatedList[0].IsDefault = 1;
+    }
+
+    const defaultObj = updatedList.find((a) => Number(a.IsDefault) === 1);
+    if (defaultObj) {
+      cust.Address = formatSavedAddressObj(defaultObj);
+      session.address = cust.Address;
+    }
+
+    savePersistentStore();
+    return res.json({
+      status: 'ok',
+      message: addressId > 0 ? 'Delivery address updated.' : 'New delivery address saved.',
+      address: targetAddr,
+      defaultAddress: cust.Address,
+      addresses: getAddressesForCustomer(cid)
+    });
+  });
+
+  app.post('/api/addresses/default', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    const { session, cust } = ctx;
+    const cid = Number(cust.CustomerID);
+    const addressId = Number((req.body || {}).addressId || (req.body || {}).address_id || 0);
+
+    const target = customerAddresses.find(
+      (a) => Number(a.AddressID) === addressId && Number(a.CustomerID) === cid
+    );
+    if (!target) {
+      return res.status(404).json({ status: 'error', error: 'Address not found.' });
+    }
+
+    for (const a of customerAddresses) {
+      if (Number(a.CustomerID) === cid) {
+        a.IsDefault = Number(a.AddressID) === addressId ? 1 : 0;
+      }
+    }
+
+    cust.Address = formatSavedAddressObj(target);
+    session.address = cust.Address;
+    savePersistentStore();
+
+    return res.json({
+      status: 'ok',
+      message: 'Default delivery address updated.',
+      defaultAddress: cust.Address,
+      addresses: getAddressesForCustomer(cid)
+    });
+  });
+
+  app.post('/api/addresses/delete', (req, res) => {
+    const ctx = requireCustomerSessionApi(req, res);
+    if (!ctx) return;
+    const { session, cust } = ctx;
+    const cid = Number(cust.CustomerID);
+    const addressId = Number((req.body || {}).addressId || (req.body || {}).address_id || 0);
+
+    const idx = customerAddresses.findIndex(
+      (a) => Number(a.AddressID) === addressId && Number(a.CustomerID) === cid
+    );
+    if (idx === -1) {
+      return res.status(404).json({ status: 'error', error: 'Address not found.' });
+    }
+
+    const wasDefault = Number(customerAddresses[idx].IsDefault) === 1;
+    customerAddresses.splice(idx, 1);
+
+    const remaining = customerAddresses.filter((a) => Number(a.CustomerID) === cid);
+    if (wasDefault && remaining.length > 0) {
+      remaining[0].IsDefault = 1;
+      cust.Address = formatSavedAddressObj(remaining[0]);
+      session.address = cust.Address;
+    }
+
+    savePersistentStore();
+    return res.json({
+      status: 'ok',
+      message: 'Delivery address deleted.',
+      defaultAddress: cust.Address,
+      addresses: getAddressesForCustomer(cid)
+    });
+  });
   // Protected by strict server-side Admin session validation + CSRF protection
   // ==========================================================================
   function normalizeJobStatus(status) {
@@ -1522,6 +2176,8 @@ async function startServer() {
       status: 'ok',
       csrfToken: session.csrfToken || null,
       todayManila: getTodayManila(),
+      unreadCount: getUnreadCountForAdmin(),
+      unreadByCustomer: getUnreadByCustomerMapForAdmin(),
       summary: computeServerJobOrderSummary(),
       orders: jobOrders
     });
@@ -1721,8 +2377,15 @@ async function startServer() {
 
   // Serve static assets under both /public/* (for GitHub Pages / direct HTML compatibility) and /*
   const publicPath = path.join(__dirname, 'public');
-  app.use('/public', express.static(publicPath));
-  app.use(express.static(publicPath));
+  const noCacheStaticOptions = {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    }
+  };
+  app.use('/public', express.static(publicPath, noCacheStaticOptions));
+  app.use(express.static(publicPath, noCacheStaticOptions));
 
   if (process.env.NODE_ENV === 'production') {
     const distPath = path.join(__dirname, 'dist');

@@ -1,6 +1,6 @@
 <div class="success-page-container">
     <div class="success-card">
-        <div class="success-icon">🎉</div>
+        <div class="success-icon">✓</div>
         <h1 class="success-title">Order Confirmed!</h1>
         <p class="success-subtitle">
             Thank you, <strong><?= htmlspecialchars($order['CustomerName']) ?></strong>! Your bespoke furniture order has been registered in the Lilia & Rowena workshop system.

@@ -14,8 +14,36 @@
         <!-- Delivery Form Left -->
         <div class="checkout-form-panel">
             <form action="index.php?route=place_order" method="POST" id="checkoutForm">
-                <h3 class="form-section-title">1. Recipient & Contact Information</h3>
-                
+                <h3 class="form-section-title">1. Recipient &amp; Contact Information</h3>
+
+                <?php if (!empty($savedAddresses)): ?>
+                    <div style="background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 1.25rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.55rem;">
+                            <label for="savedAddressSelect" style="font-size: 0.84rem; font-weight: 800; color: #0369a1; margin: 0;">
+                                Select from Saved Delivery Addresses
+                            </label>
+                            <a href="index.php?route=profile&amp;tab=addresses" style="font-size: 0.78rem; color: #0284c7; font-weight: 700; text-decoration: none;">
+                                Manage Addresses →
+                            </a>
+                        </div>
+                        <select id="savedAddressSelect" style="width: 100%; padding: 0.65rem 0.8rem; border-radius: 8px; border: 1px solid #7dd3fc; background: #ffffff; font-size: 0.88rem; color: #0f172a;"
+                                onchange="var opt = this.options[this.selectedIndex]; if (opt && opt.dataset.address) { document.getElementById('fullName').value = opt.dataset.recipient || ''; document.getElementById('phoneNumber').value = opt.dataset.phone || ''; document.getElementById('deliveryAddress').value = opt.dataset.address || ''; }">
+                            <?php foreach ($savedAddresses as $sAddr): ?>
+                                <?php
+                                $formattedAddr = trim($sAddr['HouseStreet'] . ', Brgy. ' . $sAddr['Barangay'] . ', ' . $sAddr['City'] . ', ' . $sAddr['Province'] . ' ' . $sAddr['PostalCode'] . (!empty($sAddr['DeliveryNotes']) ? ' (' . $sAddr['DeliveryNotes'] . ')' : ''));
+                                ?>
+                                <option value="<?= (int)$sAddr['AddressID'] ?>"
+                                        data-recipient="<?= htmlspecialchars((string)$sAddr['RecipientName']) ?>"
+                                        data-phone="<?= htmlspecialchars((string)$sAddr['PhoneNumber']) ?>"
+                                        data-address="<?= htmlspecialchars($formattedAddr) ?>"
+                                        <?= (int)$sAddr['IsDefault'] === 1 ? 'selected' : '' ?>>
+                                    [<?= htmlspecialchars((string)$sAddr['AddressLabel']) ?><?= (int)$sAddr['IsDefault'] === 1 ? ' · Default' : '' ?>] <?= htmlspecialchars((string)$sAddr['RecipientName']) ?> — <?= htmlspecialchars($formattedAddr) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                <?php endif; ?>
+
                 <div class="form-group">
                     <label for="fullName">Full Name *</label>
                     <input type="text" id="fullName" name="full_name" required 
@@ -39,12 +67,12 @@
                     </div>
                 </div>
 
-                <h3 class="form-section-title">2. Delivery Destination & Notes</h3>
+                <h3 class="form-section-title">2. Delivery Destination &amp; Notes</h3>
 
                 <div class="form-group">
                     <label for="deliveryAddress">Complete Delivery Address *</label>
                     <textarea id="deliveryAddress" name="address" rows="3" required 
-                              placeholder="House/Unit #, Street, Barangay, City, Province"><?= htmlspecialchars($customer['Address'] ?? '') ?></textarea>
+                              placeholder="House/Unit #, Street, Barangay, City, Province"><?= htmlspecialchars($customer['DefaultAddress'] ?? $customer['Address'] ?? '') ?></textarea>
                 </div>
 
                 <h3 class="form-section-title">3. Payment Terms (Cash on Delivery / Downpayment)</h3>
@@ -60,7 +88,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary btn-large btn-block" style="margin-top: 1.5rem;">
-                    Confirm & Place Furniture Order (₱<?= number_format($requiredDownpayment, 2) ?> Downpayment)
+                    Confirm &amp; Place Furniture Order (₱<?= number_format($requiredDownpayment, 2) ?> Downpayment)
                 </button>
             </form>
         </div>

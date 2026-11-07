@@ -50,6 +50,6 @@
 </footer>
 
 <!-- Clean, simple Vanilla JavaScript -->
-<script src="js/main.js"></script>
+<script src="js/main.js?v=20261107_v4" onerror="var s=document.createElement('script');s.src='public/js/main.js?v=20261107_v4';document.body.appendChild(s);"></script>
 </body>
 </html>

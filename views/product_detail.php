@@ -13,9 +13,9 @@
                  class="detail-main-img"
                  onerror="this.src='images/product_dining_table.jpg'">
             <div class="detail-badges-row">
-                <span class="badge-item">🪵 100% Solid Kiln-Dried Hardwood</span>
-                <span class="badge-item">🔨 Hand-Finished Mortise & Tenon</span>
-                <span class="badge-item">🛡️ 5-Year Warranty</span>
+                <span class="badge-item">100% Solid Kiln-Dried Hardwood</span>
+                <span class="badge-item">Hand-Finished Mortise & Tenon</span>
+                <span class="badge-item">5-Year Warranty</span>
             </div>
         </div>
 
@@ -91,7 +91,7 @@
                     </div>
 
                     <button type="submit" class="btn-primary btn-large">
-                        Add to Shopping Cart 🛒
+                        Add to Shopping Cart
                     </button>
                 </div>
             </form>

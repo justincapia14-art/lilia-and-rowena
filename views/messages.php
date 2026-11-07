@@ -33,7 +33,7 @@ $activeCustomerId = isset($activeCustomerId) ? (int)$activeCustomerId : ($logged
                     <?php $cid = (int)$conv['CustomerID']; ?>
                     <a href="index.php?route=messages&amp;customer_id=<?= $cid ?>"
                        class="<?= $cid === $activeCustomerId ? 'btn-sm-primary' : 'btn-sm-soft' ?>">
-                        👤 <?= htmlspecialchars($conv['FullName']) ?> (#<?= $cid ?> · <?= (int)$conv['MessageCount'] ?> msgs)
+                        <?= htmlspecialchars($conv['FullName']) ?> (#<?= $cid ?> · <?= (int)$conv['MessageCount'] ?> msgs)
                     </a>
                 <?php endforeach; ?>
             </div>

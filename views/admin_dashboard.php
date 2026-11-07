@@ -44,21 +44,29 @@ $tabLabels = [
 
         <nav class="oms-sidebar-nav">
             <a href="index.php?route=admin_dashboard&amp;tab=deadline_today" class="oms-nav-item <?= $activeTab === 'deadline_today' ? 'active' : '' ?>">
-                <span>⏰ Deadline Today</span>
+                <span>Deadline Today</span>
                 <span class="oms-nav-count"><?= (int)($summaryCounts['deadlineToday'] ?? 0) ?></span>
             </a>
             <a href="index.php?route=admin_dashboard&amp;tab=all" class="oms-nav-item <?= $activeTab !== 'deadline_today' ? 'active' : '' ?>">
-                <span>📋 Job Orders</span>
-                <span class="oms-nav-count"><?= (int)($summaryCounts['totalOrders'] ?? 0) ?></span>
+                <span>Job Orders</span>
+                <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <?php if (!empty($totalAdminUnread) && (int)$totalAdminUnread > 0): ?>
+                        <span class="unread-red-badge" title="<?= (int)$totalAdminUnread ?> unread customer message(s)"><?= (int)$totalAdminUnread ?></span>
+                    <?php endif; ?>
+                    <span class="oms-nav-count"><?= (int)($summaryCounts['totalOrders'] ?? 0) ?></span>
+                </span>
             </a>
             <a href="#adminConversationsSection" class="oms-nav-item">
-                <span>💬 Customer Messages</span>
+                <span>Customer Messages</span>
+                <?php if (!empty($totalAdminUnread) && (int)$totalAdminUnread > 0): ?>
+                    <span class="unread-red-badge" title="<?= (int)$totalAdminUnread ?> unread customer message(s)"><?= (int)$totalAdminUnread ?></span>
+                <?php endif; ?>
             </a>
             <a href="#adminMaterialsSection" class="oms-nav-item">
-                <span>🪵 Materials &amp; Staff</span>
+                <span>Materials &amp; Staff</span>
             </a>
             <a href="index.php?route=home" class="oms-nav-item">
-                <span>🏠 Storefront Home</span>
+                <span>Storefront Home</span>
             </a>
         </nav>
 
@@ -99,7 +107,7 @@ $tabLabels = [
 
         <?php if (!empty($adminError)): ?>
             <div class="oms-alert-error">
-                ⚠️ <?= htmlspecialchars($adminError) ?>
+                <?= htmlspecialchars($adminError) ?>
             </div>
         <?php endif; ?>
 
@@ -141,27 +149,27 @@ $tabLabels = [
             <!-- 6 TABS: Deadline Today, Orders Today, Overdue Orders, Active Orders, Unpaid Orders, All Orders -->
             <div class="oms-tabs-bar" role="tablist">
                 <a href="index.php?route=admin_dashboard&amp;tab=deadline_today" class="oms-tab-link <?= $activeTab === 'deadline_today' ? 'active tab-danger' : '' ?>">
-                    <span>🎯 Deadline Today</span>
+                    <span>Deadline Today</span>
                     <span class="oms-tab-badge badge-danger"><?= (int)($summaryCounts['deadlineToday'] ?? 0) ?></span>
                 </a>
                 <a href="index.php?route=admin_dashboard&amp;tab=orders_today" class="oms-tab-link <?= $activeTab === 'orders_today' ? 'active' : '' ?>">
-                    <span>✨ Orders Today</span>
+                    <span>Orders Today</span>
                     <span class="oms-tab-badge"><?= (int)($summaryCounts['ordersToday'] ?? 0) ?></span>
                 </a>
                 <a href="index.php?route=admin_dashboard&amp;tab=overdue" class="oms-tab-link <?= $activeTab === 'overdue' ? 'active tab-danger' : '' ?>">
-                    <span>⚠️ Overdue Orders</span>
+                    <span>Overdue Orders</span>
                     <span class="oms-tab-badge badge-danger"><?= (int)($summaryCounts['overdueOrders'] ?? 0) ?></span>
                 </a>
                 <a href="index.php?route=admin_dashboard&amp;tab=active" class="oms-tab-link <?= $activeTab === 'active' ? 'active' : '' ?>">
-                    <span>🔨 Active Orders</span>
+                    <span>Active Orders</span>
                     <span class="oms-tab-badge"><?= (int)($summaryCounts['activeOrders'] ?? 0) ?></span>
                 </a>
                 <a href="index.php?route=admin_dashboard&amp;tab=unpaid" class="oms-tab-link <?= $activeTab === 'unpaid' ? 'active' : '' ?>">
-                    <span>💳 Unpaid Orders</span>
+                    <span>Unpaid Orders</span>
                     <span class="oms-tab-badge"><?= (int)($summaryCounts['unpaidOrders'] ?? 0) ?></span>
                 </a>
                 <a href="index.php?route=admin_dashboard&amp;tab=all" class="oms-tab-link <?= $activeTab === 'all' ? 'active' : '' ?>">
-                    <span>🗂️ All Orders</span>
+                    <span>All Orders</span>
                     <span class="oms-tab-badge"><?= (int)($summaryCounts['totalOrders'] ?? 0) ?></span>
                 </a>
             </div>
@@ -288,7 +296,7 @@ $tabLabels = [
                                     <!-- 2. Customer Name -->
                                     <td>
                                         <strong><?= htmlspecialchars($ord['CustomerName']) ?></strong>
-                                        <small class="oms-sub-meta">📞 <?= htmlspecialchars($ord['CustomerPhone']) ?></small>
+                                        <small class="oms-sub-meta">Tel: <?= htmlspecialchars($ord['CustomerPhone']) ?></small>
                                     </td>
 
                                     <!-- 3. Furniture Product -->
@@ -322,7 +330,7 @@ $tabLabels = [
                                     <!-- 7. Priority -->
                                     <td>
                                         <span class="oms-priority-pill <?= $priorityBadgeClass ?>">
-                                            <?= $priority === 'Urgent' ? '🔥 Urgent' : ($priority === 'High' ? '⚡ High' : 'Normal') ?>
+                                            <?= $priority === 'Urgent' ? 'Urgent' : ($priority === 'High' ? 'High' : 'Normal') ?>
                                         </span>
                                     </td>
 
@@ -337,7 +345,7 @@ $tabLabels = [
                                     <!-- 9. Assigned Staff -->
                                     <td>
                                         <span class="oms-staff-chip">
-                                            👷 <?= htmlspecialchars($ord['AssignedStaffName'] ?: 'Unassigned') ?>
+                                            <?= htmlspecialchars($ord['AssignedStaffName'] ?: 'Unassigned') ?>
                                         </span>
                                     </td>
 
@@ -386,8 +394,15 @@ $tabLabels = [
                                                     <button type="submit" class="btn-sm-primary" style="padding: 0.25rem 0.5rem; font-size: 0.72rem;">Save</button>
                                                 </div>
                                             </form>
-                                            <a href="index.php?route=admin_dashboard&amp;tab=<?= urlencode($activeTab) ?>&amp;view_order_id=<?= $oid ?>#jobOrderDetailBox" class="btn-sm-soft" style="text-align: center; font-size: 0.72rem; padding: 0.22rem 0.5rem;">
-                                                👁️ View Order Details
+                                            <?php
+                                            $custIdForRow = (int)($ord['CustomerID'] ?? 0);
+                                            $rowUnread = (int)($unreadByCustomer[$custIdForRow] ?? 0);
+                                            ?>
+                                            <a href="index.php?route=admin_dashboard&amp;tab=<?= urlencode($activeTab) ?>&amp;view_order_id=<?= $oid ?>#jobOrderDetailBox" class="btn-sm-soft" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; text-align: center; font-size: 0.72rem; padding: 0.25rem 0.5rem;">
+                                                <span>Order Details &amp; Messages</span>
+                                                <?php if ($rowUnread > 0): ?>
+                                                    <span class="unread-red-badge" title="<?= $rowUnread ?> unread message(s)"><?= $rowUnread ?></span>
+                                                <?php endif; ?>
                                             </a>
                                         </div>
                                     </td>
@@ -399,17 +414,21 @@ $tabLabels = [
             </div>
         </div>
 
-        <!-- DETAILED ORDER VIEW PANEL (When Admin clicks View Order Details) -->
+        <!-- DETAILED ORDER VIEW & ORDER MANAGEMENT MESSAGES PANEL (When Admin clicks View Order Details & Messages) -->
         <?php if (!empty($viewOrderDetail)): ?>
+            <?php
+            $loggedInAdminId = (int)($_SESSION['admin_id'] ?? 1);
+            $detailCustId = (int)($viewOrderDetail['CustomerID'] ?? 1);
+            ?>
             <div id="jobOrderDetailBox" class="oms-board-card" style="padding: 1.5rem; margin-bottom: 2rem; border: 2px solid #0284c7;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div>
-                        <span class="oms-kicker">Job Order Specification Sheet</span>
+                        <span class="oms-kicker">Job Order Specification &amp; Customer Messages</span>
                         <h3 style="font-family: 'Playfair Display', serif; font-size: 1.35rem;">Job Order #JO-2026-<?= str_pad((string)$viewOrderDetail['OrderID'], 4, '0', STR_PAD_LEFT) ?> — <?= htmlspecialchars($viewOrderDetail['CustomerName']) ?></h3>
                     </div>
                     <a href="index.php?route=admin_dashboard&amp;tab=<?= urlencode($activeTab) ?>" class="btn-sm-soft">✕ Close Details</a>
                 </div>
-                <div class="form-row-2" style="font-size: 0.84rem; gap: 1.25rem;">
+                <div class="form-row-2" style="font-size: 0.84rem; gap: 1.25rem; margin-bottom: 1.25rem;">
                     <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
                         <strong>Customer &amp; Delivery Information</strong>
                         <p style="margin-top: 0.4rem;">• <strong>Customer:</strong> <?= htmlspecialchars($viewOrderDetail['CustomerName']) ?> (<?= htmlspecialchars($viewOrderDetail['Email']) ?>)</p>
@@ -429,8 +448,121 @@ $tabLabels = [
                         <?php endforeach; ?>
                     </div>
                 </div>
+
+                <!-- Order Conversation inside Order Management -->
+                <div style="background: #f8fafc; border: 1px solid #bae6fd; border-radius: 10px; padding: 1.15rem;">
+                    <h4 style="margin: 0 0 0.65rem; font-size: 1rem; color: #0f172a;">Order Management Conversation with <?= htmlspecialchars($viewOrderDetail['CustomerName']) ?></h4>
+                    <div class="chat-feed-box" style="height: 220px; background: #ffffff; margin-bottom: 0.85rem;">
+                        <?php if (empty($orderMessages)): ?>
+                            <p style="text-align: center; color: #64748b; padding: 1.5rem;">No messages for this customer order yet.</p>
+                        <?php else: ?>
+                            <?php foreach ($orderMessages as $m): ?>
+                                <?php
+                                $msgSenderRole = strtolower(trim($m['SenderRole'] ?? 'customer'));
+                                $isOwnAdminMessage = ($msgSenderRole === 'admin');
+                                $rowClass = $isOwnAdminMessage ? 'chat-row own-row' : 'chat-row other-row';
+                                $bubbleClass = $isOwnAdminMessage ? 'chat-bubble msg-own' : 'chat-bubble msg-other';
+                                $senderLabel = $isOwnAdminMessage
+                                    ? htmlspecialchars($m['SenderName']) . ' (You)'
+                                    : htmlspecialchars($m['SenderName']) . ' (Customer)';
+                                ?>
+                                <div class="<?= $rowClass ?>">
+                                    <div class="<?= $bubbleClass ?>">
+                                        <div class="chat-bubble-meta">
+                                            <strong><?= $senderLabel ?> · Order #<?= htmlspecialchars((string)($m['OrderID'] ?? $viewOrderDetail['OrderID'])) ?></strong>
+                                            <span><?= htmlspecialchars($m['Topic']) ?> · <?= htmlspecialchars($m['CreatedAt']) ?></span>
+                                        </div>
+                                        <div><?= nl2br(htmlspecialchars($m['MessageText'])) ?></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <form action="index.php?route=messages_send" method="POST" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                        <?= Csrf::inputField() ?>
+                        <input type="hidden" name="sender_role" value="Admin">
+                        <input type="hidden" name="customer_id" value="<?= $detailCustId ?>">
+                        <input type="hidden" name="order_id" value="<?= (int)$viewOrderDetail['OrderID'] ?>">
+                        <input type="hidden" name="topic" value="Order #<?= (int)$viewOrderDetail['OrderID'] ?> Update">
+                        <input type="text" name="message_text" required placeholder="Send update regarding Job Order #JO-2026-<?= str_pad((string)$viewOrderDetail['OrderID'], 4, '0', STR_PAD_LEFT) ?>..." style="flex: 1; padding: 0.55rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem;">
+                        <button type="submit" class="btn-sm-primary">Send Order Reply →</button>
+                    </form>
+                </div>
             </div>
         <?php endif; ?>
+
+        <!-- CUSTOMER MESSAGES & ORDER FOLLOW-UP SECTION INSIDE ORDER MANAGEMENT -->
+        <div id="adminConversationsSection" style="background: #f0f7ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.85rem;">
+                <div>
+                    <span class="oms-kicker" style="color: #0284c7;">PRIVATE 1-ON-1 CUSTOMER CONVERSATIONS (Table: Order_Message)</span>
+                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; margin: 0;">Customer Messages &amp; Order Follow-Up</h3>
+                    <p style="font-size: 0.82rem; color: #475569; margin: 0.25rem 0 0;">
+                        Select a customer conversation below to view their order messages and send a private reply.
+                    </p>
+                </div>
+                <span class="hero-est-tag" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">● Conversation #<?= (int)($selectedCustomerId ?? 1) ?> Active</span>
+            </div>
+
+            <?php if (!empty($conversations)): ?>
+                <div style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 8px; padding: 0.75rem 0.9rem; margin-bottom: 0.9rem;">
+                    <strong style="font-size: 0.74rem; color: #075985; display: block; margin-bottom: 0.45rem;">Select Customer Conversation:</strong>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <?php foreach ($conversations as $conv): ?>
+                            <?php
+                            $cid = (int)$conv['CustomerID'];
+                            $cUnread = (int)($conv['UnreadCount'] ?? 0);
+                            ?>
+                            <a href="index.php?route=admin_dashboard&amp;tab=<?= urlencode($activeTab) ?>&amp;customer_id=<?= $cid ?>#adminConversationsSection"
+                               class="<?= $cid === (int)($selectedCustomerId ?? 1) ? 'btn-sm-primary' : 'btn-sm-soft' ?>"
+                               style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                                <span><?= htmlspecialchars($conv['FullName']) ?> (Customer #<?= $cid ?> · <?= (int)$conv['MessageCount'] ?> msgs)</span>
+                                <?php if ($cUnread > 0): ?>
+                                    <span class="unread-red-badge"><?= $cUnread ?></span>
+                                <?php endif; ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <div class="chat-feed-box" style="height: 220px; background: #ffffff; margin-bottom: 0.85rem;">
+                <?php if (empty($messages)): ?>
+                    <p style="text-align: center; color: #64748b; padding: 1.5rem;">No messages in this customer's conversation yet.</p>
+                <?php else: ?>
+                    <?php foreach ($messages as $m): ?>
+                        <?php
+                        $msgSenderRole = strtolower(trim($m['SenderRole'] ?? 'customer'));
+                        $isOwnAdminMessage = ($msgSenderRole === 'admin');
+                        $rowClass = $isOwnAdminMessage ? 'chat-row own-row' : 'chat-row other-row';
+                        $bubbleClass = $isOwnAdminMessage ? 'chat-bubble msg-own' : 'chat-bubble msg-other';
+                        $senderLabel = $isOwnAdminMessage
+                            ? htmlspecialchars($m['SenderName']) . ' (You)'
+                            : htmlspecialchars($m['SenderName']) . ' (Customer)';
+                        ?>
+                        <div class="<?= $rowClass ?>">
+                            <div class="<?= $bubbleClass ?>">
+                                <div class="chat-bubble-meta">
+                                    <strong><?= $senderLabel ?> · Order #<?= htmlspecialchars((string)($m['OrderID'] ?? 'General')) ?></strong>
+                                    <span><?= htmlspecialchars($m['Topic']) ?> · <?= htmlspecialchars($m['CreatedAt']) ?></span>
+                                </div>
+                                <div><?= nl2br(htmlspecialchars($m['MessageText'])) ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <form action="index.php?route=messages_send" method="POST" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <?= Csrf::inputField() ?>
+                <input type="hidden" name="sender_role" value="Admin">
+                <input type="hidden" name="customer_id" value="<?= (int)($selectedCustomerId ?? 1) ?>">
+                <input type="hidden" name="order_id" value="<?= ((int)($selectedCustomerId ?? 1) === 2) ? '1002' : '1001' ?>">
+                <input type="hidden" name="topic" value="Workshop Admin Reply">
+                <input type="text" name="message_text" required placeholder="Reply privately to Customer #<?= (int)($selectedCustomerId ?? 1) ?>..." style="flex: 1; padding: 0.55rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; background: #ffffff;">
+                <button type="submit" class="btn-sm-primary">Send Admin Reply →</button>
+            </form>
+        </div>
 
         <!-- 2. RAW MATERIALS & WORKSHOP EMPLOYEES -->
         <div id="adminMaterialsSection" class="form-row-2" style="gap: 1.5rem; margin-bottom: 2rem;">
@@ -481,70 +613,6 @@ $tabLabels = [
                     </tbody>
                 </table>
             </div>
-        </div>
-
-        <!-- 3. PRIVATE CUSTOMER CONVERSATIONS & ORDER FOLLOW-UPS (Table: Order_Message) -->
-        <?php
-        $loggedInAdminId = (int)($_SESSION['admin_id'] ?? 1);
-        $selectedCustomerId = isset($selectedCustomerId) ? (int)$selectedCustomerId : 1;
-        ?>
-        <div id="adminConversationsSection" style="background: #ffffff; border: 1px solid #bae6fd; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-            <h3 style="font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 0.4rem;">Private Customer-Admin Conversations (Table: Order_Message)</h3>
-            <p style="font-size: 0.82rem; color: #475569; margin-bottom: 1rem;">
-                Each customer has a separate, private conversation. Select a customer below to view only their messages and send a private reply.
-            </p>
-
-            <?php if (!empty($conversations)): ?>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; padding-bottom: 0.85rem; border-bottom: 1px solid #e2e8f0;">
-                    <?php foreach ($conversations as $conv): ?>
-                        <?php $cid = (int)$conv['CustomerID']; ?>
-                        <a href="index.php?route=admin_dashboard&amp;tab=<?= urlencode($activeTab) ?>&amp;customer_id=<?= $cid ?>#adminConversationsSection"
-                           class="<?= $cid === $selectedCustomerId ? 'btn-sm-primary' : 'btn-sm-soft' ?>">
-                            👤 <?= htmlspecialchars($conv['FullName']) ?> (Customer #<?= $cid ?> · <?= (int)$conv['MessageCount'] ?> messages)
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="chat-feed-box" style="height: 280px; background: #f8fafc;">
-                <?php if (empty($messages)): ?>
-                    <p style="text-align: center; color: #64748b; padding: 2rem;">No messages in Customer #<?= $selectedCustomerId ?>'s conversation yet.</p>
-                <?php else: ?>
-                    <?php foreach ($messages as $m): ?>
-                        <?php
-                        $msgSenderRole = strtolower(trim($m['SenderRole'] ?? 'customer'));
-                        $msgSenderId = isset($m['SenderID'])
-                            ? (int)$m['SenderID']
-                            : ($msgSenderRole === 'admin' ? (int)($m['AdminID'] ?? 0) : (int)($m['CustomerID'] ?? 0));
-                        $isOwnAdminMessage = ($msgSenderRole === 'admin' && $msgSenderId === $loggedInAdminId);
-                        $rowClass = $isOwnAdminMessage ? 'chat-row own-row' : 'chat-row other-row';
-                        $bubbleClass = $isOwnAdminMessage ? 'chat-bubble msg-own' : 'chat-bubble msg-other';
-                        $senderLabel = $isOwnAdminMessage
-                            ? htmlspecialchars($m['SenderName']) . ' (You)'
-                            : htmlspecialchars($m['SenderName']) . ' (' . htmlspecialchars($m['SenderRole']) . ')';
-                        ?>
-                        <div class="<?= $rowClass ?>">
-                            <div class="<?= $bubbleClass ?>">
-                                <div class="chat-bubble-meta">
-                                    <strong><?= $senderLabel ?> · Order #<?= htmlspecialchars((string)($m['OrderID'] ?? 'General')) ?></strong>
-                                    <span><?= htmlspecialchars($m['Topic']) ?> · <?= htmlspecialchars($m['CreatedAt']) ?></span>
-                                </div>
-                                <div><?= nl2br(htmlspecialchars($m['MessageText'])) ?></div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-
-            <form action="index.php?route=messages_send" method="POST" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                <?= Csrf::inputField() ?>
-                <input type="hidden" name="sender_role" value="Admin">
-                <input type="hidden" name="customer_id" value="<?= $selectedCustomerId ?>">
-                <input type="hidden" name="order_id" value="<?= $selectedCustomerId === 2 ? '1002' : '1001' ?>">
-                <input type="hidden" name="topic" value="Workshop Admin Reply">
-                <input type="text" name="message_text" required placeholder="Type official Admin reply to Customer #<?= $selectedCustomerId ?>..." style="flex: 1; padding: 0.55rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem;">
-                <button type="submit" class="btn-sm-primary">Send Private Reply to Customer #<?= $selectedCustomerId ?> →</button>
-            </form>
         </div>
     </div>
 </div>

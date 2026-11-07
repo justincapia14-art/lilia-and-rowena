@@ -3,19 +3,49 @@ namespace App\Models;
 
 use App\Config\Database;
 use PDO;
+use Throwable;
 
 /**
  * Message Model (PSR-4)
  * Maps to the `Order_Message` table in `furniture_shop`.
- * Uses PDO prepared statements for all queries and enforces conversation ownership.
+ * Uses PDO prepared statements for all queries, enforces conversation ownership,
+ * and tracks read/unread status (`IsRead`, `ReadAt`) for accurate red notification badges.
  */
 class Message
 {
     private PDO $db;
+    private static bool $schemaEnsured = false;
 
     public function __construct()
     {
         $this->db = Database::getConnection();
+        $this->ensureReadStatusSchema();
+    }
+
+    /**
+     * Auto-ensure IsRead and ReadAt columns exist on Order_Message.
+     */
+    private function ensureReadStatusSchema(): void
+    {
+        if (self::$schemaEnsured) {
+            return;
+        }
+        try {
+            $colsStmt = $this->db->query("SHOW COLUMNS FROM Order_Message");
+            $existingCols = [];
+            foreach ($colsStmt->fetchAll() as $col) {
+                $existingCols[strtolower((string)$col['Field'])] = true;
+            }
+            if (!isset($existingCols['isread'])) {
+                $this->db->exec("ALTER TABLE Order_Message ADD COLUMN IsRead TINYINT(1) NOT NULL DEFAULT 0 AFTER MessageText");
+            }
+            if (!isset($existingCols['readat'])) {
+                $this->db->exec("ALTER TABLE Order_Message ADD COLUMN ReadAt DATETIME NULL AFTER IsRead");
+            }
+            self::$schemaEnsured = true;
+        } catch (Throwable $e) {
+            // Safe fallback
+        }
     }
 
     /**
@@ -61,7 +91,8 @@ class Message
         $stmt = $this->db->prepare(
             "SELECT m.MessageID, m.CustomerID, m.OrderID, m.AdminID,
                     CASE WHEN m.SenderRole = 'Admin' THEN m.AdminID ELSE m.CustomerID END AS SenderID,
-                    m.SenderRole, m.SenderName, m.Topic, m.MessageText, m.CreatedAt
+                    m.SenderRole, m.SenderName, m.Topic, m.MessageText,
+                    COALESCE(m.IsRead, 0) AS IsRead, m.ReadAt, m.CreatedAt
              FROM Order_Message m
              WHERE m.MessageID = :mid
              LIMIT 1"
@@ -73,7 +104,6 @@ class Message
 
     /**
      * Fetch messages strictly for a single Customer's private conversation (Customer <-> Admin).
-     * Computes `SenderID` from `AdminID` (when SenderRole = 'Admin') or `CustomerID` (when SenderRole = 'Customer').
      */
     public function getMessagesByCustomer(int $customerId): array
     {
@@ -83,7 +113,8 @@ class Message
 
         $sql = "SELECT m.MessageID, m.CustomerID, m.OrderID, m.AdminID,
                        CASE WHEN m.SenderRole = 'Admin' THEN m.AdminID ELSE m.CustomerID END AS SenderID,
-                       m.SenderRole, m.SenderName, m.Topic, m.MessageText, m.CreatedAt,
+                       m.SenderRole, m.SenderName, m.Topic, m.MessageText,
+                       COALESCE(m.IsRead, 0) AS IsRead, m.ReadAt, m.CreatedAt,
                        c.FullName AS CustomerName, c.Email AS CustomerEmail
                 FROM Order_Message m
                 INNER JOIN Customer c ON m.CustomerID = c.CustomerID
@@ -106,25 +137,97 @@ class Message
     }
 
     /**
-     * Fetch the list of separate customer conversations for the Admin Inbox sidebar.
-     * Uses a prepared statement and groups strictly by CustomerID.
+     * Count unread messages for a specific Customer (only counts unread messages sent by Admin).
+     * Never counts messages sent by the customer themselves.
+     */
+    public function getUnreadCountForCustomer(int $customerId): int
+    {
+        if ($customerId <= 0) {
+            return 0;
+        }
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM Order_Message
+             WHERE CustomerID = :cid
+               AND SenderRole = 'Admin'
+               AND COALESCE(IsRead, 0) = 0"
+        );
+        $stmt->execute([':cid' => $customerId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Count total unread messages for Admin across all customer conversations (only counts unread messages sent by Customers).
+     * Never counts messages sent by Admin.
+     */
+    public function getUnreadCountForAdmin(): int
+    {
+        $stmt = $this->db->query(
+            "SELECT COUNT(*) FROM Order_Message
+             WHERE SenderRole = 'Customer'
+               AND COALESCE(IsRead, 0) = 0"
+        );
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Mark all unread Admin messages in a Customer's conversation as read when the Customer views their messages.
+     */
+    public function markReadForCustomer(int $customerId): int
+    {
+        if ($customerId <= 0) {
+            return 0;
+        }
+        $stmt = $this->db->prepare(
+            "UPDATE Order_Message
+             SET IsRead = 1, ReadAt = NOW()
+             WHERE CustomerID = :cid
+               AND SenderRole = 'Admin'
+               AND COALESCE(IsRead, 0) = 0"
+        );
+        $stmt->execute([':cid' => $customerId]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Mark all unread Customer messages in a Customer's conversation as read when the Admin opens that conversation.
+     */
+    public function markReadForAdmin(int $customerId): int
+    {
+        if ($customerId <= 0) {
+            return 0;
+        }
+        $stmt = $this->db->prepare(
+            "UPDATE Order_Message
+             SET IsRead = 1, ReadAt = NOW()
+             WHERE CustomerID = :cid
+               AND SenderRole = 'Customer'
+               AND COALESCE(IsRead, 0) = 0"
+        );
+        $stmt->execute([':cid' => $customerId]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Fetch the list of separate customer conversations for the Admin Order Management inbox,
+     * including each customer's unread count (`UnreadCount` from Customer messages).
      */
     public function getCustomerConversations(): array
     {
         $sql = "SELECT c.CustomerID, c.FullName, c.Email, c.PhoneNumber,
                        COUNT(m.MessageID) AS MessageCount,
+                       SUM(CASE WHEN m.SenderRole = 'Customer' AND COALESCE(m.IsRead, 0) = 0 THEN 1 ELSE 0 END) AS UnreadCount,
                        MAX(m.CreatedAt) AS LastMessageAt
                 FROM Customer c
                 LEFT JOIN Order_Message m ON c.CustomerID = m.CustomerID
                 GROUP BY c.CustomerID, c.FullName, c.Email, c.PhoneNumber
-                ORDER BY COALESCE(MAX(m.CreatedAt), '1970-01-01 00:00:00') DESC, c.CustomerID ASC";
+                ORDER BY UnreadCount DESC, COALESCE(MAX(m.CreatedAt), '1970-01-01 00:00:00') DESC, c.CustomerID ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
     /**
-     * Insert a new message into a specific Customer's private conversation using a prepared statement.
+     * Insert a new message into a specific Customer's private conversation (starts as IsRead = 0 for the recipient).
      */
     public function createMessage(
         int $customerId,
@@ -136,8 +239,8 @@ class Message
         string $messageText
     ): int {
         $sql = "INSERT INTO Order_Message
-                (CustomerID, OrderID, AdminID, SenderRole, SenderName, Topic, MessageText)
-                VALUES (:cid, :oid, :aid, :role, :name, :topic, :text)";
+                (CustomerID, OrderID, AdminID, SenderRole, SenderName, Topic, MessageText, IsRead)
+                VALUES (:cid, :oid, :aid, :role, :name, :topic, :text, 0)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':cid'   => $customerId,

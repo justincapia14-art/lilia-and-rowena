@@ -14,8 +14,12 @@ var currentUserSession = {
     id: 1,            // Matches CustomerID = 1 in Customer table
     role: 'customer', // 'customer' or 'admin'
     name: 'Maria Teresa Santos',
+    username: 'maria.santos',
     email: 'maria.santos@example.com',
     phone: '0917-123-4567',
+    gender: 'Female',
+    birthday: '1992-05-14',
+    profileImage: '',
     address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City'
 };
 
@@ -23,18 +27,71 @@ var registeredCustomers = [
     {
         id: 1,
         fullName: 'Maria Teresa Santos',
+        username: 'maria.santos',
         email: 'maria.santos@example.com',
         password: 'password123',
         phone: '0917-123-4567',
+        gender: 'Female',
+        birthday: '1992-05-14',
+        profileImage: '',
         address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City'
     },
     {
         id: 2,
         fullName: 'Atty. Roberto Mendoza',
+        username: 'roberto.mendoza',
         email: 'roberto.mendoza@example.com',
         password: 'password123',
         phone: '0918-987-6543',
+        gender: 'Male',
+        birthday: '1984-11-20',
+        profileImage: '',
         address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa'
+    }
+];
+
+var customerSavedAddresses = [
+    {
+        AddressID: 1,
+        CustomerID: 1,
+        RecipientName: 'Maria Teresa Santos',
+        PhoneNumber: '0917-123-4567',
+        StreetAddress: 'Unit 14B, Tower 2, Serendra',
+        Barangay: 'Fort Bonifacio',
+        City: 'Taguig City',
+        Province: 'Metro Manila',
+        PostalCode: '1634',
+        DeliveryNotes: 'Use South Lobby service elevator; notify concierge 30 mins prior.',
+        AddressLabel: 'Home',
+        IsDefault: 1
+    },
+    {
+        AddressID: 2,
+        CustomerID: 1,
+        RecipientName: 'Maria Teresa Santos (Office)',
+        PhoneNumber: '0917-123-4567',
+        StreetAddress: '18th Floor, One Bonifacio High Street, 5th Ave',
+        Barangay: 'Fort Bonifacio',
+        City: 'Taguig City',
+        Province: 'Metro Manila',
+        PostalCode: '1634',
+        DeliveryNotes: 'Deliveries accepted Mon-Fri 9:00 AM - 4:00 PM at loading bay.',
+        AddressLabel: 'Work',
+        IsDefault: 0
+    },
+    {
+        AddressID: 3,
+        CustomerID: 2,
+        RecipientName: 'Atty. Roberto Mendoza',
+        PhoneNumber: '0918-987-6543',
+        StreetAddress: '88 Narra Avenue, Ayala Alabang Village',
+        Barangay: 'Ayala Alabang',
+        City: 'Muntinlupa City',
+        Province: 'Metro Manila',
+        PostalCode: '1780',
+        DeliveryNotes: 'Present workshop gate pass at Madras Gate guardhouse.',
+        AddressLabel: 'Home',
+        IsDefault: 1
     }
 ];
 
@@ -291,7 +348,7 @@ function showChatSecurityAlert(message) {
     var alertBox = document.getElementById('chatSecurityAlertBox');
     if (alertBox) {
         if (message) {
-            alertBox.textContent = '🛡️ ' + message;
+            alertBox.textContent = message;
             alertBox.style.display = 'block';
         } else {
             alertBox.textContent = '';
@@ -344,8 +401,9 @@ function savePersistedClientDatabase() {
     try {
         if (typeof window === 'undefined' || !window.localStorage) return;
         var payload = {
-            schemaVersion: 2,
+            schemaVersion: 3,
             registeredCustomers: registeredCustomers,
+            customerSavedAddresses: customerSavedAddresses,
             currentUserSession: currentUserSession,
             currentSessionToken: currentSessionToken,
             currentCsrfToken: currentCsrfToken,
@@ -383,18 +441,30 @@ function loadPersistedClientDatabase() {
                     registeredCustomers.push({
                         id: Number(sc.id) || (registeredCustomers.length + 1),
                         fullName: sc.fullName || '',
+                        username: sc.username || String(sc.email).split('@')[0],
                         email: String(sc.email).toLowerCase(),
                         password: sc.password || 'password123',
                         phone: sc.phone || '',
+                        gender: sc.gender || '',
+                        birthday: sc.birthday || '',
+                        profileImage: sc.profileImage || '',
                         address: sc.address || ''
                     });
-                } else if (sc.password) {
-                    registeredCustomers[foundIdx].password = sc.password;
+                } else {
+                    if (sc.password) registeredCustomers[foundIdx].password = sc.password;
                     registeredCustomers[foundIdx].fullName = sc.fullName || registeredCustomers[foundIdx].fullName;
+                    registeredCustomers[foundIdx].username = sc.username || registeredCustomers[foundIdx].username;
                     registeredCustomers[foundIdx].phone = sc.phone || registeredCustomers[foundIdx].phone;
+                    registeredCustomers[foundIdx].gender = sc.gender !== undefined ? sc.gender : registeredCustomers[foundIdx].gender;
+                    registeredCustomers[foundIdx].birthday = sc.birthday !== undefined ? sc.birthday : registeredCustomers[foundIdx].birthday;
+                    registeredCustomers[foundIdx].profileImage = sc.profileImage !== undefined ? sc.profileImage : registeredCustomers[foundIdx].profileImage;
                     registeredCustomers[foundIdx].address = sc.address || registeredCustomers[foundIdx].address;
                 }
             }
+        }
+
+        if (Array.isArray(parsed.customerSavedAddresses) && parsed.customerSavedAddresses.length > 0) {
+            customerSavedAddresses = parsed.customerSavedAddresses;
         }
 
         if (parsed.currentSessionToken !== undefined) {
@@ -412,7 +482,7 @@ function loadPersistedClientDatabase() {
         if (Array.isArray(parsed.shoppingCart)) {
             shoppingCart = parsed.shoppingCart;
         }
-        if (parsed.sampleOrders && typeof parsed.sampleOrders === 'object' && parsed.schemaVersion === 2) {
+        if (parsed.sampleOrders && typeof parsed.sampleOrders === 'object' && (parsed.schemaVersion === 2 || parsed.schemaVersion === 3)) {
             var orderKeys = Object.keys(parsed.sampleOrders);
             for (var k = 0; k < orderKeys.length; k++) {
                 var oid = orderKeys[k];
@@ -426,6 +496,9 @@ function loadPersistedClientDatabase() {
                 var msgExists = false;
                 for (var ex = 0; ex < staticFallbackMessagesStore.length; ex++) {
                     if (Number(staticFallbackMessagesStore[ex].MessageID) === Number(savedMsg.MessageID)) {
+                        if (savedMsg.IsRead !== undefined) {
+                            staticFallbackMessagesStore[ex].IsRead = Number(savedMsg.IsRead);
+                        }
                         msgExists = true;
                         break;
                     }
@@ -457,15 +530,23 @@ function mergeServerCustomersIntoLocal(serverCustomers) {
             registeredCustomers.push({
                 id: Number(sc.id || sc.CustomerID) || (registeredCustomers.length + 1),
                 fullName: sc.fullName || sc.FullName || '',
+                username: sc.username || sc.Username || normEmail.split('@')[0],
                 email: normEmail,
                 password: sc.password || 'password123',
                 phone: sc.phone || sc.PhoneNumber || '',
+                gender: sc.gender || sc.Gender || '',
+                birthday: sc.birthday || sc.Birthday || '',
+                profileImage: sc.profileImage || sc.ProfileImage || '',
                 address: sc.address || sc.Address || ''
             });
         } else {
             existing.id = Number(sc.id || sc.CustomerID) || existing.id;
             existing.fullName = sc.fullName || sc.FullName || existing.fullName;
+            existing.username = sc.username || sc.Username || existing.username;
             existing.phone = sc.phone || sc.PhoneNumber || existing.phone;
+            if (sc.gender !== undefined || sc.Gender !== undefined) existing.gender = sc.gender || sc.Gender || '';
+            if (sc.birthday !== undefined || sc.Birthday !== undefined) existing.birthday = sc.birthday || sc.Birthday || '';
+            if (sc.profileImage !== undefined || sc.ProfileImage !== undefined) existing.profileImage = sc.profileImage || sc.ProfileImage || '';
             existing.address = sc.address || sc.Address || existing.address;
         }
     }
@@ -488,15 +569,36 @@ function getAuthRequestHeaders() {
     return headers;
 }
 
+function renderAvatarElement(el, nameStr, profileImageStr) {
+    if (!el) return;
+    var cleanImg = String(profileImageStr || '').trim();
+    if (cleanImg) {
+        el.innerHTML = '<img src="' + escapeHtmlText(cleanImg) + '" alt="' + escapeHtmlText(nameStr || 'Profile') + '" />';
+    } else {
+        var initial = String(nameStr || 'M').trim().charAt(0).toUpperCase() || 'M';
+        el.textContent = initial;
+    }
+}
+
 function renderAuthHeaderState() {
     var loggedInBox = document.getElementById('headerLoggedInBox');
     var loggedOutBox = document.getElementById('headerLoggedOutBox');
+    var custDropdownWrap = document.getElementById('customerProfileDropdownWrap');
+    var adminLoggedInWrap = document.getElementById('headerAdminLoggedInWrap');
     var userNameEl = document.getElementById('headerUserName');
+    var headerAvatarEl = document.getElementById('headerProfileAvatar');
+    var dropNameEl = document.getElementById('dropdownCustomerName');
+    var dropEmailEl = document.getElementById('dropdownCustomerEmail');
+    var adminNameLabel = document.getElementById('headerAdminNameLabel');
     var adminNavBtn = document.getElementById('headerAdminBtn');
     var openAdminChatBtn = document.getElementById('openAdminConsoleFromChatBtn');
     var csrfInput = document.getElementById('adminCsrfTokenInput');
+    var cpCsrfInput = document.getElementById('cpProfileCsrfToken');
     if (csrfInput && currentCsrfToken) {
         csrfInput.value = currentCsrfToken;
+    }
+    if (cpCsrfInput && currentCsrfToken) {
+        cpCsrfInput.value = currentCsrfToken;
     }
 
     if (!loggedInBox || !loggedOutBox) return;
@@ -506,30 +608,47 @@ function renderAuthHeaderState() {
         loggedOutBox.style.display = 'none';
 
         if (currentUserSession.role === 'admin') {
-            if (userNameEl) userNameEl.textContent = '🔑 Admin (' + currentUserSession.email.split('@')[0] + ')';
+            if (custDropdownWrap) custDropdownWrap.style.display = 'none';
+            if (adminLoggedInWrap) adminLoggedInWrap.style.display = 'inline-flex';
+            if (adminNameLabel) adminNameLabel.textContent = 'Admin (' + (currentUserSession.email || 'admin').split('@')[0] + ')';
             if (adminNavBtn) adminNavBtn.style.display = 'inline-flex';
             if (openAdminChatBtn) openAdminChatBtn.style.display = 'inline-flex';
         } else {
-            var firstName = currentUserSession.name.split(' ')[0];
-            if (userNameEl) userNameEl.textContent = 'Hello, ' + firstName;
+            if (custDropdownWrap) custDropdownWrap.style.display = 'inline-flex';
+            if (adminLoggedInWrap) adminLoggedInWrap.style.display = 'none';
+            if (userNameEl) userNameEl.textContent = 'My Account';
+            var localRec = getCustomerRecordById(currentUserSession.id);
+            var avatarImg = currentUserSession.profileImage || (localRec && localRec.profileImage) || '';
+            renderAvatarElement(headerAvatarEl, currentUserSession.name, avatarImg);
+            if (dropNameEl) dropNameEl.textContent = currentUserSession.name || 'Valued Customer';
+            if (dropEmailEl) dropEmailEl.textContent = currentUserSession.email || '';
             if (adminNavBtn) adminNavBtn.style.display = 'none';
             if (openAdminChatBtn) openAdminChatBtn.style.display = 'none';
         }
 
-        // Pre-fill checkout fields for the logged-in user
-        var chkName = document.getElementById('chkFullName');
-        var chkEmail = document.getElementById('chkEmail');
-        var chkPhone = document.getElementById('chkPhone');
-        var chkAddr = document.getElementById('chkAddress');
-        if (chkName && currentUserSession.name) chkName.value = currentUserSession.name;
-        if (chkEmail && currentUserSession.email) chkEmail.value = currentUserSession.email;
-        if (chkPhone && currentUserSession.phone) chkPhone.value = currentUserSession.phone;
-        if (chkAddr && currentUserSession.address) chkAddr.value = currentUserSession.address;
+        // Pre-fill checkout fields & saved address selector for the logged-in user
+        if (typeof populateCheckoutSavedAddresses === 'function') {
+            populateCheckoutSavedAddresses();
+        } else {
+            var chkName = document.getElementById('chkFullName');
+            var chkEmail = document.getElementById('chkEmail');
+            var chkPhone = document.getElementById('chkPhone');
+            var chkAddr = document.getElementById('chkAddress');
+            if (chkName && currentUserSession.name) chkName.value = currentUserSession.name;
+            if (chkEmail && currentUserSession.email) chkEmail.value = currentUserSession.email;
+            if (chkPhone && currentUserSession.phone) chkPhone.value = currentUserSession.phone;
+            if (chkAddr && currentUserSession.address) chkAddr.value = currentUserSession.address;
+        }
     } else {
         loggedInBox.style.display = 'none';
         loggedOutBox.style.display = 'flex';
         if (adminNavBtn) adminNavBtn.style.display = 'none';
         if (openAdminChatBtn) openAdminChatBtn.style.display = 'none';
+        closeCustomerProfileDropdown();
+    }
+
+    if (typeof updateUnreadBadgesUI === 'function') {
+        updateUnreadBadgesUI();
     }
 
     showChatSecurityAlert('');
@@ -1041,9 +1160,9 @@ function getPriorityBadgeClassName(priorityStr) {
 
 function getPriorityIconText(priorityStr) {
     var p = String(priorityStr || 'Normal').trim();
-    if (p === 'Urgent') return '🔥 Urgent';
-    if (p === 'High') return '⚡ High';
-    return '📋 Normal';
+    if (p === 'Urgent') return 'Urgent';
+    if (p === 'High') return 'High';
+    return 'Normal';
 }
 
 function getPriorityRankNumber(priorityStr) {
@@ -1159,6 +1278,15 @@ function scrollToAdminSection(elementId) {
     } else if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+}
+
+function openAdminMessagesInOms() {
+    scrollToAdminSection('adminMessagesBlock');
+    if (currentUserSession.isLoggedIn && currentUserSession.role === 'admin') {
+        markMessagesAsReadForViewer(selectedAdminConversationCustomerId);
+    }
+    var replyIn = document.getElementById('adminReplyInput');
+    if (replyIn) replyIn.focus();
 }
 
 function showAdminOmsNotice(messageText) {
@@ -1620,15 +1748,15 @@ function renderAdminDashboard() {
         // Deadline badge
         var deadlineBadgeHtml = '';
         if (isOverdue) {
-            deadlineBadgeHtml = '<span class="oms-deadline-tag overdue">🚨 OVERDUE</span>';
+            deadlineBadgeHtml = '<span class="oms-deadline-tag overdue">OVERDUE</span>';
         } else if (isDueToday && !finished) {
-            deadlineBadgeHtml = '<span class="oms-deadline-tag today">⏰ DUE TODAY</span>';
+            deadlineBadgeHtml = '<span class="oms-deadline-tag today">DUE TODAY</span>';
         } else if (isDueToday && finished) {
             deadlineBadgeHtml = '<span class="oms-deadline-tag ok">✓ DUE TODAY</span>';
         } else if (finished) {
             deadlineBadgeHtml = '<span class="oms-deadline-tag ok">✓ FINISHED</span>';
         } else {
-            deadlineBadgeHtml = '<span class="oms-deadline-tag ok">📅 SCHEDULED</span>';
+            deadlineBadgeHtml = '<span class="oms-deadline-tag ok">SCHEDULED</span>';
         }
 
         var prodTitle = item.productName || (item.itemSummary ? item.itemSummary.split('(')[0].trim() : 'Custom Furniture');
@@ -1636,6 +1764,13 @@ function renderAdminDashboard() {
         if (prodSpec.indexOf(prodTitle) === 0 && prodSpec.length > prodTitle.length) {
             prodSpec = prodSpec.slice(prodTitle.length).trim();
         }
+
+        var custUnreadForAdmin = (typeof computeUnreadCountForAdminByCustomer === 'function')
+            ? computeUnreadCountForAdminByCustomer(item.customerId || 1)
+            : 0;
+        var unreadPillHtml = custUnreadForAdmin > 0
+            ? '<div style="margin-top:0.2rem;"><span class="unread-red-badge" title="Unread customer message">' + custUnreadForAdmin + ' new</span></div>'
+            : '';
 
         rowsHtml +=
             '<tr class="' + rowClass + '">' +
@@ -1647,7 +1782,8 @@ function renderAdminDashboard() {
                 // 2. Customer Name
                 '<td>' +
                     '<span class="oms-cust-name">' + escapeAdminHtml(item.customer) + '</span>' +
-                    '<span class="oms-cust-meta">📞 ' + escapeAdminHtml(item.customerPhone || '0917-123-4567') + '</span>' +
+                    '<span class="oms-cust-meta">Tel: ' + escapeAdminHtml(item.customerPhone || '0917-123-4567') + '</span>' +
+                    unreadPillHtml +
                 '</td>' +
                 // 3. Furniture Product
                 '<td>' +
@@ -1689,7 +1825,7 @@ function renderAdminDashboard() {
                 '</td>' +
                 // 9. Assigned Staff
                 '<td>' +
-                    '<div><span class="oms-staff-chip">👷 ' + escapeAdminHtml(currentStaff) + '</span></div>' +
+                    '<div><span class="oms-staff-chip">' + escapeAdminHtml(currentStaff) + '</span></div>' +
                     '<select aria-label="Staff for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStaff(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.15rem 0.2rem; font-size:0.64rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:108px;">' +
                         staffOpts +
                     '</select>' +
@@ -1704,7 +1840,10 @@ function renderAdminDashboard() {
                 // 11. Actions
                 '<td>' +
                     '<div style="display:flex; flex-direction:column; gap:0.25rem;">' +
-                        '<button type="button" class="btn-sm-primary" onclick="openAdminJobOrderDetail(\'' + escapeAdminHtml(oid) + '\')" style="padding:0.24rem 0.45rem; font-size:0.66rem; white-space:nowrap;">👁️ View</button>' +
+                        '<button type="button" class="btn-sm-primary" onclick="openAdminJobOrderDetail(\'' + escapeAdminHtml(oid) + '\')" style="padding:0.24rem 0.45rem; font-size:0.66rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:0.25rem;">' +
+                            '<span>View / Chat</span>' +
+                            (custUnreadForAdmin > 0 ? '<span class="unread-red-badge" style="min-width:16px; height:16px; font-size:0.62rem; padding:0 4px;">' + custUnreadForAdmin + '</span>' : '') +
+                        '</button>' +
                         (!finished
                             ? '<button type="button" class="btn-sm-outline" onclick="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', \'Completed\')" style="padding:0.2rem 0.42rem; font-size:0.64rem; white-space:nowrap; color:#15803d; border-color:#86efac;">✓ Done</button>'
                             : '') +
@@ -1728,40 +1867,45 @@ function renderAdminJobOrderDetailContent(orderId) {
     var total = Number(record.total) || 0;
     var paid = Number(record.downpayment) || 0;
     var balance = Math.max(0, total - paid);
+    var orderCustomerId = Number(record.customerId) || 1;
+    var adminViewerSession = (currentUserSession.isLoggedIn && currentUserSession.role === 'admin')
+        ? currentUserSession
+        : { isLoggedIn: true, id: 1, role: 'admin', name: 'Rowena & Lilia (Workshop Admin)' };
+    var orderChatHtml = buildMessengerFeedHtml(adminViewerSession, orderCustomerId);
 
     panel.style.display = 'block';
     panel.innerHTML =
         '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.85rem; padding-bottom:0.65rem; border-bottom:1px solid #bae6fd;">' +
             '<div>' +
-                '<span class="modal-kicker" style="color:#0284c7;">DETAILED JOB ORDER VIEW & DEADLINE EDITOR</span>' +
+                '<span class="modal-kicker" style="color:#0284c7;">DETAILED JOB ORDER VIEW, DEADLINE EDITOR & ORDER MESSAGES</span>' +
                 '<h4 style="font-size:1rem; font-weight:800; color:#0f172a; margin:0.15rem 0 0;">Job Order #JO-' + escapeAdminHtml(record.orderId) + ' — ' + escapeAdminHtml(record.customer) + '</h4>' +
             '</div>' +
             '<button type="button" class="btn-sm-outline" onclick="closeAdminJobOrderDetail()">✕ Close Detail View</button>' +
         '</div>' +
         '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:0.75rem; margin-bottom:0.9rem; font-size:0.78rem;">' +
             '<div style="background:#f8fafc; padding:0.7rem; border-radius:8px; border:1px solid #e2e8f0;">' +
-                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">👤 CUSTOMER & DELIVERY INFO</strong>' +
+                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">CUSTOMER & DELIVERY SNAPSHOT</strong>' +
                 '<div><strong>Name:</strong> ' + escapeAdminHtml(record.customer) + '</div>' +
                 '<div><strong>Phone:</strong> ' + escapeAdminHtml(record.customerPhone || '0917-123-4567') + '</div>' +
                 '<div><strong>Email:</strong> ' + escapeAdminHtml(record.customerEmail || 'client@example.com') + '</div>' +
-                '<div><strong>Address:</strong> ' + escapeAdminHtml(record.address || 'Metro Manila') + '</div>' +
+                '<div><strong>Delivery Address:</strong> ' + escapeAdminHtml(record.address || 'Metro Manila') + '</div>' +
             '</div>' +
             '<div style="background:#f8fafc; padding:0.7rem; border-radius:8px; border:1px solid #e2e8f0;">' +
-                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">🪑 FURNITURE SPECIFICATIONS</strong>' +
+                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">FURNITURE SPECIFICATIONS</strong>' +
                 '<div><strong>Product:</strong> ' + escapeAdminHtml(record.productName || record.itemSummary) + '</div>' +
                 '<div><strong>Specs:</strong> ' + escapeAdminHtml(record.itemSummary) + '</div>' +
                 '<div><strong>Quantity:</strong> ' + (Number(record.quantity) || 1) + ' pc(s)</div>' +
                 '<div><strong>Order Date:</strong> ' + formatReadableDateManila(record.placed) + ' (' + escapeAdminHtml(record.placed) + ')</div>' +
             '</div>' +
             '<div style="background:#f8fafc; padding:0.7rem; border-radius:8px; border:1px solid #e2e8f0;">' +
-                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">💳 FINANCIAL SUMMARY</strong>' +
+                '<strong style="color:#0369a1; display:block; margin-bottom:0.25rem;">FINANCIAL SUMMARY</strong>' +
                 '<div><strong>Total Amount:</strong> ₱' + total.toLocaleString() + '</div>' +
                 '<div><strong>Paid / Downpayment:</strong> ₱' + paid.toLocaleString() + '</div>' +
                 '<div><strong>Remaining Balance:</strong> <span style="color:' + (balance > 0 ? '#dc2626' : '#15803d') + '; font-weight:800;">₱' + balance.toLocaleString() + '</span></div>' +
                 '<div><strong>Workshop Stage:</strong> ' + escapeAdminHtml(record.stage || 'In Progress') + '</div>' +
             '</div>' +
         '</div>' +
-        '<form onsubmit="return saveAdminJobOrderDetail(event, \'' + escapeAdminHtml(record.orderId) + '\')" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:0.65rem; align-items:end; background:#f0f9ff; padding:0.85rem; border-radius:8px; border:1px solid #bae6fd;">' +
+        '<form onsubmit="return saveAdminJobOrderDetail(event, \'' + escapeAdminHtml(record.orderId) + '\')" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:0.65rem; align-items:end; background:#f0f9ff; padding:0.85rem; border-radius:8px; border:1px solid #bae6fd; margin-bottom:1rem;">' +
             '<div>' +
                 '<label style="display:block; font-size:0.7rem; font-weight:700; color:#0369a1; margin-bottom:0.2rem;">Order Status</label>' +
                 '<select id="detailEditStatus" style="width:100%; padding:0.42rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
@@ -1807,13 +1951,40 @@ function renderAdminJobOrderDetailContent(orderId) {
                 '<input type="text" id="detailEditJobNotes" value="' + escapeAdminHtml(record.jobNotes || '') + '" placeholder="Add carpentry, finish, or delivery notes..." style="width:100%; padding:0.42rem 0.6rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#fff;">' +
             '</div>' +
             '<div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; gap:0.5rem;">' +
-                '<button type="submit" class="btn-sm-primary" style="padding:0.48rem 1rem;">💾 Save Job Order Changes</button>' +
+                '<button type="submit" class="btn-sm-primary" style="padding:0.48rem 1rem;">Save Job Order Changes</button>' +
             '</div>' +
-        '</form>';
+        '</form>' +
+        // Embedded Order Messages Inside Order Management
+        '<div style="border:1px solid #bae6fd; border-radius:10px; padding:0.95rem; background:#f8fafc;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.55rem;">' +
+                '<div>' +
+                    '<strong style="font-size:0.86rem; color:#0369a1;">Order Messages & Customer Conversation (' + escapeAdminHtml(record.customer) + ')</strong>' +
+                    '<span style="display:block; font-size:0.72rem; color:#64748b;">Managed directly inside Order Management · Opening this order marks customer messages as Read.</span>' +
+                '</div>' +
+                '<span style="font-size:0.7rem; font-weight:700; color:#15803d; background:#dcfce7; padding:0.18rem 0.55rem; border-radius:999px; border:1px solid #bbf7d0;">✓ Messages Read</span>' +
+            '</div>' +
+            '<div id="adminOrderDetailChatFeed" class="chat-feed-box" style="height:175px; background:#ffffff; margin-bottom:0.65rem;">' +
+                orderChatHtml +
+            '</div>' +
+            '<form onsubmit="return handleAdminDetailReplySubmit(event, ' + orderCustomerId + ', \'' + escapeAdminHtml(record.orderId) + '\')" style="display:flex; gap:0.5rem; flex-wrap:wrap;">' +
+                '<input type="text" id="adminDetailReplyInput" required placeholder="Reply privately to ' + escapeAdminHtml(record.customer) + ' regarding Job Order #JO-' + escapeAdminHtml(record.orderId) + '..." style="flex:1; min-width:220px; padding:0.5rem 0.75rem; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem; background:#ffffff;" />' +
+                '<button type="submit" class="btn-sm-primary">Send Order Reply →</button>' +
+            '</form>' +
+        '</div>';
 }
 
 function openAdminJobOrderDetail(orderId) {
     selectedAdminDetailOrderId = String(orderId);
+    var record = sampleOrders[selectedAdminDetailOrderId];
+    if (record && record.customerId) {
+        selectedAdminConversationCustomerId = Number(record.customerId) || 1;
+        if (typeof markMessagesAsReadForViewer === 'function') {
+            markMessagesAsReadForViewer(selectedAdminConversationCustomerId);
+        }
+        if (typeof fetchAuthorizedConversationMessages === 'function') {
+            fetchAuthorizedConversationMessages(selectedAdminConversationCustomerId);
+        }
+    }
     renderAdminJobOrderDetailContent(selectedAdminDetailOrderId);
     var panel = document.getElementById('adminJobOrderDetailPanel') || document.getElementById('adminOrderDetailPanel');
     var container = document.getElementById('omsMainScrollContainer');
@@ -2208,6 +2379,9 @@ function renderCartDrawer() {
 function proceedToCheckoutModal() {
     if (shoppingCart.length === 0) return;
     closeModal('cartDrawerBackdrop');
+    if (typeof populateCheckoutSavedAddresses === 'function') {
+        populateCheckoutSavedAddresses();
+    }
     openModal('checkoutModal');
 }
 
@@ -2340,12 +2514,12 @@ function lookupOrderById(orderId) {
         '<div class="timeline-track">' + timelineHtml + '</div>' +
         '<div class="form-row-2" style="margin-bottom:1rem;">' +
             '<div style="padding:0.9rem; border:1px solid #e2e8f0; border-radius:8px;">' +
-                '<strong style="font-size:0.75rem; color:#0369a1; display:block; margin-bottom:0.3rem;">🔨 WORKSHOP ASSIGNMENT</strong>' +
+                '<strong style="font-size:0.75rem; color:#0369a1; display:block; margin-bottom:0.3rem;">WORKSHOP ASSIGNMENT</strong>' +
                 '<p style="font-size:0.78rem;"><strong>Carpenter:</strong> ' + record.carpenter + '</p>' +
                 '<p style="font-size:0.78rem;"><strong>Stage:</strong> ' + record.stage + '</p>' +
             '</div>' +
             '<div style="padding:0.9rem; border:1px solid #e2e8f0; border-radius:8px;">' +
-                '<strong style="font-size:0.75rem; color:#0369a1; display:block; margin-bottom:0.3rem;">🚚 IN-HOUSE DELIVERY DISPATCH</strong>' +
+                '<strong style="font-size:0.75rem; color:#0369a1; display:block; margin-bottom:0.3rem;">IN-HOUSE DELIVERY DISPATCH</strong>' +
                 '<p style="font-size:0.78rem;"><strong>Driver:</strong> ' + record.driver + '</p>' +
                 '<p style="font-size:0.78rem;"><strong>Address:</strong> ' + record.address + '</p>' +
             '</div>' +
@@ -2391,6 +2565,8 @@ var staticFallbackMessagesStore = [
         SenderName: 'Maria Teresa Santos',
         Topic: 'Order Follow-Up (#1001)',
         MessageText: 'Good day! I would like to follow up on Order #1001 (220cm Mahogany Dining Set). Can we also add 2 extra matching dining chairs and felt floor protectors to our order?',
+        IsRead: 1,
+        ReadAt: '2026-11-06 09:20:00',
         CreatedAt: '2026-11-06 09:15:00'
     },
     {
@@ -2403,6 +2579,8 @@ var staticFallbackMessagesStore = [
         SenderName: 'Rowena & Lilia (Workshop Admin)',
         Topic: 'Order Follow-Up (#1001)',
         MessageText: 'Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers on Nov 9!',
+        IsRead: 0,
+        ReadAt: null,
         CreatedAt: '2026-11-06 09:22:00'
     },
     {
@@ -2415,6 +2593,8 @@ var staticFallbackMessagesStore = [
         SenderName: 'Atty. Roberto Mendoza',
         Topic: 'Add Custom Request (#1002)',
         MessageText: 'Hello Admin, for my Order #1002 (Scandinavian Sky Blue Lounge Sofa), can we include 2 extra bolster throw pillows in the same sky blue linen fabric?',
+        IsRead: 0,
+        ReadAt: null,
         CreatedAt: '2026-11-06 10:05:00'
     },
     {
@@ -2427,6 +2607,8 @@ var staticFallbackMessagesStore = [
         SenderName: 'Rowena & Lilia (Workshop Admin)',
         Topic: 'Add Custom Request (#1002)',
         MessageText: 'Good morning Atty. Roberto! We have reserved the extra Sky Blue Woven Linen fabric from Artisan Upholstery Co. and will hand-stitch 2 matching bolster pillows (+₱1,800) for your Order #1002.',
+        IsRead: 1,
+        ReadAt: '2026-11-06 10:25:00',
         CreatedAt: '2026-11-06 10:14:00'
     }
 ];
@@ -2436,6 +2618,7 @@ function syncStaticFallbackMessages() {
         liveOrderMessages = [];
         adminConversationsList = [];
         renderMessageFeeds();
+        updateUnreadBadgesUI();
         return;
     }
     var targetCid = (currentUserSession.role === 'admin')
@@ -2451,15 +2634,23 @@ function syncStaticFallbackMessages() {
     if (currentUserSession.role === 'admin') {
         adminConversationsList = registeredCustomers.map(function (c) {
             var count = 0;
+            var unread = 0;
             for (var j = 0; j < staticFallbackMessagesStore.length; j++) {
-                if (Number(staticFallbackMessagesStore[j].CustomerID) === Number(c.id)) count++;
+                var m = staticFallbackMessagesStore[j];
+                if (Number(m.CustomerID) === Number(c.id)) {
+                    count++;
+                    if (String(m.SenderRole) === 'Customer' && Number(m.IsRead || 0) === 0) {
+                        unread++;
+                    }
+                }
             }
-            return { CustomerID: c.id, FullName: c.fullName, MessageCount: count };
+            return { CustomerID: c.id, FullName: c.fullName, MessageCount: count, UnreadCount: unread };
         });
     } else {
         adminConversationsList = [];
     }
     renderMessageFeeds();
+    updateUnreadBadgesUI();
 }
 
 // Tracks which Customer conversation the Admin currently has open (1 = Maria Santos, 2 = Atty. Roberto, etc.)
@@ -2497,10 +2688,29 @@ function fetchAuthorizedConversationMessages(explicitCustomerIdForAdmin) {
         }
         if (result.status === 200 && result.data && Array.isArray(result.data.messages)) {
             liveOrderMessages = result.data.messages;
+            // Sync staticFallbackMessagesStore read statuses with server
+            for (var s = 0; s < liveOrderMessages.length; s++) {
+                var srvMsg = liveOrderMessages[s];
+                var foundLocal = false;
+                for (var l = 0; l < staticFallbackMessagesStore.length; l++) {
+                    if (Number(staticFallbackMessagesStore[l].MessageID) === Number(srvMsg.MessageID)) {
+                        staticFallbackMessagesStore[l] = srvMsg;
+                        foundLocal = true;
+                        break;
+                    }
+                }
+                if (!foundLocal) {
+                    staticFallbackMessagesStore.push(srvMsg);
+                }
+            }
             if (Array.isArray(result.data.conversations)) {
                 adminConversationsList = result.data.conversations;
             }
             renderMessageFeeds();
+            updateUnreadBadgesUI();
+            if (currentUserSession.role === 'admin') {
+                renderAdminDashboard();
+            }
         }
         return result;
     })
@@ -2575,7 +2785,7 @@ function getCustomerRecordById(customerId) {
 function buildMessengerFeedHtml(viewerSession, conversationCustomerId) {
     if (!viewerSession || !viewerSession.isLoggedIn || !viewerSession.id) {
         return '<div style="text-align:center; padding: 2.5rem 1rem; color:#475569;">' +
-            '<strong style="display:block; color:#0f172a; margin-bottom:0.35rem;">🔒 Private Customer-Admin Messenger</strong>' +
+            '<strong style="display:block; color:#0f172a; margin-bottom:0.35rem;">Private Customer-Admin Messenger</strong>' +
             '<span style="font-size:0.8rem;">Please sign in to your Customer or Admin account to view your private conversation.</span>' +
         '</div>';
     }
@@ -2635,13 +2845,17 @@ function buildAdminConversationListHtml() {
         if (msgCount === 0 && cid === Number(selectedAdminConversationCustomerId)) {
             msgCount = getPrivateConversationMessages(cid).length;
         }
+        var unreadForCust = (typeof computeUnreadCountForAdminByCustomer === 'function')
+            ? computeUnreadCountForAdminByCustomer(cid)
+            : 0;
         var isSelected = (cid === Number(selectedAdminConversationCustomerId));
         var btnClass = isSelected ? 'btn-sm-primary' : 'btn-sm-soft';
         var orderLabel = (cid === 1) ? 'Order #1001' : ((cid === 2) ? 'Order #1002' : 'Custom Inquiry');
 
         html +=
             '<button type="button" class="' + btnClass + '" data-conversation-btn="' + cid + '" onclick="selectAdminConversation(' + cid + ')">' +
-                '<span>👤 ' + escapeHtmlText(cust.fullName) + ' (Customer #' + cid + ' · ' + orderLabel + ' · ' + msgCount + ' msgs)</span>' +
+                '<span>' + escapeHtmlText(cust.fullName) + ' (Customer #' + cid + ' · ' + orderLabel + ' · ' + msgCount + ' msgs)</span>' +
+                (unreadForCust > 0 ? '<span class="unread-red-badge" style="margin-left:0.35rem;">' + unreadForCust + '</span>' : '') +
             '</button>';
     }
     return html;
@@ -2666,6 +2880,9 @@ function selectAdminConversation(customerId) {
 
     selectedAdminConversationCustomerId = requestedCid;
     showChatSecurityAlert('');
+    if (typeof markMessagesAsReadForViewer === 'function') {
+        markMessagesAsReadForViewer(requestedCid);
+    }
 
     // Sync Admin reply dropdown in Admin Console
     var targetSelect = document.getElementById('adminReplyTargetOrder');
@@ -2689,6 +2906,13 @@ function selectAdminConversation(customerId) {
     }
 
     return fetchAuthorizedConversationMessages(selectedAdminConversationCustomerId);
+}
+
+function handleAdminReplyTargetChange(val) {
+    if (!val) return;
+    var parts = String(val).split('|');
+    var cid = Number(parts[0]) || 1;
+    selectAdminConversation(cid);
 }
 
 // Update Order dropdown, Topic dropdown, and Quick Templates so Customers only see their own orders
@@ -2724,18 +2948,18 @@ function renderPrivateOrderOptionsForConversation(conversationCustomerId) {
     if (quickChipsBox) {
         if (cid === 1) {
             quickChipsBox.innerHTML =
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1001\', \'Order Follow-Up (#1001)\', \'Hello Admin! I would like to follow up on the production status of Order #1001 (Mahogany Dining Set). How is the finishing progressing?\')">📋 Follow up Order #1001 status</button>' +
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1001\', \'Add Custom Request (#1001)\', \'Hello Admin! Can we add 2 extra matching solid mahogany dining chairs to our Order #1001?\')">➕ Add 2 extra chairs to Order #1001</button>' +
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1001\', \'Delivery Schedule (#1001)\', \'Good day! Could you please confirm the estimated delivery arrival window for Order #1001?\')">🚚 Confirm Order #1001 delivery time</button>';
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1001\', \'Order Follow-Up (#1001)\', \'Hello Admin! I would like to follow up on the production status of Order #1001 (Mahogany Dining Set). How is the finishing progressing?\')">Follow up Order #1001 status</button>' +
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1001\', \'Add Custom Request (#1001)\', \'Hello Admin! Can we add 2 extra matching solid mahogany dining chairs to our Order #1001?\')">Add 2 extra chairs to Order #1001</button>' +
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1001\', \'Delivery Schedule (#1001)\', \'Good day! Could you please confirm the estimated delivery arrival window for Order #1001?\')">Confirm Order #1001 delivery time</button>';
         } else if (cid === 2) {
             quickChipsBox.innerHTML =
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1002\', \'Order Follow-Up (#1002)\', \'Hello Admin! I would like to check on the framing progress for my Order #1002 (Scandinavian Sky Blue Lounge Sofa).\')">📋 Follow up Order #1002 status</button>' +
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1002\', \'Add Custom Request (#1002)\', \'Hello Admin, can we add a water-resistant fabric guard treatment to our Order #1002 Sky Blue Lounge Sofa?\')">🛋️ Add fabric guard to Order #1002</button>' +
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1002\', \'Delivery Schedule (#1002)\', \'Good day! Could you please confirm the scheduled delivery date for Order #1002 to Ayala Alabang?\')">🚚 Confirm Order #1002 delivery date</button>';
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1002\', \'Order Follow-Up (#1002)\', \'Hello Admin! I would like to check on the framing progress for my Order #1002 (Scandinavian Sky Blue Lounge Sofa).\')">Follow up Order #1002 status</button>' +
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1002\', \'Add Custom Request (#1002)\', \'Hello Admin, can we add a water-resistant fabric guard treatment to our Order #1002 Sky Blue Lounge Sofa?\')">Add fabric guard to Order #1002</button>' +
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'1002\', \'Delivery Schedule (#1002)\', \'Good day! Could you please confirm the scheduled delivery date for Order #1002 to Ayala Alabang?\')">Confirm Order #1002 delivery date</button>';
         } else {
             quickChipsBox.innerHTML =
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'\', \'Workshop Inquiry\', \'Hello Admin! I would like to request a custom dimension quote for a solid mahogany dining table.\')">📐 Request Custom Dimension Quote</button>' +
-                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'\', \'Delivery Coordination\', \'Hello Admin! What is the lead time for delivery to Metro Manila?\')">🚚 Ask About Delivery Lead Time</button>';
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'\', \'Workshop Inquiry\', \'Hello Admin! I would like to request a custom dimension quote for a solid mahogany dining table.\')">Request Custom Dimension Quote</button>' +
+                '<button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt(\'\', \'Delivery Coordination\', \'Hello Admin! What is the lead time for delivery to Metro Manila?\')">Ask About Delivery Lead Time</button>';
         }
     }
 }
@@ -2748,15 +2972,36 @@ function upsertLiveMessage(newMsg) {
             return;
         }
     }
+    var updatedFallback = false;
+    for (var s = 0; s < staticFallbackMessagesStore.length; s++) {
+        if (Number(staticFallbackMessagesStore[s].MessageID) === Number(newMsg.MessageID)) {
+            staticFallbackMessagesStore[s] = newMsg;
+            updatedFallback = true;
+            break;
+        }
+    }
+    if (!updatedFallback) {
+        staticFallbackMessagesStore.push(newMsg);
+    }
+
+    var updatedLive = false;
     for (var i = 0; i < liveOrderMessages.length; i++) {
         if (Number(liveOrderMessages[i].MessageID) === Number(newMsg.MessageID)) {
             liveOrderMessages[i] = newMsg;
-            renderMessageFeeds();
-            return;
+            updatedLive = true;
+            break;
         }
     }
-    liveOrderMessages.push(newMsg);
+    if (!updatedLive) {
+        liveOrderMessages.push(newMsg);
+    }
+
+    savePersistedClientDatabase();
     renderMessageFeeds();
+    updateUnreadBadgesUI();
+    if (currentUserSession.role === 'admin') {
+        renderAdminDashboard();
+    }
 }
 
 function escapeHtmlText(str) {
@@ -2788,10 +3033,11 @@ function syncSocketAuthIdentity() {
     chatSocket.send(JSON.stringify(identifyPacket));
 }
 
-// Render private conversations in both the Messenger Chat Modal and the Admin Console Inbox
+// Render private conversations in both the Messenger Chat Modal and Order Management Detail Panel
 function renderMessageFeeds() {
     var customerFeed = document.getElementById('customerChatFeed');
     var adminFeed = document.getElementById('adminChatFeed');
+    var adminOrderDetailFeed = document.getElementById('adminOrderDetailChatFeed');
     var headerCount = document.getElementById('headerMsgCount');
     var floatingCount = document.getElementById('floatingMsgCount');
     var viewerStatusEl = document.getElementById('chatCurrentViewerLabel');
@@ -2819,7 +3065,6 @@ function renderMessageFeeds() {
         ? getPrivateConversationMessages(activeConversationCustomerId)
         : [];
 
-    // Header badge shows only the count of messages in the user's private conversation (or active thread for Admin)
     if (headerCount) headerCount.textContent = visibleConversationMsgs.length;
     if (floatingCount) floatingCount.textContent = visibleConversationMsgs.length;
 
@@ -2828,14 +3073,14 @@ function renderMessageFeeds() {
         if (currentUserSession.isLoggedIn && currentUserSession.role === 'admin') {
             var activeCust = getCustomerRecordById(activeConversationCustomerId);
             viewerStatusEl.innerHTML =
-                '🔑 Logged in as <strong>' + escapeHtmlText(currentUserSession.name) + '</strong> (<code>AdminID: ' + Number(currentUserSession.id) + '</code>) · ' +
+                'Logged in as <strong>' + escapeHtmlText(currentUserSession.name) + '</strong> (<code>AdminID: ' + Number(currentUserSession.id) + '</code>) · ' +
                 'Viewing Private Conversation with <strong>' + escapeHtmlText(activeCust.fullName) + ' (Customer #' + activeConversationCustomerId + ')</strong>';
         } else if (currentUserSession.isLoggedIn && currentUserSession.role === 'customer') {
             viewerStatusEl.innerHTML =
-                '🔒 Private Conversation: <strong>' + escapeHtmlText(currentUserSession.name) + '</strong> (<code>CustomerID: ' + Number(currentUserSession.id) + '</code>) ↔ <strong>Workshop Admin</strong> — Only you and the Admin can see this chat.';
+                'Private Conversation: <strong>' + escapeHtmlText(currentUserSession.name) + '</strong> (<code>CustomerID: ' + Number(currentUserSession.id) + '</code>) ↔ <strong>Workshop Admin</strong> — Only you and the Admin can see this chat.';
         } else {
             viewerStatusEl.innerHTML =
-                '🔒 <strong>Sign In Required</strong> — Please sign in as a Customer or Admin to access your private conversation.';
+                '<strong>Sign In Required</strong> — Please sign in as a Customer or Admin to access your private conversation.';
         }
     }
 
@@ -2856,7 +3101,6 @@ function renderMessageFeeds() {
             'Active Private Conversation: <strong>' + escapeHtmlText(targetCust.fullName) + ' (Customer #' + Number(selectedAdminConversationCustomerId) + ')</strong> ↔ <strong>Workshop Admin</strong>';
     }
 
-    // Keep Admin Console reply dropdown options synced with all registered customers
     var targetSelect = document.getElementById('adminReplyTargetOrder');
     if (targetSelect) {
         var selectHtml = '';
@@ -2881,7 +3125,6 @@ function renderMessageFeeds() {
         }
     }
 
-    // Highlight active quick-switch button in the Messenger modal
     if (switchCust1Btn) {
         var isCust1 = currentUserSession.isLoggedIn && currentUserSession.role === 'customer' && Number(currentUserSession.id) === 1;
         switchCust1Btn.className = isCust1 ? 'btn-sm-primary' : 'btn-sm-soft';
@@ -2895,7 +3138,6 @@ function renderMessageFeeds() {
         switchAdmin1Btn.className = isAdm1 ? 'btn-sm-primary' : 'btn-sm-soft';
     }
 
-    // Update Order dropdown & Quick Prompts for the active private conversation
     if (activeConversationCustomerId) {
         renderPrivateOrderOptionsForConversation(activeConversationCustomerId);
     }
@@ -2906,13 +3148,23 @@ function renderMessageFeeds() {
         customerFeed.scrollTop = customerFeed.scrollHeight;
     }
 
-    // 2. Render Admin Console Inbox (#adminChatFeed) scoped strictly to selectedAdminConversationCustomerId
+    // 2. Render Order Management Detail Chat Feed (#adminOrderDetailChatFeed)
+    var adminViewerSession = (currentUserSession.isLoggedIn && currentUserSession.role === 'admin')
+        ? currentUserSession
+        : { isLoggedIn: true, id: 1, role: 'admin', name: 'Rowena & Lilia (Workshop Admin)' };
+
     if (adminFeed) {
-        var adminViewerSession = (currentUserSession.isLoggedIn && currentUserSession.role === 'admin')
-            ? currentUserSession
-            : { isLoggedIn: true, id: 1, role: 'admin', name: 'Rowena & Lilia (Workshop Admin)' };
         adminFeed.innerHTML = buildMessengerFeedHtml(adminViewerSession, selectedAdminConversationCustomerId);
         adminFeed.scrollTop = adminFeed.scrollHeight;
+    }
+    if (adminOrderDetailFeed && selectedAdminDetailOrderId && sampleOrders[selectedAdminDetailOrderId]) {
+        var ordCid = Number(sampleOrders[selectedAdminDetailOrderId].customerId) || 1;
+        adminOrderDetailFeed.innerHTML = buildMessengerFeedHtml(adminViewerSession, ordCid);
+        adminOrderDetailFeed.scrollTop = adminOrderDetailFeed.scrollHeight;
+    }
+
+    if (typeof updateUnreadBadgesUI === 'function') {
+        updateUnreadBadgesUI();
     }
 }
 
@@ -2959,6 +3211,7 @@ function initRealTimeMessaging() {
                     currentUserSession = data.user;
                     savePersistedClientDatabase();
                     renderAuthHeaderState();
+                    syncCustomerProfileFromServer();
                     if (currentUserSession.role === 'admin' && typeof refreshAdminJobOrdersFromServer === 'function') {
                         refreshAdminJobOrdersFromServer(true);
                     }
@@ -3012,7 +3265,6 @@ function initRealTimeMessaging() {
                     return;
                 }
                 if (data.type === 'messages:init' && Array.isArray(data.messages)) {
-                    // Replace local message store exclusively with the server-authorized conversation messages
                     liveOrderMessages = data.messages;
                     if (Array.isArray(data.conversations)) {
                         adminConversationsList = data.conversations;
@@ -3030,7 +3282,6 @@ function initRealTimeMessaging() {
         };
 
         chatSocket.onclose = function () {
-            // Reconnect automatically after 3 seconds if connection drops
             setTimeout(initRealTimeMessaging, 3000);
         };
     } catch (err) {
@@ -3038,8 +3289,16 @@ function initRealTimeMessaging() {
     }
 }
 
-// Open the Live Chat Modal
+// Open the Live Chat Modal & mark incoming messages read for the viewer
 function openLiveChatModal(prefillOrderId, prefillTopic) {
+    closeCustomerProfileDropdown();
+    if (currentUserSession.isLoggedIn) {
+        if (currentUserSession.role === 'customer') {
+            markMessagesAsReadForViewer();
+        } else if (currentUserSession.role === 'admin') {
+            markMessagesAsReadForViewer(selectedAdminConversationCustomerId);
+        }
+    }
     renderMessageFeeds();
     if (prefillOrderId) {
         var orderSelect = document.getElementById('chatOrderSelect');
@@ -3132,6 +3391,8 @@ function sendLiveOrderMessage(payload) {
             SenderName: currentUserSession.name || 'User',
             Topic: payload.Topic || 'Order Follow-Up',
             MessageText: payload.MessageText || '',
+            IsRead: 0,
+            ReadAt: null,
             CreatedAt: 'Just now'
         };
         staticFallbackMessagesStore.push(newFallbackMsg);
@@ -3159,7 +3420,6 @@ function handleCustomerChatSubmit(event) {
     var topic = (topicSelect && topicSelect.value) ? topicSelect.value : 'Order Follow-Up';
 
     if (currentUserSession.role === 'admin') {
-        // Admin explicitly specifies the selected customer conversation to reply to
         sendLiveOrderMessage({
             CustomerID: Number(selectedAdminConversationCustomerId) || 1,
             OrderID: orderId,
@@ -3167,7 +3427,6 @@ function handleCustomerChatSubmit(event) {
             MessageText: text
         });
     } else {
-        // Customer: do not send client-supplied CustomerID; backend derives CustomerID strictly from authenticated session
         sendLiveOrderMessage({
             OrderID: orderId,
             Topic: topic,
@@ -3199,7 +3458,6 @@ function handleAdminReplySubmit(event) {
     var ordId = Number(parts[1]) || (custId === 2 ? 1002 : 1001);
     var topic = parts[2] || 'Workshop Admin Reply';
 
-    // Switch active admin conversation to the customer being replied to so Admin immediately sees the reply in that thread
     selectedAdminConversationCustomerId = custId;
 
     sendLiveOrderMessage({
@@ -3220,6 +3478,1128 @@ function handleAdminReplySubmit(event) {
     return false;
 }
 
+// Reply to Customer directly from inside Order Management Job Order Detail panel
+function handleAdminDetailReplySubmit(event, customerId, orderId) {
+    event.preventDefault();
+    if (!currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
+        return false;
+    }
+    var inputEl = document.getElementById('adminDetailReplyInput');
+    var text = inputEl ? inputEl.value.trim() : '';
+    if (!text) return false;
+
+    var cid = Number(customerId) || 1;
+    var oid = Number(orderId) || 1001;
+    selectedAdminConversationCustomerId = cid;
+
+    sendLiveOrderMessage({
+        CustomerID: cid,
+        OrderID: oid,
+        Topic: 'Order Follow-Up (#' + oid + ')',
+        MessageText: text
+    }).then(function () {
+        if (selectedAdminDetailOrderId) {
+            renderAdminJobOrderDetailContent(selectedAdminDetailOrderId);
+        }
+    });
+
+    if (inputEl) inputEl.value = '';
+    showAdminOmsNotice('✓ Order reply sent to Customer #' + cid + ' for Job Order #JO-' + oid + '.');
+    return false;
+}
+
+// ============================================================================
+// 11. RED UNREAD MESSAGE NOTIFICATION BADGES & READ STATUS SYNC
+// ============================================================================
+function getAllKnownMessagesForUnreadCount() {
+    // Combine staticFallbackMessagesStore and liveOrderMessages without duplicates
+    var mapById = {};
+    var result = [];
+    for (var i = 0; i < staticFallbackMessagesStore.length; i++) {
+        var m = staticFallbackMessagesStore[i];
+        if (m && m.MessageID) {
+            mapById[Number(m.MessageID)] = m;
+        }
+    }
+    for (var j = 0; j < liveOrderMessages.length; j++) {
+        var lm = liveOrderMessages[j];
+        if (lm && lm.MessageID) {
+            mapById[Number(lm.MessageID)] = lm;
+        }
+    }
+    var keys = Object.keys(mapById);
+    for (var k = 0; k < keys.length; k++) {
+        result.push(mapById[keys[k]]);
+    }
+    return result;
+}
+
+// Customer unread count: ONLY messages sent by Admin in this customer's conversation with IsRead == 0
+function computeUnreadCountForCustomer(customerId) {
+    var cid = Number(customerId) || 0;
+    if (cid <= 0) return 0;
+    var allMsgs = getAllKnownMessagesForUnreadCount();
+    var unread = 0;
+    for (var i = 0; i < allMsgs.length; i++) {
+        var msg = allMsgs[i];
+        if (
+            Number(msg.CustomerID) === cid &&
+            String(msg.SenderRole || '').toLowerCase() === 'admin' &&
+            Number(msg.IsRead !== undefined ? msg.IsRead : 1) === 0
+        ) {
+            unread++;
+        }
+    }
+    return unread;
+}
+
+// Admin unread count per customer: ONLY messages sent by Customer with IsRead == 0
+function computeUnreadCountForAdminByCustomer(customerId) {
+    var cid = Number(customerId) || 0;
+    if (cid <= 0) return 0;
+    for (var c = 0; c < adminConversationsList.length; c++) {
+        if (Number(adminConversationsList[c].CustomerID) === cid && adminConversationsList[c].UnreadCount !== undefined) {
+            return Number(adminConversationsList[c].UnreadCount) || 0;
+        }
+    }
+    var allMsgs = getAllKnownMessagesForUnreadCount();
+    var unread = 0;
+    for (var i = 0; i < allMsgs.length; i++) {
+        var msg = allMsgs[i];
+        if (
+            Number(msg.CustomerID) === cid &&
+            String(msg.SenderRole || '').toLowerCase() === 'customer' &&
+            Number(msg.IsRead !== undefined ? msg.IsRead : 1) === 0
+        ) {
+            unread++;
+        }
+    }
+    return unread;
+}
+
+function computeTotalUnreadCountForAdmin() {
+    var total = 0;
+    for (var i = 0; i < registeredCustomers.length; i++) {
+        total += computeUnreadCountForAdminByCustomer(registeredCustomers[i].id);
+    }
+    return total;
+}
+
+function setBadgeElementCount(badgeEl, count) {
+    if (!badgeEl) return;
+    var n = Number(count) || 0;
+    if (n > 0) {
+        badgeEl.textContent = String(n);
+        badgeEl.style.display = 'inline-flex';
+    } else {
+        badgeEl.textContent = '0';
+        badgeEl.style.display = 'none';
+    }
+}
+
+function updateUnreadBadgesUI() {
+    var headerBadge = document.getElementById('headerUnreadBadge');
+    var dropdownBadge = document.getElementById('dropdownUnreadBadge');
+    var cpSidebarBadge = document.getElementById('cpSidebarUnreadBadge');
+    var adminHeaderBadge = document.getElementById('adminHeaderUnreadBadge');
+    var omsSidebarBadge = document.getElementById('omsSidebarUnreadBadge');
+    var omsSidebarMessagesBadge = document.getElementById('omsSidebarMessagesUnreadBadge');
+
+    if (!currentUserSession || !currentUserSession.isLoggedIn) {
+        setBadgeElementCount(headerBadge, 0);
+        setBadgeElementCount(dropdownBadge, 0);
+        setBadgeElementCount(cpSidebarBadge, 0);
+        setBadgeElementCount(adminHeaderBadge, 0);
+        setBadgeElementCount(omsSidebarBadge, 0);
+        setBadgeElementCount(omsSidebarMessagesBadge, 0);
+        return;
+    }
+
+    if (currentUserSession.role === 'customer') {
+        var custUnread = computeUnreadCountForCustomer(currentUserSession.id);
+        setBadgeElementCount(headerBadge, custUnread);
+        setBadgeElementCount(dropdownBadge, custUnread);
+        setBadgeElementCount(cpSidebarBadge, custUnread);
+        setBadgeElementCount(adminHeaderBadge, 0);
+        setBadgeElementCount(omsSidebarBadge, 0);
+        setBadgeElementCount(omsSidebarMessagesBadge, 0);
+    } else if (currentUserSession.role === 'admin') {
+        var admUnread = computeTotalUnreadCountForAdmin();
+        setBadgeElementCount(headerBadge, 0);
+        setBadgeElementCount(dropdownBadge, 0);
+        setBadgeElementCount(cpSidebarBadge, 0);
+        setBadgeElementCount(adminHeaderBadge, admUnread);
+        setBadgeElementCount(omsSidebarBadge, admUnread);
+        setBadgeElementCount(omsSidebarMessagesBadge, admUnread);
+    }
+}
+
+function markMessagesAsReadForViewer(targetCustomerIdForAdmin) {
+    if (!currentUserSession || !currentUserSession.isLoggedIn) return;
+    var nowIso = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    if (currentUserSession.role === 'customer') {
+        var cid = Number(currentUserSession.id) || 1;
+        for (var i = 0; i < staticFallbackMessagesStore.length; i++) {
+            var m = staticFallbackMessagesStore[i];
+            if (Number(m.CustomerID) === cid && String(m.SenderRole).toLowerCase() === 'admin') {
+                m.IsRead = 1;
+                m.ReadAt = nowIso;
+            }
+        }
+        for (var j = 0; j < liveOrderMessages.length; j++) {
+            var lm = liveOrderMessages[j];
+            if (Number(lm.CustomerID) === cid && String(lm.SenderRole).toLowerCase() === 'admin') {
+                lm.IsRead = 1;
+                lm.ReadAt = nowIso;
+            }
+        }
+    } else if (currentUserSession.role === 'admin') {
+        var targetCid = Number(targetCustomerIdForAdmin || selectedAdminConversationCustomerId) || 1;
+        for (var a = 0; a < staticFallbackMessagesStore.length; a++) {
+            var am = staticFallbackMessagesStore[a];
+            if (Number(am.CustomerID) === targetCid && String(am.SenderRole).toLowerCase() === 'customer') {
+                am.IsRead = 1;
+                am.ReadAt = nowIso;
+            }
+        }
+        for (var b = 0; b < liveOrderMessages.length; b++) {
+            var alm = liveOrderMessages[b];
+            if (Number(alm.CustomerID) === targetCid && String(alm.SenderRole).toLowerCase() === 'customer') {
+                alm.IsRead = 1;
+                alm.ReadAt = nowIso;
+            }
+        }
+        for (var c = 0; c < adminConversationsList.length; c++) {
+            if (Number(adminConversationsList[c].CustomerID) === targetCid) {
+                adminConversationsList[c].UnreadCount = 0;
+            }
+        }
+    }
+
+    savePersistedClientDatabase();
+    updateUnreadBadgesUI();
+    if (currentUserSession.role === 'admin') {
+        renderAdminDashboard();
+    }
+
+    fetch('/api/messages/mark-read', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({
+            customerId: targetCustomerIdForAdmin || selectedAdminConversationCustomerId || currentUserSession.id
+        })
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+        if (data && data.status === 'ok' && Array.isArray(data.conversations)) {
+            adminConversationsList = data.conversations;
+            updateUnreadBadgesUI();
+            if (currentUserSession.role === 'admin') {
+                renderAdminDashboard();
+            }
+        }
+    })
+    .catch(function () {
+        fetch('public/index.php?route=api_mark_messages_read', {
+            method: 'POST',
+            headers: getAuthRequestHeaders(),
+            body: JSON.stringify({
+                customerId: targetCustomerIdForAdmin || selectedAdminConversationCustomerId || currentUserSession.id
+            })
+        }).catch(function () {});
+    });
+}
+
+// ============================================================================
+// 12. CUSTOMER PROFILE DROPDOWN MENU (Matches Reference Screenshot)
+// ============================================================================
+function toggleCustomerProfileDropdown(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    var menu = document.getElementById('customerProfileDropdownMenu');
+    var trigger = document.getElementById('customerProfileTriggerBtn');
+    if (!menu) return;
+    var isOpen = menu.classList.contains('open');
+    if (isOpen) {
+        closeCustomerProfileDropdown();
+    } else {
+        menu.classList.add('open');
+        if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        updateUnreadBadgesUI();
+    }
+}
+
+function closeCustomerProfileDropdown() {
+    var menu = document.getElementById('customerProfileDropdownMenu');
+    var trigger = document.getElementById('customerProfileTriggerBtn');
+    if (menu) menu.classList.remove('open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+
+function openMessagesFromCustomerDropdown() {
+    closeCustomerProfileDropdown();
+    openLiveChatModal();
+}
+
+// ============================================================================
+// 13. SHOPEE-INSPIRED CUSTOMER "MY PROFILE" & "MY ADDRESSES" MANAGEMENT
+// ============================================================================
+var activeCustomerProfileTab = 'profile';
+var isCustomerProfileEditMode = false;
+
+function showCustomerProfileNotice(msg, isError) {
+    var okBox = document.getElementById('cpFeedbackBanner');
+    var errBox = document.getElementById('cpErrorBanner');
+    if (okBox) okBox.style.display = 'none';
+    if (errBox) errBox.style.display = 'none';
+    if (!msg) return;
+    if (isError) {
+        if (errBox) {
+            errBox.textContent = msg;
+            errBox.style.display = 'block';
+        }
+    } else if (okBox) {
+        okBox.textContent = msg;
+        okBox.style.display = 'block';
+    }
+}
+
+function getAddressesForCustomer(customerId) {
+    var cid = Number(customerId) || 1;
+    var list = [];
+    for (var i = 0; i < customerSavedAddresses.length; i++) {
+        if (Number(customerSavedAddresses[i].CustomerID) === cid) {
+            list.push(customerSavedAddresses[i]);
+        }
+    }
+    list.sort(function (a, b) {
+        if (Number(b.IsDefault) !== Number(a.IsDefault)) {
+            return Number(b.IsDefault) - Number(a.IsDefault);
+        }
+        return Number(a.AddressID) - Number(b.AddressID);
+    });
+    return list;
+}
+
+function formatFullSavedAddressLine(addr) {
+    if (!addr) return '';
+    var parts = [
+        addr.StreetAddress,
+        addr.Barangay ? ('Brgy. ' + addr.Barangay) : '',
+        addr.City,
+        addr.Province,
+        addr.PostalCode
+    ].filter(function (p) { return Boolean(p && String(p).trim()); });
+    return parts.join(', ');
+}
+
+function syncCustomerProfileFromServer() {
+    if (!currentUserSession || !currentUserSession.isLoggedIn || currentUserSession.role !== 'customer') {
+        return Promise.resolve(null);
+    }
+    return fetch('/api/profile', {
+        method: 'GET',
+        headers: getAuthRequestHeaders()
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+        if (data && data.status === 'ok') {
+            if (data.profile) {
+                var p = data.profile;
+                currentUserSession.name = p.fullName || currentUserSession.name;
+                currentUserSession.username = p.username || currentUserSession.username;
+                currentUserSession.email = p.email || currentUserSession.email;
+                currentUserSession.phone = p.phone || currentUserSession.phone;
+                currentUserSession.gender = p.gender !== undefined ? p.gender : currentUserSession.gender;
+                currentUserSession.birthday = p.birthday !== undefined ? p.birthday : currentUserSession.birthday;
+                currentUserSession.profileImage = p.profileImage !== undefined ? p.profileImage : currentUserSession.profileImage;
+                currentUserSession.address = p.address || currentUserSession.address;
+
+                for (var i = 0; i < registeredCustomers.length; i++) {
+                    if (Number(registeredCustomers[i].id) === Number(currentUserSession.id)) {
+                        registeredCustomers[i].fullName = currentUserSession.name;
+                        registeredCustomers[i].username = currentUserSession.username;
+                        registeredCustomers[i].email = currentUserSession.email;
+                        registeredCustomers[i].phone = currentUserSession.phone;
+                        registeredCustomers[i].gender = currentUserSession.gender;
+                        registeredCustomers[i].birthday = currentUserSession.birthday;
+                        registeredCustomers[i].profileImage = currentUserSession.profileImage;
+                        registeredCustomers[i].address = currentUserSession.address;
+                        break;
+                    }
+                }
+            }
+            if (Array.isArray(data.addresses)) {
+                var cid = Number(currentUserSession.id) || 1;
+                var others = customerSavedAddresses.filter(function (a) { return Number(a.CustomerID) !== cid; });
+                customerSavedAddresses = others.concat(data.addresses);
+            }
+            savePersistedClientDatabase();
+            renderAuthHeaderState();
+        }
+        return data;
+    })
+    .catch(function () {
+        return null;
+    });
+}
+
+function openCustomerProfileModal(tabName) {
+    closeCustomerProfileDropdown();
+    if (!currentUserSession || !currentUserSession.isLoggedIn) {
+        openModal('authModal');
+        return;
+    }
+    showCustomerProfileNotice('', false);
+    populateCustomerProfileModalFields();
+    switchCustomerProfileTab(tabName || 'profile');
+    toggleCustomerProfileEditMode(false);
+    openModal('customerProfileModal');
+    syncCustomerProfileFromServer().then(function () {
+        populateCustomerProfileModalFields();
+        renderCustomerAddressesList();
+        renderCustomerMyOrdersList();
+    });
+}
+
+function switchCustomerProfileTab(tabName) {
+    activeCustomerProfileTab = tabName || 'profile';
+    var tabs = ['profile', 'addresses', 'orders', 'password'];
+    for (var i = 0; i < tabs.length; i++) {
+        var t = tabs[i];
+        var pane = document.getElementById('cpPane_' + t);
+        var navBtn = document.getElementById('cpNav_' + t);
+        if (pane) pane.style.display = (t === activeCustomerProfileTab) ? 'block' : 'none';
+        if (navBtn) navBtn.classList.toggle('active', t === activeCustomerProfileTab);
+    }
+    showCustomerProfileNotice('', false);
+    if (activeCustomerProfileTab === 'addresses') {
+        renderCustomerAddressesList();
+    } else if (activeCustomerProfileTab === 'orders') {
+        renderCustomerMyOrdersList();
+    } else if (activeCustomerProfileTab === 'profile') {
+        populateCustomerProfileModalFields();
+    }
+}
+
+function populateCustomerProfileModalFields() {
+    var cid = Number(currentUserSession.id) || 1;
+    var custRec = getCustomerRecordById(cid);
+    var fullName = currentUserSession.name || custRec.fullName || '';
+    var username = currentUserSession.username || custRec.username || (currentUserSession.email || '').split('@')[0];
+    var email = currentUserSession.email || custRec.email || '';
+    var phone = currentUserSession.phone || custRec.phone || '';
+    var gender = currentUserSession.gender !== undefined ? currentUserSession.gender : (custRec.gender || '');
+    var birthday = currentUserSession.birthday !== undefined ? currentUserSession.birthday : (custRec.birthday || '');
+    var profileImage = currentUserSession.profileImage || custRec.profileImage || '';
+    var defaultAddr = currentUserSession.address || custRec.address || '';
+
+    var addrList = getAddressesForCustomer(cid);
+    for (var i = 0; i < addrList.length; i++) {
+        if (Number(addrList[i].IsDefault) === 1) {
+            defaultAddr = formatFullSavedAddressLine(addrList[i]);
+            break;
+        }
+    }
+
+    var nameIn = document.getElementById('cpFullName');
+    var userIn = document.getElementById('cpUsername');
+    var emailIn = document.getElementById('cpEmail');
+    var phoneIn = document.getElementById('cpPhone');
+    var genderIn = document.getElementById('cpGender');
+    var bdayIn = document.getElementById('cpBirthday');
+    var addrIn = document.getElementById('cpDefaultAddress');
+    var sidebarName = document.getElementById('cpSidebarName');
+    var sidebarAvatar = document.getElementById('cpSidebarAvatar');
+    var largeAvatar = document.getElementById('cpAvatarPreviewBox');
+
+    if (nameIn) nameIn.value = fullName;
+    if (userIn) userIn.value = username;
+    if (emailIn) emailIn.value = email;
+    if (phoneIn) phoneIn.value = phone;
+    if (genderIn) genderIn.value = gender || '';
+    if (bdayIn) bdayIn.value = birthday || '';
+    if (addrIn) addrIn.value = defaultAddr;
+    if (sidebarName) sidebarName.textContent = fullName;
+    renderAvatarElement(sidebarAvatar, fullName, profileImage);
+    renderAvatarElement(largeAvatar, fullName, profileImage);
+}
+
+function toggleCustomerProfileEditMode(enable) {
+    isCustomerProfileEditMode = Boolean(enable);
+    var fieldIds = ['cpFullName', 'cpUsername', 'cpEmail', 'cpPhone', 'cpGender', 'cpBirthday', 'cpDefaultAddress'];
+    for (var i = 0; i < fieldIds.length; i++) {
+        var el = document.getElementById(fieldIds[i]);
+        if (el) el.disabled = !isCustomerProfileEditMode;
+    }
+    var actionsBox = document.getElementById('cpProfileFormActions');
+    var editBtn = document.getElementById('cpEditProfileToggleBtn');
+    if (actionsBox) actionsBox.style.display = isCustomerProfileEditMode ? 'flex' : 'none';
+    if (editBtn) editBtn.style.display = isCustomerProfileEditMode ? 'none' : 'inline-flex';
+    if (!isCustomerProfileEditMode) {
+        populateCustomerProfileModalFields();
+    } else {
+        var firstInput = document.getElementById('cpFullName');
+        if (firstInput) firstInput.focus();
+    }
+}
+
+function handleProfileImageFileChange(fileInput) {
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+    var file = fileInput.files[0];
+    var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (allowedTypes.indexOf(String(file.type).toLowerCase()) === -1) {
+        showCustomerProfileNotice('Invalid image file type. Please choose a JPG, PNG, or WEBP image.', true);
+        fileInput.value = '';
+        return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        showCustomerProfileNotice('Image size exceeds the 2 MB maximum limit. Please select a smaller image.', true);
+        fileInput.value = '';
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var dataUrl = e.target.result;
+        currentUserSession.profileImage = dataUrl;
+        for (var i = 0; i < registeredCustomers.length; i++) {
+            if (Number(registeredCustomers[i].id) === Number(currentUserSession.id)) {
+                registeredCustomers[i].profileImage = dataUrl;
+                break;
+            }
+        }
+        savePersistedClientDatabase();
+        populateCustomerProfileModalFields();
+        renderAuthHeaderState();
+        showCustomerProfileNotice('✓ Profile picture updated! Click "Save Profile Changes" or it is automatically saved to your account.', false);
+
+        fetch('/api/profile/update', {
+            method: 'POST',
+            headers: getAuthRequestHeaders(),
+            body: JSON.stringify({
+                fullName: currentUserSession.name,
+                username: currentUserSession.username,
+                email: currentUserSession.email,
+                phone: currentUserSession.phone,
+                gender: currentUserSession.gender,
+                birthday: currentUserSession.birthday,
+                address: currentUserSession.address,
+                profileImage: dataUrl,
+                csrf_token: currentCsrfToken
+            })
+        }).catch(function () {});
+    };
+    reader.readAsDataURL(file);
+}
+
+function saveCustomerProfileForm(event) {
+    event.preventDefault();
+    var fullName = (document.getElementById('cpFullName').value || '').trim();
+    var username = (document.getElementById('cpUsername').value || '').trim();
+    var email = (document.getElementById('cpEmail').value || '').trim().toLowerCase();
+    var phone = (document.getElementById('cpPhone').value || '').trim();
+    var gender = (document.getElementById('cpGender').value || '').trim();
+    var birthday = (document.getElementById('cpBirthday').value || '').trim();
+    var defaultAddress = (document.getElementById('cpDefaultAddress').value || '').trim();
+
+    if (fullName.length < 2) {
+        showCustomerProfileNotice('Full Name must be at least 2 characters.', true);
+        return false;
+    }
+    if (!email || email.indexOf('@') === -1) {
+        showCustomerProfileNotice('Please enter a valid email address.', true);
+        return false;
+    }
+    if (phone.replace(/[^0-9]/g, '').length < 10) {
+        showCustomerProfileNotice('Please enter a valid mobile number (at least 10 digits).', true);
+        return false;
+    }
+    if (defaultAddress.length < 5) {
+        showCustomerProfileNotice('Please provide a complete Default Delivery Address.', true);
+        return false;
+    }
+
+    currentUserSession.name = fullName;
+    currentUserSession.username = username || email.split('@')[0];
+    currentUserSession.email = email;
+    currentUserSession.phone = phone;
+    currentUserSession.gender = gender;
+    currentUserSession.birthday = birthday;
+    currentUserSession.address = defaultAddress;
+
+    var cid = Number(currentUserSession.id) || 1;
+    for (var i = 0; i < registeredCustomers.length; i++) {
+        if (Number(registeredCustomers[i].id) === cid) {
+            registeredCustomers[i].fullName = fullName;
+            registeredCustomers[i].username = currentUserSession.username;
+            registeredCustomers[i].email = email;
+            registeredCustomers[i].phone = phone;
+            registeredCustomers[i].gender = gender;
+            registeredCustomers[i].birthday = birthday;
+            registeredCustomers[i].address = defaultAddress;
+            break;
+        }
+    }
+
+    // Update default address record if one exists
+    var updatedDefaultAddr = false;
+    for (var a = 0; a < customerSavedAddresses.length; a++) {
+        if (Number(customerSavedAddresses[a].CustomerID) === cid && Number(customerSavedAddresses[a].IsDefault) === 1) {
+            customerSavedAddresses[a].RecipientName = fullName;
+            customerSavedAddresses[a].PhoneNumber = phone;
+            customerSavedAddresses[a].StreetAddress = defaultAddress;
+            updatedDefaultAddr = true;
+            break;
+        }
+    }
+    if (!updatedDefaultAddr) {
+        customerSavedAddresses.push({
+            AddressID: Date.now(),
+            CustomerID: cid,
+            RecipientName: fullName,
+            PhoneNumber: phone,
+            StreetAddress: defaultAddress,
+            Barangay: '',
+            City: 'Metro Manila',
+            Province: 'Metro Manila',
+            PostalCode: '',
+            DeliveryNotes: '',
+            AddressLabel: 'Home',
+            IsDefault: 1
+        });
+    }
+
+    savePersistedClientDatabase();
+    toggleCustomerProfileEditMode(false);
+    populateCustomerProfileModalFields();
+    renderAuthHeaderState();
+    showCustomerProfileNotice('✓ Your profile information and default delivery address have been saved.', false);
+
+    fetch('/api/profile/update', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({
+            fullName: fullName,
+            username: currentUserSession.username,
+            email: email,
+            phone: phone,
+            gender: gender,
+            birthday: birthday,
+            address: defaultAddress,
+            profileImage: currentUserSession.profileImage || '',
+            csrf_token: currentCsrfToken
+        })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        if (data && data.status === 'ok' && Array.isArray(data.addresses)) {
+            var others = customerSavedAddresses.filter(function (ad) { return Number(ad.CustomerID) !== cid; });
+            customerSavedAddresses = others.concat(data.addresses);
+            savePersistedClientDatabase();
+            renderAuthHeaderState();
+        }
+    })
+    .catch(function () {
+        fetch('public/index.php?route=api_profile_update', {
+            method: 'POST',
+            headers: getAuthRequestHeaders(),
+            body: JSON.stringify({
+                fullName: fullName,
+                username: currentUserSession.username,
+                email: email,
+                phone: phone,
+                gender: gender,
+                birthday: birthday,
+                address: defaultAddress,
+                csrf_token: currentCsrfToken
+            })
+        }).catch(function () {});
+    });
+
+    return false;
+}
+
+// --- MY ADDRESSES CRUD (Shopee-Style Delivery Address Book) ---
+function renderCustomerAddressesList() {
+    var container = document.getElementById('cpAddressesListContainer');
+    if (!container) return;
+    var cid = Number(currentUserSession.id) || 1;
+    var list = getAddressesForCustomer(cid);
+
+    if (list.length === 0) {
+        container.innerHTML =
+            '<div style="padding:2rem; text-align:center; color:#64748b; border:1px dashed #cbd5e1; border-radius:10px;">' +
+                '<strong style="display:block; color:#0f172a; margin-bottom:0.25rem;">No Saved Delivery Addresses Yet</strong>' +
+                '<span style="font-size:0.78rem;">Click "+ Add New Address" above to save your home or office delivery destination.</span>' +
+            '</div>';
+        return;
+    }
+
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+        var addr = list[i];
+        var aid = Number(addr.AddressID);
+        var isDef = Number(addr.IsDefault) === 1;
+        var fullLine = formatFullSavedAddressLine(addr);
+        html +=
+            '<div class="cp-address-card ' + (isDef ? 'is-default' : '') + '">' +
+                '<div style="flex:1; min-width:0;">' +
+                    '<div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.3rem;">' +
+                        '<strong style="font-size:0.88rem; color:#0f172a;">' + escapeHtmlText(addr.RecipientName) + '</strong>' +
+                        '<span style="color:#cbd5e1;">|</span>' +
+                        '<span style="font-size:0.8rem; color:#475569; font-weight:600;">Tel: ' + escapeHtmlText(addr.PhoneNumber) + '</span>' +
+                        '<span class="cp-label-badge">' + escapeHtmlText(addr.AddressLabel || 'Home') + '</span>' +
+                        (isDef ? '<span class="cp-default-badge">Default</span>' : '') +
+                    '</div>' +
+                    '<div style="font-size:0.8rem; color:#334155; line-height:1.45;">' + escapeHtmlText(fullLine) + '</div>' +
+                    (addr.DeliveryNotes
+                        ? '<div style="font-size:0.73rem; color:#64748b; margin-top:0.2rem;">Note: ' + escapeHtmlText(addr.DeliveryNotes) + '</div>'
+                        : '') +
+                '</div>' +
+                '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; flex-shrink:0;">' +
+                    '<div style="display:flex; gap:0.5rem;">' +
+                        '<button type="button" class="btn-link-sm" style="font-size:0.75rem; color:#0284c7; font-weight:700;" onclick="openCustomerAddressEditor(' + aid + ')">Edit</button>' +
+                        (list.length > 1
+                            ? '<button type="button" class="btn-link-sm" style="font-size:0.75rem; color:#dc2626; font-weight:700;" onclick="deleteCustomerAddress(' + aid + ')">Delete</button>'
+                            : '') +
+                    '</div>' +
+                    (!isDef
+                        ? '<button type="button" class="btn-sm-soft" style="font-size:0.7rem; padding:0.25rem 0.6rem;" onclick="setCustomerDefaultAddress(' + aid + ')">Set as Default</button>'
+                        : '<span style="font-size:0.7rem; color:#0369a1; font-weight:700;">✓ Active Default</span>') +
+                '</div>' +
+            '</div>';
+    }
+    container.innerHTML = html;
+}
+
+function openCustomerAddressEditor(addressId) {
+    var card = document.getElementById('cpAddressEditorCard');
+    var titleEl = document.getElementById('cpAddressEditorTitle');
+    if (!card) return;
+    card.style.display = 'block';
+
+    var cid = Number(currentUserSession.id) || 1;
+    var existing = null;
+    if (addressId) {
+        for (var i = 0; i < customerSavedAddresses.length; i++) {
+            if (Number(customerSavedAddresses[i].AddressID) === Number(addressId) && Number(customerSavedAddresses[i].CustomerID) === cid) {
+                existing = customerSavedAddresses[i];
+                break;
+            }
+        }
+    }
+
+    document.getElementById('addrEditId').value = existing ? String(existing.AddressID) : '';
+    document.getElementById('addrRecipientName').value = existing ? (existing.RecipientName || '') : (currentUserSession.name || '');
+    document.getElementById('addrPhoneNumber').value = existing ? (existing.PhoneNumber || '') : (currentUserSession.phone || '');
+    document.getElementById('addrStreet').value = existing ? (existing.StreetAddress || '') : '';
+    document.getElementById('addrBarangay').value = existing ? (existing.Barangay || '') : '';
+    document.getElementById('addrCity').value = existing ? (existing.City || '') : '';
+    document.getElementById('addrProvince').value = existing ? (existing.Province || 'Metro Manila') : 'Metro Manila';
+    document.getElementById('addrPostalCode').value = existing ? (existing.PostalCode || '') : '';
+    document.getElementById('addrNotes').value = existing ? (existing.DeliveryNotes || '') : '';
+    document.getElementById('addrLabel').value = existing ? (existing.AddressLabel || 'Home') : 'Home';
+    document.getElementById('addrIsDefault').checked = existing ? (Number(existing.IsDefault) === 1) : (getAddressesForCustomer(cid).length === 0);
+
+    if (titleEl) {
+        titleEl.textContent = existing ? 'Edit Delivery Address' : 'Add New Delivery Address';
+    }
+}
+
+function closeCustomerAddressEditor() {
+    var card = document.getElementById('cpAddressEditorCard');
+    if (card) card.style.display = 'none';
+}
+
+function saveCustomerAddressForm(event) {
+    event.preventDefault();
+    var cid = Number(currentUserSession.id) || 1;
+    var editId = document.getElementById('addrEditId').value.trim();
+    var recipientName = document.getElementById('addrRecipientName').value.trim();
+    var phoneNumber = document.getElementById('addrPhoneNumber').value.trim();
+    var streetAddress = document.getElementById('addrStreet').value.trim();
+    var barangay = document.getElementById('addrBarangay').value.trim();
+    var city = document.getElementById('addrCity').value.trim();
+    var province = document.getElementById('addrProvince').value.trim();
+    var postalCode = document.getElementById('addrPostalCode').value.trim();
+    var deliveryNotes = document.getElementById('addrNotes').value.trim();
+    var addressLabel = document.getElementById('addrLabel').value || 'Home';
+    var isDefault = document.getElementById('addrIsDefault').checked ? 1 : 0;
+
+    if (!recipientName || !phoneNumber || !streetAddress || !city || !province) {
+        showCustomerProfileNotice('Please complete all required delivery address fields.', true);
+        return false;
+    }
+
+    var myAddresses = getAddressesForCustomer(cid);
+    if (myAddresses.length === 0) {
+        isDefault = 1;
+    }
+
+    if (isDefault === 1) {
+        for (var i = 0; i < customerSavedAddresses.length; i++) {
+            if (Number(customerSavedAddresses[i].CustomerID) === cid) {
+                customerSavedAddresses[i].IsDefault = 0;
+            }
+        }
+    }
+
+    var savedRecord = null;
+    if (editId) {
+        for (var j = 0; j < customerSavedAddresses.length; j++) {
+            if (Number(customerSavedAddresses[j].AddressID) === Number(editId) && Number(customerSavedAddresses[j].CustomerID) === cid) {
+                customerSavedAddresses[j].RecipientName = recipientName;
+                customerSavedAddresses[j].PhoneNumber = phoneNumber;
+                customerSavedAddresses[j].StreetAddress = streetAddress;
+                customerSavedAddresses[j].Barangay = barangay;
+                customerSavedAddresses[j].City = city;
+                customerSavedAddresses[j].Province = province;
+                customerSavedAddresses[j].PostalCode = postalCode;
+                customerSavedAddresses[j].DeliveryNotes = deliveryNotes;
+                customerSavedAddresses[j].AddressLabel = addressLabel;
+                customerSavedAddresses[j].IsDefault = isDefault;
+                savedRecord = customerSavedAddresses[j];
+                break;
+            }
+        }
+    }
+
+    if (!savedRecord) {
+        var maxAid = 10;
+        for (var k = 0; k < customerSavedAddresses.length; k++) {
+            if (Number(customerSavedAddresses[k].AddressID) > maxAid) {
+                maxAid = Number(customerSavedAddresses[k].AddressID);
+            }
+        }
+        savedRecord = {
+            AddressID: maxAid + 1,
+            CustomerID: cid,
+            RecipientName: recipientName,
+            PhoneNumber: phoneNumber,
+            StreetAddress: streetAddress,
+            Barangay: barangay,
+            City: city,
+            Province: province,
+            PostalCode: postalCode,
+            DeliveryNotes: deliveryNotes,
+            AddressLabel: addressLabel,
+            IsDefault: isDefault
+        };
+        customerSavedAddresses.push(savedRecord);
+    }
+
+    if (Number(savedRecord.IsDefault) === 1) {
+        var formatted = formatFullSavedAddressLine(savedRecord);
+        currentUserSession.address = formatted;
+        for (var c = 0; c < registeredCustomers.length; c++) {
+            if (Number(registeredCustomers[c].id) === cid) {
+                registeredCustomers[c].address = formatted;
+                break;
+            }
+        }
+    }
+
+    savePersistedClientDatabase();
+    closeCustomerAddressEditor();
+    renderCustomerAddressesList();
+    populateCustomerProfileModalFields();
+    renderAuthHeaderState();
+    showCustomerProfileNotice('✓ Delivery address saved successfully.', false);
+
+    fetch('/api/addresses/save', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({
+            addressId: editId ? Number(editId) : null,
+            recipientName: recipientName,
+            phoneNumber: phoneNumber,
+            streetAddress: streetAddress,
+            barangay: barangay,
+            city: city,
+            province: province,
+            postalCode: postalCode,
+            deliveryNotes: deliveryNotes,
+            addressLabel: addressLabel,
+            isDefault: Boolean(isDefault),
+            csrf_token: currentCsrfToken
+        })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        if (data && data.status === 'ok' && Array.isArray(data.addresses)) {
+            var others = customerSavedAddresses.filter(function (ad) { return Number(ad.CustomerID) !== cid; });
+            customerSavedAddresses = others.concat(data.addresses);
+            savePersistedClientDatabase();
+            renderCustomerAddressesList();
+            renderAuthHeaderState();
+        }
+    })
+    .catch(function () {});
+
+    return false;
+}
+
+function setCustomerDefaultAddress(addressId) {
+    var cid = Number(currentUserSession.id) || 1;
+    var chosen = null;
+    for (var i = 0; i < customerSavedAddresses.length; i++) {
+        if (Number(customerSavedAddresses[i].CustomerID) === cid) {
+            if (Number(customerSavedAddresses[i].AddressID) === Number(addressId)) {
+                customerSavedAddresses[i].IsDefault = 1;
+                chosen = customerSavedAddresses[i];
+            } else {
+                customerSavedAddresses[i].IsDefault = 0;
+            }
+        }
+    }
+    if (chosen) {
+        var fullLine = formatFullSavedAddressLine(chosen);
+        currentUserSession.address = fullLine;
+        for (var c = 0; c < registeredCustomers.length; c++) {
+            if (Number(registeredCustomers[c].id) === cid) {
+                registeredCustomers[c].address = fullLine;
+                break;
+            }
+        }
+    }
+    savePersistedClientDatabase();
+    renderCustomerAddressesList();
+    populateCustomerProfileModalFields();
+    renderAuthHeaderState();
+    showCustomerProfileNotice('✓ Default delivery address updated.', false);
+
+    fetch('/api/addresses/default', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({ addressId: Number(addressId), csrf_token: currentCsrfToken })
+    }).catch(function () {});
+}
+
+function deleteCustomerAddress(addressId) {
+    var cid = Number(currentUserSession.id) || 1;
+    var remaining = [];
+    var removedWasDefault = false;
+    for (var i = 0; i < customerSavedAddresses.length; i++) {
+        var a = customerSavedAddresses[i];
+        if (Number(a.CustomerID) === cid && Number(a.AddressID) === Number(addressId)) {
+            if (Number(a.IsDefault) === 1) removedWasDefault = true;
+            continue;
+        }
+        remaining.push(a);
+    }
+    customerSavedAddresses = remaining;
+    if (removedWasDefault) {
+        for (var j = 0; j < customerSavedAddresses.length; j++) {
+            if (Number(customerSavedAddresses[j].CustomerID) === cid) {
+                customerSavedAddresses[j].IsDefault = 1;
+                currentUserSession.address = formatFullSavedAddressLine(customerSavedAddresses[j]);
+                break;
+            }
+        }
+    }
+    savePersistedClientDatabase();
+    renderCustomerAddressesList();
+    populateCustomerProfileModalFields();
+    renderAuthHeaderState();
+    showCustomerProfileNotice('✓ Address removed from your saved addresses.', false);
+
+    fetch('/api/addresses/delete', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({ addressId: Number(addressId), csrf_token: currentCsrfToken })
+    }).catch(function () {});
+}
+
+// --- CHECKOUT SAVED ADDRESS SELECTOR INTEGRATION ---
+function populateCheckoutSavedAddresses() {
+    var selectEl = document.getElementById('chkSavedAddressSelect');
+    var boxEl = document.getElementById('chkSavedAddressBox');
+    var chkName = document.getElementById('chkFullName');
+    var chkEmail = document.getElementById('chkEmail');
+    var chkPhone = document.getElementById('chkPhone');
+    var chkAddr = document.getElementById('chkAddress');
+
+    if (!currentUserSession || !currentUserSession.isLoggedIn || currentUserSession.role !== 'customer') {
+        if (boxEl) boxEl.style.display = 'none';
+        return;
+    }
+    if (boxEl) boxEl.style.display = 'block';
+    if (chkEmail && currentUserSession.email) chkEmail.value = currentUserSession.email;
+
+    var cid = Number(currentUserSession.id) || 1;
+    var list = getAddressesForCustomer(cid);
+    if (!selectEl) return;
+
+    if (list.length === 0) {
+        selectEl.innerHTML = '<option value="custom">Custom Delivery Address (Type below)</option>';
+        if (chkName && currentUserSession.name) chkName.value = currentUserSession.name;
+        if (chkPhone && currentUserSession.phone) chkPhone.value = currentUserSession.phone;
+        if (chkAddr && currentUserSession.address) chkAddr.value = currentUserSession.address;
+        return;
+    }
+
+    var optsHtml = '';
+    var defaultAddr = list[0];
+    for (var i = 0; i < list.length; i++) {
+        var a = list[i];
+        var isDef = Number(a.IsDefault) === 1;
+        if (isDef) defaultAddr = a;
+        var labelTag = '[' + (a.AddressLabel || 'Home') + (isDef ? ' · DEFAULT' : '') + '] ';
+        var summary = labelTag + a.RecipientName + ' (' + a.PhoneNumber + ') — ' + formatFullSavedAddressLine(a);
+        optsHtml += '<option value="' + Number(a.AddressID) + '" ' + (isDef ? 'selected' : '') + '>' + escapeHtmlText(summary) + '</option>';
+    }
+    optsHtml += '<option value="custom">+ Enter a different one-time delivery address below</option>';
+    selectEl.innerHTML = optsHtml;
+
+    if (defaultAddr) {
+        if (chkName) chkName.value = defaultAddr.RecipientName || currentUserSession.name || '';
+        if (chkPhone) chkPhone.value = defaultAddr.PhoneNumber || currentUserSession.phone || '';
+        if (chkAddr) chkAddr.value = formatFullSavedAddressLine(defaultAddr);
+    }
+}
+
+function handleCheckoutAddressSelection(addressIdValue) {
+    if (!addressIdValue || addressIdValue === 'custom') return;
+    var cid = Number(currentUserSession.id) || 1;
+    var list = getAddressesForCustomer(cid);
+    for (var i = 0; i < list.length; i++) {
+        if (Number(list[i].AddressID) === Number(addressIdValue)) {
+            var chosen = list[i];
+            var chkName = document.getElementById('chkFullName');
+            var chkPhone = document.getElementById('chkPhone');
+            var chkAddr = document.getElementById('chkAddress');
+            if (chkName) chkName.value = chosen.RecipientName || currentUserSession.name || '';
+            if (chkPhone) chkPhone.value = chosen.PhoneNumber || currentUserSession.phone || '';
+            if (chkAddr) chkAddr.value = formatFullSavedAddressLine(chosen);
+            break;
+        }
+    }
+}
+
+// --- CUSTOMER MY ORDERS LIST IN MY PROFILE MODAL ---
+function renderCustomerMyOrdersList() {
+    var container = document.getElementById('cpMyOrdersListContainer');
+    if (!container) return;
+    var cid = Number(currentUserSession.id) || 1;
+    var keys = Object.keys(sampleOrders);
+    var myOrders = [];
+    for (var i = 0; i < keys.length; i++) {
+        var ord = sampleOrders[keys[i]];
+        if (ord && Number(ord.customerId) === cid) {
+            myOrders.push(ord);
+        }
+    }
+    myOrders.sort(function (a, b) {
+        return Number(b.orderId) - Number(a.orderId);
+    });
+
+    if (myOrders.length === 0) {
+        container.innerHTML =
+            '<div style="padding:2rem; text-align:center; color:#64748b; border:1px dashed #cbd5e1; border-radius:10px;">' +
+                '<strong style="display:block; color:#0f172a; margin-bottom:0.25rem;">No Orders Found Under Your Account Yet</strong>' +
+                '<span style="font-size:0.78rem;">Explore our handcrafted solid wood collection to place your first custom order.</span>' +
+            '</div>';
+        return;
+    }
+
+    var html = '';
+    for (var j = 0; j < myOrders.length; j++) {
+        var o = myOrders[j];
+        var total = Number(o.total) || 0;
+        var paid = Number(o.downpayment) || 0;
+        var balance = Math.max(0, total - paid);
+        html +=
+            '<div class="cp-address-card" style="flex-direction:column; gap:0.65rem;">' +
+                '<div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:0.5rem; border-bottom:1px solid #f1f5f9; padding-bottom:0.5rem;">' +
+                    '<div>' +
+                        '<strong style="font-size:0.88rem; color:#0369a1;">Order #' + escapeHtmlText(o.orderId) + '</strong>' +
+                        '<span style="font-size:0.74rem; color:#64748b; margin-left:0.5rem;">Placed: ' + escapeHtmlText(o.placed) + ' · Target Date: ' + escapeHtmlText(o.due) + '</span>' +
+                    '</div>' +
+                    '<span class="oms-status-badge ' + getStatusBadgeClassName(o.status) + '">' + escapeHtmlText(o.status) + '</span>' +
+                '</div>' +
+                '<div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%; flex-wrap:wrap; gap:0.75rem; font-size:0.8rem;">' +
+                    '<div style="flex:1; min-width:220px;">' +
+                        '<strong style="color:#0f172a; display:block;">' + escapeHtmlText(o.itemSummary || o.productName) + '</strong>' +
+                        '<div style="color:#475569; font-size:0.75rem; margin-top:0.2rem;"><strong>Order Delivery Snapshot:</strong> ' + escapeHtmlText(o.address) + '</div>' +
+                        '<div style="color:#64748b; font-size:0.73rem; margin-top:0.15rem;">Carpenter: ' + escapeHtmlText(o.carpenter) + ' · Stage: ' + escapeHtmlText(o.stage) + '</div>' +
+                    '</div>' +
+                    '<div style="text-align:right;">' +
+                        '<strong style="font-size:0.95rem; color:#0f172a; display:block;">₱' + total.toLocaleString() + '</strong>' +
+                        '<span style="font-size:0.72rem; color:' + (balance > 0 ? '#dc2626' : '#15803d') + '; font-weight:700;">' +
+                            (balance > 0 ? ('Balance Due: ₱' + balance.toLocaleString()) : '✓ Paid in Full') +
+                        '</span>' +
+                        '<div style="display:flex; gap:0.4rem; margin-top:0.45rem; justify-content:flex-end;">' +
+                            '<button type="button" class="btn-sm-soft" style="font-size:0.7rem; padding:0.25rem 0.55rem;" onclick="closeModal(\'customerProfileModal\'); lookupOrderById(\'' + escapeHtmlText(o.orderId) + '\'); openModal(\'trackOrderModal\');">Track Order</button>' +
+                            '<button type="button" class="btn-sm-primary" style="font-size:0.7rem; padding:0.25rem 0.55rem;" onclick="closeModal(\'customerProfileModal\'); openLiveChatModal(\'' + escapeHtmlText(o.orderId) + '\', \'Order Follow-Up (#' + escapeHtmlText(o.orderId) + ')\');">Message Admin</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+    container.innerHTML = html;
+}
+
+// --- CHANGE PASSWORD IN MY PROFILE MODAL ---
+function handleCustomerChangePassword(event) {
+    event.preventDefault();
+    var curPass = document.getElementById('cpCurrentPassword').value;
+    var newPass = document.getElementById('cpNewPassword').value;
+    var confirmPass = document.getElementById('cpConfirmPassword').value;
+
+    if (!curPass || !newPass || !confirmPass) {
+        showCustomerProfileNotice('Please fill in all password fields.', true);
+        return false;
+    }
+    if (newPass.length < 6) {
+        showCustomerProfileNotice('New password must be at least 6 characters long.', true);
+        return false;
+    }
+    if (newPass !== confirmPass) {
+        showCustomerProfileNotice('New password and confirmation password do not match.', true);
+        return false;
+    }
+
+    var cid = Number(currentUserSession.id) || 1;
+    var custRec = null;
+    for (var i = 0; i < registeredCustomers.length; i++) {
+        if (Number(registeredCustomers[i].id) === cid) {
+            custRec = registeredCustomers[i];
+            break;
+        }
+    }
+
+    if (custRec && custRec.password && custRec.password !== curPass) {
+        showCustomerProfileNotice('Current password is incorrect. Please verify and try again.', true);
+        return false;
+    }
+
+    if (custRec) {
+        custRec.password = newPass;
+    }
+    savePersistedClientDatabase();
+
+    document.getElementById('cpCurrentPassword').value = '';
+    document.getElementById('cpNewPassword').value = '';
+    document.getElementById('cpConfirmPassword').value = '';
+    showCustomerProfileNotice('✓ Your account password has been updated securely.', false);
+
+    fetch('/api/profile/password', {
+        method: 'POST',
+        headers: getAuthRequestHeaders(),
+        body: JSON.stringify({
+            currentPassword: curPass,
+            newPassword: newPass,
+            confirmPassword: confirmPass,
+            csrf_token: currentCsrfToken
+        })
+    }).catch(function () {});
+
+    return false;
+}
+
 // Initialize listeners on page load
 document.addEventListener('DOMContentLoaded', function () {
     loadPersistedClientDatabase();
@@ -3236,10 +4616,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (finishSelect) finishSelect.addEventListener('change', updateProductPrice);
     if (isCustomCheckbox) isCustomCheckbox.addEventListener('change', updateProductPrice);
 
+    // Close Customer Profile Dropdown when clicking outside or pressing Escape
+    document.addEventListener('click', function (e) {
+        var wrap = document.getElementById('customerProfileDropdownWrap');
+        if (wrap && !wrap.contains(e.target)) {
+            closeCustomerProfileDropdown();
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeCustomerProfileDropdown();
+        }
+    });
+
     renderAuthHeaderState();
     renderCartDrawer();
     renderAdminDashboard();
     lookupOrderById('1001');
     initRealTimeMessaging();
 });
+
 

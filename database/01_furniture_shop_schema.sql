@@ -45,12 +45,40 @@ CREATE TABLE Supplier (
 CREATE TABLE Customer (
     CustomerID    INT           NOT NULL AUTO_INCREMENT,
     FullName      VARCHAR(100)  NOT NULL,
+    Username      VARCHAR(50)   NULL,
     Email         VARCHAR(100)  NOT NULL,
     PasswordHash  VARCHAR(255)  NOT NULL,
     PhoneNumber   VARCHAR(20)   NOT NULL,
+    Gender        VARCHAR(20)   NULL,
+    Birthday      DATE          NULL,
+    ProfileImage  VARCHAR(255)  NULL,
     Address       VARCHAR(255)  NOT NULL,
     CONSTRAINT pk_customer PRIMARY KEY (CustomerID),
     CONSTRAINT uq_customer_email UNIQUE (Email)
+) ENGINE = InnoDB;
+
+-- ---------------------------------------------------------------------
+-- 4B. Customer_Address: Multiple saved delivery addresses per customer (Shopee-style)
+-- ---------------------------------------------------------------------
+CREATE TABLE Customer_Address (
+    AddressID             INT           NOT NULL AUTO_INCREMENT,
+    CustomerID            INT           NOT NULL,
+    RecipientName         VARCHAR(100)  NOT NULL,
+    PhoneNumber           VARCHAR(20)   NOT NULL,
+    HouseStreet           VARCHAR(150)  NOT NULL,
+    Barangay              VARCHAR(100)  NOT NULL,
+    City                  VARCHAR(100)  NOT NULL,
+    Province              VARCHAR(100)  NOT NULL,
+    PostalCode            VARCHAR(20)   NOT NULL,
+    DeliveryInstructions  VARCHAR(255)  NULL,
+    AddressLabel          VARCHAR(20)   NOT NULL DEFAULT 'Home',
+    IsDefault             TINYINT(1)    NOT NULL DEFAULT 0,
+    CreatedAt             DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_customer_address PRIMARY KEY (AddressID),
+    CONSTRAINT chk_address_label CHECK (AddressLabel IN ('Home', 'Work', 'Other')),
+    CONSTRAINT fk_address_customer FOREIGN KEY (CustomerID)
+        REFERENCES Customer (CustomerID)
+        ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -295,6 +323,8 @@ CREATE TABLE Order_Message (
     SenderName   VARCHAR(100)  NOT NULL,
     Topic        VARCHAR(60)   NOT NULL DEFAULT 'Order Follow-Up',
     MessageText  TEXT          NOT NULL,
+    IsRead       TINYINT(1)    NOT NULL DEFAULT 0,
+    ReadAt       DATETIME      NULL,
     CreatedAt    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_order_message PRIMARY KEY (MessageID),
     CONSTRAINT chk_message_sender CHECK (SenderRole IN ('Customer', 'Admin')),

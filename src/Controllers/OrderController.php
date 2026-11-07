@@ -26,10 +26,13 @@ class OrderController
             exit;
         }
 
-        // Customer details if logged in
+        // Customer details and saved addresses if logged in
         $customer = null;
+        $savedAddresses = [];
         if (isset($_SESSION['customer_id'])) {
-            $customer = $this->customerModel->findById((int)$_SESSION['customer_id']);
+            $customerId = (int)$_SESSION['customer_id'];
+            $customer = $this->customerModel->findById($customerId);
+            $savedAddresses = $this->customerModel->getAddresses($customerId);
         }
 
         $cartItems = $_SESSION['cart'];

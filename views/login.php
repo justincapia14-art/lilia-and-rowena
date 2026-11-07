@@ -44,8 +44,8 @@
 
         <div style="margin-top: 1.5rem; padding: 0.9rem; background: #f0f7ff; border: 1px solid #bae6fd; border-radius: 8px; font-size: 0.76rem; color: #334155; line-height: 1.6;">
             <strong style="color: #075985; display: block; margin-bottom: 0.25rem;">Database Accounts (From 02_sample_data.sql):</strong>
-            <div>👤 <strong>Customer:</strong> <code>maria.santos@example.com</code> | Pass: <code>password123</code></div>
-            <div>🔑 <strong>Admin:</strong> <code>admin@liliaandrowena.com</code> | Pass: <code>admin123</code></div>
+            <div><strong>Customer:</strong> <code>maria.santos@example.com</code> | Pass: <code>password123</code></div>
+            <div><strong>Admin:</strong> <code>admin@liliaandrowena.com</code> | Pass: <code>admin123</code></div>
         </div>
     </div>
 </div>

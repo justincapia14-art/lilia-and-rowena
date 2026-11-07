@@ -12,7 +12,6 @@
 
     <?php if (empty($cartItems)): ?>
         <div class="empty-cart-card">
-            <span class="empty-icon">🪑</span>
             <h2>Your cart is currently empty</h2>
             <p>Ready to upgrade your home? Explore our handcrafted solid wood catalog.</p>
             <a href="index.php?route=catalog" class="btn-primary">Explore Furniture Collection</a>

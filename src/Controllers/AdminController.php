@@ -69,10 +69,16 @@ class AdminController
         $summaryCounts = $this->jobOrderModel->getSummaryCounts();
         $jobOrders = $this->jobOrderModel->getJobOrders($filters);
 
-        // If viewing a specific Job Order detail modal/panel on the page
+        // If viewing a specific Job Order detail modal/panel inside Order Management
         $viewOrderDetail = null;
+        $orderMessages = [];
         if (!empty($_GET['view_order_id'])) {
             $viewOrderDetail = $this->orderModel->getOrderDetails((int)$_GET['view_order_id']);
+            if ($viewOrderDetail && !empty($viewOrderDetail['CustomerID'])) {
+                $orderCustId = (int)$viewOrderDetail['CustomerID'];
+                $this->messageModel->markReadForAdmin($orderCustId);
+                $orderMessages = $this->messageModel->getMessagesByCustomer($orderCustId);
+            }
         }
 
         $orders = $this->adminModel->getAllOrders();
@@ -82,12 +88,21 @@ class AdminController
         $employees = $this->adminModel->getAllEmployees();
         $suppliers = $this->adminModel->getAllSuppliers();
 
-        // Separate 1-on-1 conversations per Customer
+        // Unread counts per customer for Order Management indicators & Customer Messages section
+        $selectedCustomerId = isset($_GET['customer_id']) ? (int)$_GET['customer_id'] : 1;
+        if ($selectedCustomerId <= 0) {
+            $selectedCustomerId = 1;
+        }
+        if (isset($_GET['customer_id'])) {
+            $this->messageModel->markReadForAdmin($selectedCustomerId);
+        }
         $conversations = $this->messageModel->getCustomerConversations();
-        $defaultCustomerId = !empty($conversations) ? (int)$conversations[0]['CustomerID'] : 1;
-        $requestedCustomerId = isset($_GET['customer_id']) ? (int)$_GET['customer_id'] : $defaultCustomerId;
-        $selectedCustomerId = $this->messageModel->customerExists($requestedCustomerId) ? $requestedCustomerId : $defaultCustomerId;
         $messages = $this->messageModel->getMessagesByCustomer($selectedCustomerId);
+        $unreadByCustomer = [];
+        foreach ($conversations as $conv) {
+            $unreadByCustomer[(int)$conv['CustomerID']] = (int)($conv['UnreadCount'] ?? 0);
+        }
+        $totalAdminUnread = $this->messageModel->getUnreadCountForAdmin();
 
         $csrfToken = Csrf::getToken();
         $adminMessage = $_SESSION['admin_message'] ?? null;

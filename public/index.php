@@ -35,9 +35,10 @@ use App\Controllers\CartController;
 use App\Controllers\OrderController;
 use App\Controllers\AdminController;
 use App\Controllers\MessageController;
+use App\Controllers\ProfileController;
 
 // 2. Simple Routing Mechanism
-$route = $_GET['route'] ?? 'home';
+$route = $_GET['route'] ?? ($_GET['action'] ?? 'home');
 
 switch ($route) {
     case 'home':
@@ -344,6 +345,31 @@ switch ($route) {
 
     case 'messages_delete':
         (new MessageController())->delete();
+        break;
+
+    // Customer My Profile, My Addresses, My Orders, and Change Password
+    case 'profile':
+        (new ProfileController())->showProfile();
+        break;
+
+    case 'profile_update':
+        (new ProfileController())->updateProfile();
+        break;
+
+    case 'address_save':
+        (new ProfileController())->saveAddress();
+        break;
+
+    case 'address_set_default':
+        (new ProfileController())->setDefaultAddress();
+        break;
+
+    case 'address_delete':
+        (new ProfileController())->deleteAddress();
+        break;
+
+    case 'profile_password':
+        (new ProfileController())->changePassword();
         break;
 
     // Shopping Cart

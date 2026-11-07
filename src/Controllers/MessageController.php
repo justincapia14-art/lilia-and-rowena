@@ -117,6 +117,7 @@ class MessageController
             if (!$this->messageModel->customerExists($activeCustomerId)) {
                 $activeCustomerId = $defaultCustId;
             }
+            $this->messageModel->markReadForAdmin($activeCustomerId);
             $messages = $this->messageModel->getMessagesByCustomer($activeCustomerId);
         } else {
             // Customer: reject any manual URL tampering (?customer_id=2 or ?conversation_id=2) with HTTP 403 Forbidden
@@ -127,6 +128,7 @@ class MessageController
             // Derive CustomerID strictly from the authenticated PHP session
             $conversations = [];
             $activeCustomerId = $auth['customerId'];
+            $this->messageModel->markReadForCustomer($activeCustomerId);
             $messages = $this->messageModel->getMessagesByCustomer($activeCustomerId);
         }
 
@@ -154,23 +156,34 @@ class MessageController
             exit;
         }
 
+        $markRead = !empty($_GET['mark_read']);
+
         if (!$auth['isAdmin']) {
             if ($this->hasUnauthorizedCustomerIdTampering($auth['customerId'])) {
                 $this->denyAccessForbidden('Forbidden: You can only retrieve messages belonging to your own conversation.', true);
             }
             $targetCustomerId = $auth['customerId'];
+            if ($markRead) {
+                $this->messageModel->markReadForCustomer($targetCustomerId);
+            }
+            $unreadCount = $this->messageModel->getUnreadCountForCustomer($targetCustomerId);
         } else {
             $requestedCustomerId = isset($_GET['customer_id'])
                 ? (int)$_GET['customer_id']
                 : (isset($_GET['conversation_id']) ? (int)$_GET['conversation_id'] : 1);
             $targetCustomerId = $requestedCustomerId > 0 ? $requestedCustomerId : 1;
+            if ($markRead) {
+                $this->messageModel->markReadForAdmin($targetCustomerId);
+            }
+            $unreadCount = $this->messageModel->getUnreadCountForAdmin();
         }
 
         $messages = $this->messageModel->getMessagesByCustomer($targetCustomerId);
         echo json_encode([
-            'status'      => 'ok',
-            'customer_id' => $targetCustomerId,
-            'messages'    => $messages,
+            'status'       => 'ok',
+            'customer_id'  => $targetCustomerId,
+            'unread_count' => $unreadCount,
+            'messages'     => $messages,
         ]);
         exit;
     }

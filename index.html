@@ -12,9 +12,499 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Pure CSS Stylesheet (Light Blue + Crisp White Palette) -->
-    <link rel="stylesheet" href="public/css/style.css" />
-    <link rel="stylesheet" href="css/style.css" />
+    <!-- Pure CSS Stylesheet (Light Blue + Crisp White Palette) with Cache Buster -->
+    <link rel="stylesheet" href="public/css/style.css?v=20261107_v6" />
+    <link rel="stylesheet" href="css/style.css?v=20261107_v6" />
+    <!-- Embedded Admin OMS & Customer Profile Stylesheet -->
+    <style id="oms-admin-embedded-css">
+      .modal-backdrop { z-index: 1200; }
+      .modal-card.modal-oms-xl {
+        max-width: 1400px !important;
+        width: 98vw !important;
+        height: 90vh !important;
+        max-height: 92vh !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .oms-admin-shell {
+        display: grid !important;
+        grid-template-columns: 185px minmax(0, 1fr) !important;
+        grid-template-rows: minmax(0, 1fr) !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        max-height: 90vh !important;
+        background-color: #f8fafc !important;
+        overflow: hidden !important;
+      }
+      .page-content .oms-admin-shell {
+        height: auto !important;
+        max-height: none !important;
+        min-height: calc(100vh - 120px) !important;
+        grid-template-rows: auto !important;
+        overflow: visible !important;
+        border-top: 1px solid #e2e8f0 !important;
+      }
+      .page-content .oms-sidebar,
+      .page-content .oms-main-content {
+        height: auto !important;
+        overflow-y: visible !important;
+      }
+      .oms-sidebar {
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 0;
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+      }
+      .oms-sidebar-brand {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        padding: 1rem 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+      }
+      .oms-brand-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+      }
+      .oms-brand-name {
+        display: block;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+        line-height: 1.2;
+      }
+      .oms-brand-sub {
+        display: block;
+        font-size: 0.66rem;
+        color: #e0f2fe;
+        margin-top: 0.1rem;
+      }
+      .oms-sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.85rem 0.65rem;
+        flex-grow: 1;
+      }
+      .oms-nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        text-align: left;
+        padding: 0.6rem 0.7rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #334155;
+        background: transparent;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+      }
+      .oms-nav-item:hover { background-color: #f0f9ff; color: #0284c7; }
+      .oms-nav-item.active {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border-color: #bae6fd;
+        font-weight: 700;
+      }
+      .oms-nav-count {
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 6px;
+        background-color: #ffffff;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        font-variant-numeric: tabular-nums;
+      }
+      .oms-sidebar-footer {
+        padding: 0.85rem;
+        border-top: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+      }
+      .oms-admin-identity { margin-bottom: 0.65rem; }
+      .oms-admin-identity strong {
+        display: block;
+        font-size: 0.66rem;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .oms-admin-identity span {
+        display: block;
+        font-size: 0.66rem;
+        color: #64748b;
+      }
+      .oms-signout-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .oms-signout-btn:hover { background-color: #fee2e2; }
+      .oms-main-content {
+        padding: 1.1rem 1.2rem;
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 1.05rem;
+      }
+      .oms-main-content > * { flex-shrink: 0; }
+      .oms-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+      }
+      .oms-kicker {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #0284c7;
+        margin-bottom: 0.15rem;
+      }
+      .oms-page-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.45rem;
+        color: #0f172a;
+        margin: 0;
+      }
+      .oms-page-subtitle {
+        font-size: 0.78rem;
+        color: #475569;
+        margin-top: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+      }
+      .oms-topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .oms-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.85rem;
+      }
+      .oms-kpi-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .oms-kpi-card.kpi-due-today { background-color: #fff7ed; border-color: #fed7aa; }
+      .oms-kpi-card.kpi-overdue { background-color: #fef2f2; border-color: #fecaca; }
+      .oms-kpi-card.kpi-pending { background-color: #f0f9ff; border-color: #bae6fd; }
+      .oms-kpi-card.kpi-completed { background-color: #f0fdf4; border-color: #bbf7d0; }
+      .oms-kpi-label { display: block; font-size: 0.72rem; font-weight: 700; color: #475569; }
+      .oms-kpi-value { display: block; font-size: 1.65rem; font-weight: 700; color: #0f172a; margin: 0.2rem 0; font-variant-numeric: tabular-nums; }
+      .oms-kpi-card.kpi-due-today .oms-kpi-value { color: #ea580c; }
+      .oms-kpi-card.kpi-overdue .oms-kpi-value { color: #dc2626; }
+      .oms-kpi-card.kpi-pending .oms-kpi-value { color: #0284c7; }
+      .oms-kpi-card.kpi-completed .oms-kpi-value { color: #15803d; }
+      .oms-kpi-foot { display: block; font-size: 0.68rem; color: #64748b; }
+      .oms-board-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .oms-tabs-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.6rem 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        overflow-x: auto;
+      }
+      .oms-tab-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.65rem 0.95rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .oms-tab-link.active {
+        color: #0284c7;
+        border-bottom-color: #0284c7;
+        background-color: #ffffff;
+        font-weight: 700;
+      }
+      .oms-tab-link.active.tab-danger { color: #dc2626; border-bottom-color: #dc2626; }
+      .oms-tab-badge {
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 0.1rem 0.45rem;
+        border-radius: 6px;
+        background-color: #e2e8f0;
+        color: #334155;
+        font-variant-numeric: tabular-nums;
+      }
+      .oms-tab-link.active .oms-tab-badge { background-color: #e0f2fe; color: #0369a1; }
+      .oms-tab-badge.badge-danger { background-color: #fee2e2; color: #dc2626; }
+      .oms-financial-strip {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.65rem 1.15rem;
+        background-color: #f0f9ff;
+        border-bottom: 1px solid #bae6fd;
+        font-size: 0.78rem;
+        color: #334155;
+        font-variant-numeric: tabular-nums;
+      }
+      .oms-strip-sep { color: #94a3b8; }
+      .oms-filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+        padding: 0.85rem 1.15rem;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #ffffff;
+      }
+      .oms-search-input-wrap { flex: 1; min-width: 240px; }
+      .oms-search-input-wrap input {
+        width: 100%;
+        padding: 0.5rem 0.85rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        background-color: #f8fafc;
+      }
+      .oms-filter-bar select {
+        padding: 0.48rem 0.65rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        background-color: #ffffff;
+        color: #1e293b;
+      }
+      .oms-table-wrap { width: 100%; overflow-x: auto; }
+      .oms-job-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.72rem;
+        text-align: left;
+      }
+      .oms-job-table thead tr { background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+      .oms-job-table th {
+        padding: 0.5rem 0.35rem;
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #475569;
+        white-space: nowrap;
+      }
+      .oms-job-table td {
+        padding: 0.5rem 0.35rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        color: #0f172a;
+      }
+      .oms-job-table tbody tr:hover { background-color: #f0f9ff; }
+      .oms-job-table tbody tr.oms-row-overdue { background-color: #fef2f2; }
+      .oms-job-table tbody tr.oms-row-urgent { background-color: #fff7ed; }
+      .oms-jo-code, .oms-job-id {
+        display: block;
+        font-family: monospace;
+        font-weight: 800;
+        font-size: 0.74rem;
+        color: #0369a1;
+        white-space: nowrap;
+      }
+      .oms-sub-meta, .oms-job-items-sub, .oms-cust-meta, .oms-prod-notes, .oms-deadline-time {
+        display: block;
+        font-size: 0.64rem;
+        color: #64748b;
+        margin-top: 0.12rem;
+        line-height: 1.3;
+      }
+      .oms-cust-name, .oms-prod-name, .oms-amount-main, .oms-deadline-date {
+        display: block;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: #0f172a;
+        line-height: 1.3;
+      }
+      .oms-prod-name, .oms-prod-notes { max-width: 130px; }
+      .oms-amount-sub { display: block; font-size: 0.65rem; font-weight: 700; margin-top: 0.12rem; white-space: nowrap; }
+      .oms-amount-sub.due { color: #dc2626; }
+      .oms-amount-sub.paid { color: #15803d; }
+      .oms-status-pill, .oms-status-badge {
+        display: inline-block;
+        padding: 0.18rem 0.45rem;
+        border-radius: 6px;
+        font-size: 0.67rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .oms-status-pending { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+      .oms-status-confirmed { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+      .oms-status-production { background-color: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+      .oms-status-delivery { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+      .oms-status-completed { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+      .oms-status-cancelled { background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+      .oms-priority-pill, .oms-priority-badge {
+        display: inline-block;
+        padding: 0.16rem 0.42rem;
+        border-radius: 6px;
+        font-size: 0.67rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .oms-priority-urgent { background-color: #ffedd5; color: #ea580c; border: 1px solid #fdba74; }
+      .oms-priority-high { background-color: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+      .oms-priority-normal { background-color: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+      .oms-staff-chip {
+        display: inline-block;
+        font-size: 0.67rem;
+        font-weight: 600;
+        color: #0369a1;
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        padding: 0.16rem 0.42rem;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      .oms-dl-tag, .oms-deadline-tag {
+        display: inline-block;
+        font-size: 0.61rem;
+        font-weight: 700;
+        padding: 0.1rem 0.36rem;
+        border-radius: 4px;
+        margin-top: 0.15rem;
+        white-space: nowrap;
+      }
+      .oms-dl-tag.tag-overdue, .oms-deadline-tag.overdue { background-color: #dc2626; color: #ffffff; }
+      .oms-dl-tag.tag-today, .oms-deadline-tag.today { background-color: #ea580c; color: #ffffff; }
+      .oms-deadline-tag.ok { background-color: #e0f2fe; color: #0369a1; }
+      .oms-alert-success { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+      .oms-alert-error { background-color: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; }
+      .unread-red-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+        background-color: #ef4444; color: #ffffff; font-size: 0.7rem; font-weight: 800;
+        line-height: 1; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+      }
+      .customer-profile-dropdown-wrap { position: relative; display: inline-flex; align-items: center; }
+      .customer-profile-trigger {
+        display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.42rem 0.8rem;
+        border-radius: 999px; background-color: #f0f9ff; border: 1px solid #bae6fd;
+        color: #0f172a; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      }
+      .customer-profile-avatar {
+        width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #0369a1);
+        color: #ffffff; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.72rem; font-weight: 800; overflow: hidden; flex-shrink: 0;
+      }
+      .customer-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .customer-profile-menu {
+        position: absolute; top: calc(100% + 8px); right: 0; width: 245px;
+        background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16); padding: 0.45rem;
+        z-index: 1100; display: none; flex-direction: column; gap: 0.15rem;
+      }
+      .customer-profile-menu.open { display: flex; }
+      .customer-profile-menu-header { padding: 0.55rem 0.75rem; border-bottom: 1px solid #f1f5f9; margin-bottom: 0.2rem; }
+      .customer-profile-menu-header strong { display: block; font-size: 0.8rem; color: #0f172a; }
+      .customer-profile-menu-header span { display: block; font-size: 0.7rem; color: #64748b; }
+      .customer-profile-item {
+        display: flex; align-items: center; justify-content: space-between; width: 100%;
+        padding: 0.58rem 0.75rem; border-radius: 8px; border: none; background: transparent;
+        color: #1e293b; font-size: 0.8rem; font-weight: 600; text-align: left; cursor: pointer;
+      }
+      .customer-profile-item:hover { background-color: #f0f9ff; color: #0284c7; }
+      .customer-profile-item-left { display: inline-flex; align-items: center; gap: 0.6rem; }
+      .customer-profile-item.item-logout { color: #dc2626; border-top: 1px solid #f1f5f9; margin-top: 0.2rem; padding-top: 0.65rem; }
+      .modal-card.modal-profile-xl { max-width: 1060px; width: 96vw; max-height: 90vh; padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+      .customer-account-shell { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: 540px; max-height: 82vh; background-color: #f8fafc; overflow: hidden; }
+      .customer-account-sidebar { background-color: #ffffff; border-right: 1px solid #e2e8f0; padding: 1.25rem 0.85rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; }
+      .cp-sidebar-user-box { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0.45rem 0.9rem; border-bottom: 1px solid #f1f5f9; }
+      .cp-sidebar-avatar { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; overflow: hidden; flex-shrink: 0; border: 2px solid #bae6fd; }
+      .cp-sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .cp-sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; }
+      .cp-nav-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.62rem 0.75rem; border-radius: 8px; border: 1px solid transparent; background: transparent; color: #334155; font-size: 0.8rem; font-weight: 600; text-align: left; cursor: pointer; }
+      .cp-nav-btn.active { background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; font-weight: 700; }
+      .customer-account-main { padding: 1.5rem 1.75rem; overflow-y: auto; background-color: #ffffff; }
+      .cp-profile-grid { display: grid; grid-template-columns: 1fr 220px; gap: 1.75rem; align-items: start; }
+      .cp-avatar-upload-card { border-left: 1px solid #e2e8f0; padding-left: 1.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.65rem; }
+      .cp-avatar-preview-lg { width: 104px; height: 104px; border-radius: 50%; background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; overflow: hidden; border: 3px solid #bae6fd; }
+      .cp-avatar-preview-lg img { width: 100%; height: 100%; object-fit: cover; }
+      .cp-address-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.15rem; background-color: #ffffff; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; }
+      .cp-address-card.is-default { border-color: #38bdf8; background-color: #f0f9ff; }
+      .cp-default-badge { display: inline-block; padding: 0.14rem 0.5rem; border-radius: 4px; background-color: #0284c7; color: #ffffff; font-size: 0.66rem; font-weight: 700; text-transform: uppercase; }
+      .cp-label-badge { display: inline-block; padding: 0.14rem 0.5rem; border-radius: 4px; background-color: #e2e8f0; color: #334155; font-size: 0.66rem; font-weight: 700; }
+      @media (max-width: 1100px) {
+        .oms-admin-shell { grid-template-columns: 1fr !important; }
+        .oms-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 820px) {
+        .customer-account-shell, .cp-profile-grid { grid-template-columns: 1fr !important; }
+      }
+    </style>
   </head>
   <body>
 
@@ -26,7 +516,7 @@
       <span class="sep" aria-hidden="true">·</span>
       <span>Free White-Glove Metro Delivery for Orders ₱15,000+</span>
       <button type="button" class="btn-top-zip" onclick="openModal('projectHubModal')">
-        <span>📦 PHP Project ZIP &amp; Guide</span>
+        <span>PHP Project ZIP &amp; Guide</span>
       </button>
     </div>
 
@@ -39,29 +529,79 @@
           <span class="brand-tagline">Handcrafted Fine Furniture</span>
         </button>
 
-        <!-- Zone 2: Navigation Links -->
+        <!-- Zone 2: Navigation Links (Standalone Messages button removed; moved inside Customer Profile Dropdown) -->
         <nav class="nav-links" aria-label="Main Navigation">
           <button type="button" onclick="scrollToSection('hero')">Home</button>
           <button type="button" onclick="scrollToSection('catalog')">Furniture Catalog</button>
           <button type="button" onclick="scrollToSection('services')">Custom Carpentry</button>
           <button type="button" onclick="scrollToSection('benefits')">Why Choose Us</button>
           <button type="button" onclick="openModal('trackOrderModal')">Track Order</button>
-          <button type="button" style="color: #0284c7; font-weight: 700;" onclick="openLiveChatModal()">
-            💬 Message Admin (<span id="headerMsgCount">3</span>)
-          </button>
         </nav>
 
-        <!-- Zone 3: User Account (Login / Admin / Logout) & Shopping Cart -->
+        <!-- Zone 3: User Account (Customer Profile Dropdown / Admin / Sign In) & Shopping Cart -->
         <div class="header-actions">
           <!-- Visible when logged in as Customer or Admin -->
           <div id="headerLoggedInBox" class="user-greeting" style="display: flex; align-items: center; gap: 0.65rem;">
-            <span id="headerUserName" style="font-weight: 700; color: #0f172a;">Hello, Maria</span>
-            <button type="button" id="headerAdminBtn" class="btn-sm-soft" style="display: none;" onclick="openModal('adminModal')">
-              🔑 Admin Panel
-            </button>
-            <button type="button" class="btn-link-sm" style="color: #dc2626; font-weight: 700;" onclick="handleUserLogout()">
-              Logout
-            </button>
+            <!-- CUSTOMER PROFILE DROPDOWN (Matches reference screenshot: My Account + Red Unread Badge + Chevron) -->
+            <div id="customerProfileDropdownWrap" class="customer-profile-dropdown-wrap">
+              <button
+                type="button"
+                id="customerProfileTriggerBtn"
+                class="customer-profile-trigger"
+                aria-haspopup="true"
+                aria-expanded="false"
+                onclick="toggleCustomerProfileDropdown(event)"
+              >
+                <span id="headerProfileAvatar" class="customer-profile-avatar">M</span>
+                <span id="headerUserName">My Account</span>
+                <span id="headerUnreadBadge" class="unread-red-badge" style="display: inline-flex;">1</span>
+                <span class="customer-profile-chevron" aria-hidden="true">▾</span>
+              </button>
+
+              <div id="customerProfileDropdownMenu" class="customer-profile-menu" role="menu" aria-label="My Account Menu">
+                <div class="customer-profile-menu-header">
+                  <strong id="dropdownCustomerName">Maria Teresa Santos</strong>
+                  <span id="dropdownCustomerEmail">maria.santos@example.com</span>
+                </div>
+
+                <button type="button" class="customer-profile-item" role="menuitem" onclick="openCustomerProfileModal('profile')">
+                  <span class="customer-profile-item-left"><span>My Profile</span></span>
+                </button>
+
+                <button type="button" class="customer-profile-item" role="menuitem" onclick="openCustomerProfileModal('addresses')">
+                  <span class="customer-profile-item-left"><span>My Addresses</span></span>
+                </button>
+
+                <button type="button" class="customer-profile-item" role="menuitem" onclick="openCustomerProfileModal('orders')">
+                  <span class="customer-profile-item-left"><span>My Orders</span></span>
+                </button>
+
+                <button type="button" id="dropdownMessagesItemBtn" class="customer-profile-item" role="menuitem" onclick="openMessagesFromCustomerDropdown()">
+                  <span class="customer-profile-item-left"><span>Messages</span></span>
+                  <span id="dropdownUnreadBadge" class="unread-red-badge" style="display: inline-flex;">1</span>
+                </button>
+
+                <button type="button" class="customer-profile-item" role="menuitem" onclick="openCustomerProfileModal('password')">
+                  <span class="customer-profile-item-left"><span>Change Password</span></span>
+                </button>
+
+                <button type="button" class="customer-profile-item item-logout" role="menuitem" onclick="closeCustomerProfileDropdown(); handleUserLogout();">
+                  <span class="customer-profile-item-left"><span>Logout</span></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ADMIN TOPBAR CONTROLS (Visible only when logged in as Admin) -->
+            <div id="headerAdminLoggedInWrap" style="display: none; align-items: center; gap: 0.55rem;">
+              <span id="headerAdminNameLabel" style="font-weight: 700; color: #0f172a; font-size: 0.8rem;">Admin</span>
+              <button type="button" id="headerAdminBtn" class="btn-sm-soft" style="display: inline-flex; align-items: center; gap: 0.4rem;" onclick="openModal('adminModal')">
+                <span>Order Management</span>
+                <span id="adminHeaderUnreadBadge" class="unread-red-badge" style="display: none;">0</span>
+              </button>
+              <button type="button" class="btn-link-sm" style="color: #dc2626; font-weight: 700;" onclick="handleUserLogout()">
+                Logout
+              </button>
+            </div>
           </div>
 
           <!-- Visible when logged out -->
@@ -84,7 +624,7 @@
       <section id="hero" class="hero-section">
         <div class="hero-container">
           <div class="hero-content">
-            <span class="hero-kicker">✦ Workshop-Direct Artisanal Craftsmanship</span>
+            <span class="hero-kicker">Workshop-Direct Artisanal Craftsmanship</span>
             <h1 class="hero-title">Heirloom Furniture, Handcrafted for Generations</h1>
             <p class="hero-subtitle">
               Custom solid wood dining sets, living room suites, and bedroom sanctuaries built to your exact room dimensions by master carpenters in Pampanga &amp; Manila.
@@ -170,7 +710,7 @@
           <div class="services-grid">
             <div class="service-card">
               <div>
-                <div class="service-icon-wrap">🪵</div>
+                <div class="service-icon-wrap">01</div>
                 <h3 class="service-title">Bespoke Custom Carpentry</h3>
                 <p class="service-text">
                   Have unique room dimensions? We adjust length, width, and height down to the centimeter using hand-cut mortise &amp; tenon joints.
@@ -184,7 +724,7 @@
 
             <div class="service-card">
               <div>
-                <div class="service-icon-wrap">🎨</div>
+                <div class="service-icon-wrap">02</div>
                 <h3 class="service-title">Master Finishes &amp; Upholstery</h3>
                 <p class="service-text">
                   Choose between Natural Teak Oil, Warm Walnut, Light Scandinavian Ash, or water-resistant polyurethane clear coats.
@@ -198,7 +738,7 @@
 
             <div class="service-card">
               <div>
-                <div class="service-icon-wrap">🚚</div>
+                <div class="service-icon-wrap">03</div>
                 <h3 class="service-title">In-House White Glove Delivery</h3>
                 <p class="service-text">
                   Our own trusted shop drivers deliver, carry upstairs, assemble, and position your furniture with zero third-party courier handling.
@@ -212,7 +752,7 @@
 
             <div class="service-card">
               <div>
-                <div class="service-icon-wrap">🪑</div>
+                <div class="service-icon-wrap">04</div>
                 <h3 class="service-title">Heirloom Restoration &amp; Repair</h3>
                 <p class="service-text">
                   Breathe new life into your cherished family treasures. We sand, reinforce loose joinery, and apply fresh protective lacquer.
@@ -240,7 +780,7 @@
 
               <div class="benefits-list">
                 <div class="benefit-item">
-                  <div class="benefit-check">₱</div>
+                  <div class="benefit-check">01</div>
                   <div>
                     <h4>Direct-from-Workshop Pricing</h4>
                     <p>Zero retail middleman or mall showroom overhead. You invest purely in master woodcutters, joinery, and seasoned timber.</p>
@@ -248,7 +788,7 @@
                 </div>
 
                 <div class="benefit-item">
-                  <div class="benefit-check">📐</div>
+                  <div class="benefit-check">02</div>
                   <div>
                     <h4>Perfect Spatial Fit Guarantee</h4>
                     <p>Never worry about standard tables blocking condo hallways or bedframes overhanging electrical outlets. We adjust dimensions to the centimeter.</p>
@@ -256,7 +796,7 @@
                 </div>
 
                 <div class="benefit-item">
-                  <div class="benefit-check">🛡️</div>
+                  <div class="benefit-check">03</div>
                   <div>
                     <h4>Safe 50% Downpayment Model</h4>
                     <p>Start with a 50% downpayment for timber milling. You only pay the remaining balance after you personally inspect the finished piece upon home delivery.</p>
@@ -629,7 +1169,7 @@
               Browse Furniture Catalog →
             </button>
             <a href="tel:+639178894211" class="btn-secondary-white">
-              <span>📞 Call Workshop: 0917-889-4211</span>
+              <span>Call Workshop: 0917-889-4211</span>
             </a>
           </div>
           <p class="final-cta-note">
@@ -670,7 +1210,7 @@
             <li><button type="button" onclick="scrollToSection('services')">Custom Sizing &amp; Mortise Joinery</button></li>
             <li><button type="button" onclick="scrollToSection('services')">Wood Stains &amp; Polyurethane Finishing</button></li>
             <li><button type="button" onclick="openModal('trackOrderModal')">White-Glove Delivery Fleet</button></li>
-            <li><button type="button" style="color: #38bdf8; font-weight: 700;" onclick="openModal('projectHubModal')">📦 Team Project Hub &amp; ZIP Download</button></li>
+            <li><button type="button" style="color: #38bdf8; font-weight: 700;" onclick="openModal('projectHubModal')">Team Project Hub &amp; ZIP Download</button></li>
           </ul>
         </div>
 
@@ -766,7 +1306,7 @@
                   <input type="number" id="customQty" value="1" min="1" max="10" />
                 </div>
                 <button type="button" class="btn-primary" onclick="addCustomizedToCart()">
-                  <span>Add Configured Piece to Cart 🛒</span>
+                  <span>Add Configured Piece to Cart</span>
                 </button>
               </div>
             </div>
@@ -841,6 +1381,21 @@
 
           <div id="checkoutErrorMsg" style="display: none; background: #fef2f2; color: #dc2626; padding: 0.65rem; border-radius: 6px; font-size: 0.78rem; margin-bottom: 0.85rem; border: 1px solid #fecaca;"></div>
 
+          <!-- SHOPEE-INSPIRED SAVED DELIVERY ADDRESS SELECTOR -->
+          <div id="chkSavedAddressBox" style="padding: 0.85rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; margin-bottom: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+              <label for="chkSavedAddressSelect" style="font-size: 0.76rem; font-weight: 800; color: #0369a1;">
+                Select Saved Delivery Address (Default Pre-Selected)
+              </label>
+              <button type="button" class="btn-link-sm" style="font-size: 0.72rem; color: #0284c7; font-weight: 700;" onclick="closeModal('checkoutModal'); openCustomerProfileModal('addresses');">
+                + Manage My Addresses
+              </button>
+            </div>
+            <select id="chkSavedAddressSelect" onchange="handleCheckoutAddressSelection(this.value)" style="width: 100%; padding: 0.5rem 0.7rem; border: 1px solid #7dd3fc; border-radius: 6px; font-size: 0.78rem; background: #ffffff; color: #0f172a;">
+              <!-- Populated dynamically by populateCheckoutSavedAddresses() -->
+            </select>
+          </div>
+
           <div class="form-group">
             <label for="chkFullName">1. Recipient Full Name *</label>
             <input type="text" id="chkFullName" required value="Maria Teresa Santos" />
@@ -906,7 +1461,7 @@
           <div style="margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
             <span style="font-size: 0.76rem; color: #475569;">Need to follow up on this order or add extra chairs/pillows?</span>
             <button type="button" class="btn-sm-primary" onclick="openFollowUpFromTracker()">
-              💬 Message Admin About This Order →
+              Message Admin About This Order →
             </button>
           </div>
         </div>
@@ -960,13 +1515,13 @@
               <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">Database Preset Accounts (1-Click Fill):</strong>
               <div style="display: flex; gap: 0.4rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
                 <button type="button" class="btn-sm-soft" style="flex: 1; justify-content: center;" onclick="fillPresetLogin('customer1')">
-                  👤 Customer #1
+                  Customer #1
                 </button>
                 <button type="button" class="btn-sm-soft" style="flex: 1; justify-content: center;" onclick="fillPresetLogin('customer2')">
-                  👤 Customer #2
+                  Customer #2
                 </button>
                 <button type="button" class="btn-sm-soft" style="flex: 1; justify-content: center;" onclick="fillPresetLogin('admin')">
-                  🔑 Admin
+                  Admin
                 </button>
               </div>
               <div><strong>Customer #1:</strong> <code>maria.santos@example.com</code> / <code>password123</code></div>
@@ -1024,25 +1579,29 @@
 
               <nav class="oms-sidebar-nav">
                 <button type="button" id="omsNavDeadlineTodayBtn" class="oms-nav-item active" onclick="switchAdminOmsTab('deadline_today')">
-                  <span>⏰ Deadline Today</span>
+                  <span>Deadline Today</span>
                   <span id="omsSidebarDueTodayCount" class="oms-nav-count">3</span>
                 </button>
                 <button type="button" id="omsNavAllOrdersBtn" class="oms-nav-item" onclick="switchAdminOmsTab('all')">
-                  <span>📋 Job Orders</span>
-                  <span id="omsSidebarTotalCount" class="oms-nav-count">7</span>
+                  <span>Job Orders</span>
+                  <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <span id="omsSidebarUnreadBadge" class="unread-red-badge" title="Unread customer messages" style="display: none;">0</span>
+                    <span id="omsSidebarTotalCount" class="oms-nav-count">7</span>
+                  </span>
                 </button>
                 <button type="button" id="omsNavOverdueBtn" class="oms-nav-item" onclick="switchAdminOmsTab('overdue')">
-                  <span>⚠️ Overdue Orders</span>
+                  <span>Overdue Orders</span>
                   <span id="omsSidebarOverdueCount" class="oms-nav-count">2</span>
                 </button>
-                <button type="button" class="oms-nav-item" onclick="scrollToAdminSection('adminMessagesBlock')">
-                  <span>💬 Customer Messages</span>
+                <button type="button" id="omsNavMessagesBtn" class="oms-nav-item" onclick="openAdminMessagesInOms()">
+                  <span>Customer Messages</span>
+                  <span id="omsSidebarMessagesUnreadBadge" class="unread-red-badge" title="Unread customer messages" style="display: none;">0</span>
                 </button>
                 <button type="button" class="oms-nav-item" onclick="scrollToAdminSection('adminInventoryBlock')">
-                  <span>🪵 Materials &amp; Staff</span>
+                  <span>Materials &amp; Staff</span>
                 </button>
                 <button type="button" class="oms-nav-item" onclick="closeModal('adminModal')">
-                  <span>🏠 Return to Storefront</span>
+                  <span>Return to Storefront</span>
                 </button>
               </nav>
             </div>
@@ -1053,7 +1612,7 @@
                 <span>Authorized Workshop Admin · Asia/Manila</span>
               </div>
               <button type="button" class="oms-signout-btn" onclick="handleUserLogout()">
-                ⏻ Sign Out Admin
+                Sign Out Admin
               </button>
             </div>
           </aside>
@@ -1073,7 +1632,7 @@
               </div>
               <div class="oms-topbar-actions">
                 <button type="button" class="btn-sm-soft" onclick="refreshAdminJobOrdersFromServer()">
-                  ↻ Refresh
+                  Refresh
                 </button>
                 <button type="button" class="btn-sm-primary" onclick="toggleNewJobOrderForm()">
                   + New Job Order
@@ -1187,27 +1746,27 @@
               <!-- 6 TABS: 1. Deadline Today, 2. Orders Today, 3. Overdue Orders, 4. Active Orders, 5. Unpaid Orders, 6. All Orders -->
               <div class="oms-tabs-bar" role="tablist" aria-label="Job Order Deadline Tabs">
                 <button type="button" id="omsTab_deadline_today" class="oms-tab-link active tab-danger" onclick="switchAdminOmsTab('deadline_today')">
-                  <span>🎯 Deadline Today</span>
+                  <span>Deadline Today</span>
                   <span id="tabCount_deadline_today" class="oms-tab-badge badge-danger">3</span>
                 </button>
                 <button type="button" id="omsTab_orders_today" class="oms-tab-link" onclick="switchAdminOmsTab('orders_today')">
-                  <span>✨ Orders Today</span>
+                  <span>Orders Today</span>
                   <span id="tabCount_orders_today" class="oms-tab-badge">2</span>
                 </button>
                 <button type="button" id="omsTab_overdue" class="oms-tab-link" onclick="switchAdminOmsTab('overdue')">
-                  <span>⚠️ Overdue Orders</span>
+                  <span>Overdue Orders</span>
                   <span id="tabCount_overdue" class="oms-tab-badge badge-danger">2</span>
                 </button>
                 <button type="button" id="omsTab_active" class="oms-tab-link" onclick="switchAdminOmsTab('active')">
-                  <span>🔨 Active Orders</span>
+                  <span>Active Orders</span>
                   <span id="tabCount_active" class="oms-tab-badge">6</span>
                 </button>
                 <button type="button" id="omsTab_unpaid" class="oms-tab-link" onclick="switchAdminOmsTab('unpaid')">
-                  <span>💳 Unpaid Orders</span>
+                  <span>Unpaid Orders</span>
                   <span id="tabCount_unpaid" class="oms-tab-badge">6</span>
                 </button>
                 <button type="button" id="omsTab_all" class="oms-tab-link" onclick="switchAdminOmsTab('all')">
-                  <span>🗂️ All Orders</span>
+                  <span>All Orders</span>
                   <span id="tabCount_all" class="oms-tab-badge">7</span>
                 </button>
               </div>
@@ -1254,8 +1813,8 @@
 
                 <select id="omsPriorityFilter" onchange="renderAdminDashboard()" aria-label="Filter by Priority">
                   <option value="ALL">All Priorities</option>
-                  <option value="Urgent">🔥 Urgent</option>
-                  <option value="High">⚡ High</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="High">High</option>
                   <option value="Normal">Normal</option>
                 </select>
 
@@ -1303,53 +1862,57 @@
               </div>
             </div>
 
-            <!-- VIEW / EDIT DETAILED JOB ORDER PANEL -->
+            <!-- VIEW / EDIT DETAILED JOB ORDER & ORDER MESSAGES PANEL (Inside Order Management) -->
             <div id="adminJobOrderDetailPanel" class="oms-board-card" style="display: none; padding: 1.25rem; border: 2px solid #0284c7; background: #ffffff;">
-              <!-- Populated when Admin clicks View / Edit on any Job Order row -->
+              <!-- Populated when Admin clicks View / Chat on any Job Order row -->
             </div>
 
-            <!-- 2. PRIVATE CUSTOMER CONVERSATIONS IN ADMIN CONSOLE -->
-            <div id="adminMessagesBlock" style="border: 1px solid #bae6fd; border-radius: 10px; padding: 1rem; background: #f0f7ff;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.5rem;">
-                <h4 style="font-family: 'Playfair Display', serif; font-size: 1.05rem; margin: 0;">Private Customer-Admin Conversations (Table: <code>Order_Message</code>)</h4>
-                <span style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid #bbf7d0;">
-                  ● Separate 1-on-1 Customer Threads
-                </span>
-              </div>
-              <p id="adminActiveThreadLabel" style="font-size: 0.75rem; color: #075985; margin-bottom: 0.5rem;">
-                Active Private Conversation: <strong>Maria Teresa Santos (Customer #1)</strong> ↔ <strong>Workshop Admin</strong>
-              </p>
-
-              <!-- Admin Customer Conversation Switcher List -->
-              <div id="adminConversationListInConsole" style="display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-                <!-- Populated by buildAdminConversationListHtml() in main.js -->
+            <!-- CUSTOMER MESSAGES & 1-ON-1 CHAT (Inside Order Management) -->
+            <div id="adminMessagesBlock" class="oms-board-card" style="padding: 1.25rem; background: #ffffff; border: 1.5px solid #bae6fd;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem; padding-bottom: 0.65rem; border-bottom: 1px solid #e2e8f0;">
+                <div>
+                  <span class="oms-kicker">ORDER MANAGEMENT · CUSTOMER CONVERSATIONS</span>
+                  <h4 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; color: #0f172a; margin: 0.1rem 0 0;">Customer Messages &amp; Order Follow-Up</h4>
+                </div>
+                <div id="adminActiveThreadLabel" style="font-size: 0.76rem; color: #334155; background: #f0f9ff; border: 1px solid #bae6fd; padding: 0.35rem 0.75rem; border-radius: 999px;">
+                  Active Private Conversation: <strong>Maria Teresa Santos (Customer #1)</strong> ↔ <strong>Workshop Admin</strong>
+                </div>
               </div>
 
-              <div id="adminChatFeed" class="chat-feed-box" style="height: 190px; background: #f8fafc;">
-                <!-- Populated in real time by renderMessageFeeds() in main.js -->
+              <div style="margin-bottom: 0.85rem;">
+                <strong style="font-size: 0.74rem; color: #0369a1; display: block; margin-bottom: 0.4rem;">Select Customer Conversation:</strong>
+                <div id="adminConversationListInConsole" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <!-- Populated dynamically by buildAdminConversationListHtml() -->
+                </div>
               </div>
 
-              <form onsubmit="return handleAdminReplySubmit(event)" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <select id="adminReplyTargetOrder" onchange="selectAdminConversation(this.value.split('|')[0])" style="padding: 0.5rem 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.76rem; background: #ffffff;">
+              <div id="adminChatFeed" class="chat-feed-box" style="height: 240px; background: #f8fafc; margin-bottom: 0.85rem;">
+                <!-- Populated dynamically by renderMessageFeeds() -->
+              </div>
+
+              <form onsubmit="return handleAdminReplySubmit(event)" style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem;">
+                <select id="adminReplyTargetOrder" onchange="handleAdminReplyTargetChange(this.value)" style="padding: 0.55rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem; background: #ffffff; color: #0f172a;">
                   <option value="1|1001|Order Follow-Up (#1001)">Reply Privately to Maria Teresa Santos (Customer #1)</option>
                   <option value="2|1002|Add Custom Request (#1002)">Reply Privately to Atty. Roberto Mendoza (Customer #2)</option>
                 </select>
-                <input type="text" id="adminReplyInput" required placeholder="Type official Admin reply (visible only to selected customer)..." style="flex: 1; min-width: 220px; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;" />
-                <button type="submit" class="btn-sm-primary">Send Private Reply →</button>
+                <input type="text" id="adminReplyInput" required placeholder="Type your reply to the selected customer..." style="flex: 1; min-width: 240px; padding: 0.55rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; background: #ffffff;" />
+                <button type="submit" class="btn-sm-primary" style="padding: 0.55rem 1rem;">
+                  Send Reply to Customer →
+                </button>
               </form>
             </div>
 
             <!-- 3. RAW MATERIALS & WORKSHOP EMPLOYEES -->
             <div id="adminInventoryBlock" class="form-row-2" style="font-size: 0.76rem;">
               <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #ffffff;">
-                <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">🪵 Raw Materials &amp; Suppliers (Tables: <code>Material</code> &amp; <code>Supplier</code>)</strong>
+                <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">Raw Materials &amp; Suppliers (Tables: <code>Material</code> &amp; <code>Supplier</code>)</strong>
                 <p>• <strong>Kiln-Dried Mahogany Planks:</strong> 850 Board Feet (Pampanga Hardwoods Inc.)</p>
                 <p>• <strong>Seasoned Teak Timber:</strong> 420 Board Feet (Pampanga Hardwoods Inc.)</p>
                 <p>• <strong>American White Ash Planks:</strong> 310 Board Feet (Luzon Timber Mill)</p>
                 <p>• <strong>Sky Blue Woven Linen Fabric:</strong> 120 Meters (Artisan Upholstery Co.)</p>
               </div>
               <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #ffffff;">
-                <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">👷 Workshop Employees (Table: <code>Employee</code>)</strong>
+                <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">Workshop Employees (Table: <code>Employee</code>)</strong>
                 <p>• <strong>Master Carding Santos:</strong> Master Carpenter (Active)</p>
                 <p>• <strong>Master Eddie Manalo:</strong> Master Carpenter (Active)</p>
                 <p>• <strong>Dante Cruz:</strong> Master Finisher (Active)</p>
@@ -1381,14 +1944,14 @@
           <div class="price-banner-box" style="margin-bottom: 0.85rem; flex-direction: column; align-items: stretch; gap: 0.6rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <div id="chatCurrentViewerLabel" style="font-size: 0.78rem; color: #0f172a;">
-                🔒 Private Conversation: <strong>Maria Teresa Santos</strong> (<code>CustomerID: 1</code>) ↔ <strong>Workshop Admin</strong> — Only you and the Admin can see this chat.
+                Private Conversation: <strong>Maria Teresa Santos</strong> (<code>CustomerID: 1</code>) ↔ <strong>Workshop Admin</strong> — Only you and the Admin can see this chat.
               </div>
               <div style="display: flex; gap: 0.45rem; align-items: center;">
                 <button type="button" class="btn-sm-soft" onclick="closeModal('liveChatModal'); openModal('authModal');">
-                  🔐 Sign In / Switch Account
+                  Sign In / Switch Account
                 </button>
                 <button type="button" id="openAdminConsoleFromChatBtn" class="btn-sm-soft" style="display: none;" onclick="openModal('adminModal')">
-                  🔑 Open Full Admin Console
+                  Open Full Admin Console
                 </button>
               </div>
             </div>
@@ -1398,7 +1961,7 @@
 
             <!-- Visible ONLY when Admin is logged in: Separate Customer Conversation List -->
             <div id="adminConversationSelectorBox" style="display: none; padding-top: 0.55rem; border-top: 1px dashed #7dd3fc;">
-              <strong style="font-size: 0.74rem; color: #075985; display: block; margin-bottom: 0.4rem;">📂 Select Customer Conversation (Admin 1-on-1 Inbox):</strong>
+              <strong style="font-size: 0.74rem; color: #075985; display: block; margin-bottom: 0.4rem;">Select Customer Conversation (Admin 1-on-1 Inbox):</strong>
               <div id="adminConversationListInChat" style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
                 <!-- Populated by buildAdminConversationListHtml() in main.js -->
               </div>
@@ -1409,13 +1972,13 @@
           <div style="font-size: 0.72rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Quick Follow-Up &amp; Add-On Templates:</div>
           <div id="chatQuickChipsContainer" class="chat-quick-chips">
             <button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt('1001', 'Order Follow-Up (#1001)', 'Hello Admin! I would like to follow up on the production status of Order #1001 (Mahogany Dining Set). How is the finishing progressing?')">
-              📋 Follow up Order #1001 status
+              Follow up Order #1001 status
             </button>
             <button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt('1001', 'Add Custom Request (#1001)', 'Hello Admin! Can we add 2 extra matching solid mahogany dining chairs to our Order #1001?')">
-              ➕ Add 2 extra chairs to Order #1001
+              + Add 2 extra chairs to Order #1001
             </button>
             <button type="button" class="chat-chip-btn" onclick="fillChatQuickPrompt('1001', 'Delivery Schedule (#1001)', 'Good day! Could you please confirm the estimated delivery arrival window for Order #1001?')">
-              🚚 Confirm Order #1001 delivery time
+              Confirm Order #1001 delivery time
             </button>
           </div>
 
@@ -1456,11 +2019,284 @@
       </div>
     </div>
 
-    <!-- FLOATING REAL-TIME CHAT BUTTON (Bottom-Right) -->
-    <button type="button" id="floatingChatBtn" class="floating-chat-launcher" onclick="openLiveChatModal()">
+    <!-- FLOATING CHAT BUTTON HIDDEN (Messages accessed inside Customer Profile Dropdown) -->
+    <button type="button" id="floatingChatBtn" class="floating-chat-launcher" style="display: none;" onclick="openLiveChatModal()">
       <span class="live-dot"></span>
-      <span>💬 Message Admin · Follow-Up / Add Item (<span id="floatingMsgCount">2</span>)</span>
+      <span>Message Admin · Follow-Up / Add Item (<span id="floatingMsgCount">2</span>)</span>
     </button>
+
+    <!-- 5D. SHOPEE-INSPIRED CUSTOMER "MY PROFILE" & ACCOUNT MANAGEMENT MODAL -->
+    <div id="customerProfileModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cpModalTitle">
+      <div class="modal-card modal-profile-xl">
+        <div class="modal-header">
+          <div>
+            <span class="modal-kicker">Customer Account Management · Lilia &amp; Rowena Furniture</span>
+            <h3 id="cpModalTitle" class="modal-title">My Account &amp; Delivery Addresses</h3>
+          </div>
+          <button type="button" class="modal-close-btn" aria-label="Close My Profile" onclick="closeModal('customerProfileModal')">✕</button>
+        </div>
+
+        <div class="customer-account-shell">
+          <!-- LEFT ACCOUNT SIDEBAR -->
+          <aside class="customer-account-sidebar" aria-label="Customer Account Navigation">
+            <div class="cp-sidebar-user-box">
+              <div id="cpSidebarAvatar" class="cp-sidebar-avatar">M</div>
+              <div style="min-width: 0;">
+                <strong id="cpSidebarName" style="display: block; font-size: 0.84rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Maria Teresa Santos</strong>
+                <button type="button" class="btn-link-sm" style="font-size: 0.72rem; color: #0284c7; padding: 0;" onclick="switchCustomerProfileTab('profile'); toggleCustomerProfileEditMode(true);">
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+
+            <nav class="cp-sidebar-nav">
+              <button type="button" id="cpNav_profile" class="cp-nav-btn active" onclick="switchCustomerProfileTab('profile')">
+                <span>My Profile</span>
+              </button>
+              <button type="button" id="cpNav_addresses" class="cp-nav-btn" onclick="switchCustomerProfileTab('addresses')">
+                <span>My Addresses</span>
+              </button>
+              <button type="button" id="cpNav_orders" class="cp-nav-btn" onclick="switchCustomerProfileTab('orders')">
+                <span>My Orders</span>
+              </button>
+              <button type="button" id="cpNav_messages" class="cp-nav-btn" onclick="closeModal('customerProfileModal'); openMessagesFromCustomerDropdown();">
+                <span>Messages</span>
+                <span id="cpSidebarUnreadBadge" class="unread-red-badge" style="display: none;">0</span>
+              </button>
+              <button type="button" id="cpNav_password" class="cp-nav-btn" onclick="switchCustomerProfileTab('password')">
+                <span>Change Password</span>
+              </button>
+              <button type="button" class="cp-nav-btn" style="color: #dc2626; margin-top: 0.35rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;" onclick="closeModal('customerProfileModal'); handleUserLogout();">
+                <span>Logout</span>
+              </button>
+            </nav>
+          </aside>
+
+          <!-- RIGHT ACCOUNT CONTENT AREA -->
+          <div class="customer-account-main">
+            <div id="cpFeedbackBanner" class="oms-alert-success" style="display: none; margin-bottom: 1rem;"></div>
+            <div id="cpErrorBanner" class="oms-alert-error" style="display: none; margin-bottom: 1rem;"></div>
+
+            <!-- PANE 1: MY PROFILE -->
+            <div id="cpPane_profile" class="cp-tab-pane">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; margin-bottom: 1.2rem; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #0f172a; margin: 0;">My Profile</h4>
+                  <p style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">Manage and protect your personal information and default delivery details.</p>
+                </div>
+                <button type="button" id="cpEditProfileToggleBtn" class="btn-sm-primary" onclick="toggleCustomerProfileEditMode(true)">
+                  Edit Profile
+                </button>
+              </div>
+
+              <form id="cpProfileForm" onsubmit="return saveCustomerProfileForm(event)">
+                <input type="hidden" id="cpProfileCsrfToken" name="csrf_token" value="" />
+                <div class="cp-profile-grid">
+                  <div>
+                    <div class="form-row-2">
+                      <div class="form-group">
+                        <label for="cpFullName">Full Name *</label>
+                        <input type="text" id="cpFullName" required disabled />
+                      </div>
+                      <div class="form-group">
+                        <label for="cpUsername">Username</label>
+                        <input type="text" id="cpUsername" placeholder="e.g. maria.santos" disabled />
+                      </div>
+                    </div>
+
+                    <div class="form-row-2">
+                      <div class="form-group">
+                        <label for="cpEmail">Email Address *</label>
+                        <input type="email" id="cpEmail" required disabled />
+                      </div>
+                      <div class="form-group">
+                        <label for="cpPhone">Mobile Number *</label>
+                        <input type="tel" id="cpPhone" required placeholder="0917-123-4567" disabled />
+                      </div>
+                    </div>
+
+                    <div class="form-row-2">
+                      <div class="form-group">
+                        <label for="cpGender">Gender (Optional)</label>
+                        <select id="cpGender" disabled>
+                          <option value="">Prefer not to say</option>
+                          <option value="Female">Female</option>
+                          <option value="Male">Male</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="cpBirthday">Birthday (Optional)</label>
+                        <input type="date" id="cpBirthday" disabled />
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="cpDefaultAddress">Default Delivery Address *</label>
+                      <textarea id="cpDefaultAddress" rows="2" required disabled></textarea>
+                      <span style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">
+                        Synced automatically with your Default Address in <button type="button" class="btn-link-sm" style="font-size: 0.7rem; color: #0284c7; padding: 0;" onclick="switchCustomerProfileTab('addresses')">My Addresses</button>.
+                      </span>
+                    </div>
+
+                    <div id="cpProfileFormActions" style="display: none; gap: 0.65rem; margin-top: 1rem;">
+                      <button type="submit" class="btn-primary">
+                        <span>Save Profile Changes</span>
+                      </button>
+                      <button type="button" class="btn-outline" onclick="toggleCustomerProfileEditMode(false)">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- RIGHT COLUMN: PROFILE PICTURE UPLOAD -->
+                  <div class="cp-avatar-upload-card">
+                    <div id="cpAvatarPreviewBox" class="cp-avatar-preview-lg">M</div>
+                    <input
+                      type="file"
+                      id="cpAvatarFileInput"
+                      accept="image/jpeg,image/png,image/webp"
+                      style="display: none;"
+                      onchange="handleProfileImageFileChange(this)"
+                    />
+                    <button type="button" class="btn-sm-soft" onclick="document.getElementById('cpAvatarFileInput').click()">
+                      Select Image
+                    </button>
+                    <div style="font-size: 0.7rem; color: #64748b; line-height: 1.45;">
+                      File size: maximum 2 MB<br />
+                      Allowed formats: .JPG, .JPEG, .PNG, .WEBP
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- PANE 2: MY ADDRESSES (SHOPEE-INSPIRED ADDRESS BOOK) -->
+            <div id="cpPane_addresses" class="cp-tab-pane" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; margin-bottom: 1.15rem; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #0f172a; margin: 0;">My Addresses</h4>
+                  <p style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">Manage saved delivery destinations for white-glove furniture delivery.</p>
+                </div>
+                <button type="button" class="btn-sm-primary" onclick="openCustomerAddressEditor(null)">
+                  + Add New Address
+                </button>
+              </div>
+
+              <!-- ADD / EDIT ADDRESS FORM CARD -->
+              <div id="cpAddressEditorCard" style="display: none; background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 10px; padding: 1.15rem; margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                  <strong id="cpAddressEditorTitle" style="font-size: 0.9rem; color: #0369a1;">Add New Delivery Address</strong>
+                  <button type="button" class="btn-sm-soft" onclick="closeCustomerAddressEditor()">Cancel</button>
+                </div>
+                <form onsubmit="return saveCustomerAddressForm(event)">
+                  <input type="hidden" id="addrEditId" value="" />
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label for="addrRecipientName">Recipient Full Name *</label>
+                      <input type="text" id="addrRecipientName" required placeholder="e.g. Maria Teresa Santos" />
+                    </div>
+                    <div class="form-group">
+                      <label for="addrPhoneNumber">Contact Number *</label>
+                      <input type="tel" id="addrPhoneNumber" required placeholder="0917-123-4567" />
+                    </div>
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label for="addrStreet">House Number / Building / Street *</label>
+                      <input type="text" id="addrStreet" required placeholder="e.g. Unit 14B, Tower 2, Serendra" />
+                    </div>
+                    <div class="form-group">
+                      <label for="addrBarangay">Barangay *</label>
+                      <input type="text" id="addrBarangay" required placeholder="e.g. Fort Bonifacio" />
+                    </div>
+                  </div>
+                  <div class="dimensions-grid-3">
+                    <div class="form-group">
+                      <label for="addrCity">City / Municipality *</label>
+                      <input type="text" id="addrCity" required placeholder="e.g. Taguig City" />
+                    </div>
+                    <div class="form-group">
+                      <label for="addrProvince">Province / Region *</label>
+                      <input type="text" id="addrProvince" required placeholder="e.g. Metro Manila" />
+                    </div>
+                    <div class="form-group">
+                      <label for="addrPostalCode">Postal Code *</label>
+                      <input type="text" id="addrPostalCode" required placeholder="e.g. 1634" />
+                    </div>
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label for="addrNotes">Additional Delivery Instructions / Landmark</label>
+                      <input type="text" id="addrNotes" placeholder="e.g. Near South Lobby service elevator" />
+                    </div>
+                    <div class="form-group">
+                      <label for="addrLabel">Address Label</label>
+                      <select id="addrLabel">
+                        <option value="Home">Home</option>
+                        <option value="Work">Work / Office</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.35rem;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.78rem; font-weight: 600; color: #0f172a; cursor: pointer;">
+                      <input type="checkbox" id="addrIsDefault" />
+                      <span>Set as Default Delivery Address</span>
+                    </label>
+                    <button type="submit" class="btn-primary">
+                      <span>✓ Save Delivery Address</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- SAVED ADDRESSES LIST -->
+              <div id="cpAddressesListContainer">
+                <!-- Populated dynamically by renderCustomerAddressesList() -->
+              </div>
+            </div>
+
+            <!-- PANE 3: MY ORDERS -->
+            <div id="cpPane_orders" class="cp-tab-pane" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.9rem; margin-bottom: 1.15rem; border-bottom: 1px solid #e2e8f0;">
+                <div>
+                  <h4 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #0f172a; margin: 0;">My Orders</h4>
+                  <p style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">Track your bespoke furniture production status and delivery snapshots.</p>
+                </div>
+              </div>
+              <div id="cpMyOrdersListContainer">
+                <!-- Populated dynamically by renderCustomerMyOrdersList() -->
+              </div>
+            </div>
+
+            <!-- PANE 4: CHANGE PASSWORD -->
+            <div id="cpPane_password" class="cp-tab-pane" style="display: none;">
+              <div style="padding-bottom: 0.9rem; margin-bottom: 1.15rem; border-bottom: 1px solid #e2e8f0;">
+                <h4 style="font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #0f172a; margin: 0;">Change Password</h4>
+                <p style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">For your account security, please verify your current password before setting a new password.</p>
+              </div>
+              <form onsubmit="return handleCustomerChangePassword(event)" style="max-width: 440px;">
+                <div class="form-group">
+                  <label for="cpCurrentPassword">Current Password *</label>
+                  <input type="password" id="cpCurrentPassword" required placeholder="Enter your current password" />
+                </div>
+                <div class="form-group">
+                  <label for="cpNewPassword">New Password * (Minimum 6 characters)</label>
+                  <input type="password" id="cpNewPassword" required minlength="6" placeholder="Enter new password" />
+                </div>
+                <div class="form-group">
+                  <label for="cpConfirmPassword">Confirm New Password *</label>
+                  <input type="password" id="cpConfirmPassword" required minlength="6" placeholder="Re-enter new password" />
+                </div>
+                <button type="submit" class="btn-primary">
+                  <span>Update Password</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- 6. PHP PROJECT ZIP & STEP-BY-STEP GUIDE MODAL -->
     <div id="projectHubModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="hubModalTitle">
@@ -1474,9 +2310,9 @@
         </div>
 
         <div class="tab-bar">
-          <button type="button" class="tab-btn active" onclick="switchHubTab('hubDownloadPane', this)">📥 Download ZIP Package</button>
-          <button type="button" class="tab-btn" onclick="switchHubTab('hubSetupPane', this)">🛠️ Step-by-Step XAMPP Guide</button>
-          <button type="button" class="tab-btn" onclick="switchHubTab('hubBlueprintPane', this)">📐 Conversion Homepage Strategy</button>
+          <button type="button" class="tab-btn active" onclick="switchHubTab('hubDownloadPane', this)">Download ZIP Package</button>
+          <button type="button" class="tab-btn" onclick="switchHubTab('hubSetupPane', this)">Step-by-Step XAMPP Guide</button>
+          <button type="button" class="tab-btn" onclick="switchHubTab('hubBlueprintPane', this)">Conversion Homepage Strategy</button>
         </div>
 
         <div class="modal-body">
@@ -1489,20 +2325,20 @@
                 Complete Composer PSR-4 folder structure (`src/Config`, `src/Models`, `src/Controllers`), HTML5 `views/`, Light Blue + White `style.css`, simple vanilla `main.js`, and MySQL `.sql` scripts.
               </p>
               <a href="public/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" class="btn-primary-white" style="display: inline-block;">
-                ⬇ Download Complete PHP Project (.zip)
+                Download Complete PHP Project (.zip)
               </a>
             </div>
 
             <div class="form-row-2" style="font-size: 0.78rem;">
               <div style="padding: 0.9rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-                <strong style="color: #075985; display: block; margin-bottom: 0.3rem;">📁 PSR-4 PHP Backend (`src/` &amp; `config/`)</strong>
+                <strong style="color: #075985; display: block; margin-bottom: 0.3rem;">PSR-4 PHP Backend (`src/` &amp; `config/`)</strong>
                 <p>• <code>composer.json</code> (PSR-4 <code>App\</code> namespace)</p>
                 <p>• <code>config/database.php</code> &amp; <code>src/Config/Database.php</code></p>
                 <p>• <code>src/Models/</code>: Admin, Category, Product, Customer, Order, Message</p>
                 <p>• <code>src/Controllers/</code>: Home, Auth, Admin, Message, Cart, Order</p>
               </div>
               <div style="padding: 0.9rem; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-                <strong style="color: #075985; display: block; margin-bottom: 0.3rem;">📁 Frontend Views &amp; SQL (`views/`, `public/`, `database/`)</strong>
+                <strong style="color: #075985; display: block; margin-bottom: 0.3rem;">Frontend Views &amp; SQL (`views/`, `public/`, `database/`)</strong>
                 <p>• <code>views/*.php</code> (Header, Footer, Home, Catalog, Cart, Login, Admin, Messages)</p>
                 <p>• <code>public/css/style.css</code> (Light Blue + White CSS)</p>
                 <p>• <code>public/js/main.js</code> (Simple Vanilla JS with clear comments)</p>
@@ -1538,6 +2374,6 @@
     </div>
 
     <!-- Plain Minimal Vanilla JavaScript (No React, No TypeScript/TSX) -->
-    <script src="public/js/main.js" onerror="var s=document.createElement('script');s.src='js/main.js';document.body.appendChild(s);"></script>
+    <script src="public/js/main.js?v=20261107_v6" onerror="var s=document.createElement('script');s.src='js/main.js?v=20261107_v6';document.body.appendChild(s);"></script>
   </body>
 </html>
