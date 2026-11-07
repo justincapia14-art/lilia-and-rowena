@@ -47,13 +47,238 @@ const customers = [
     PhoneNumber: '0918-987-6543',
     Address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
     DefaultOrderID: 1002
+  },
+  {
+    CustomerID: 3,
+    FullName: 'Engr. Danica Gomez',
+    Email: 'danica.gomez@example.com',
+    Password: 'password123',
+    PhoneNumber: '0917-542-8810',
+    Address: 'One Serendra, Bonifacio Global City, Taguig',
+    DefaultOrderID: 1003
+  },
+  {
+    CustomerID: 4,
+    FullName: 'Dr. Ronald & Elena Ramos',
+    Email: 'ronald.ramos@example.com',
+    Password: 'password123',
+    PhoneNumber: '0918-334-9012',
+    Address: 'Villa Barosa, San Fernando, Pampanga',
+    DefaultOrderID: 1006
+  },
+  {
+    CustomerID: 5,
+    FullName: 'Arch. Marco & Patricia Villanueva',
+    Email: 'marco.villanueva@example.com',
+    Password: 'password123',
+    PhoneNumber: '0922-719-4401',
+    Address: 'Beverly Hills Subdivision, Antipolo, Rizal',
+    DefaultOrderID: 1004
   }
 ];
 
+function getTodayManila() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date());
+}
+
+function offsetDateManila(daysOffset) {
+  const baseStr = getTodayManila();
+  const [y, m, d] = baseStr.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + Number(daysOffset || 0)));
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${dt.getUTCFullYear()}-${pad(dt.getUTCMonth() + 1)}-${pad(dt.getUTCDate())}`;
+}
+
 const customerOrders = [
   { OrderID: 1001, CustomerID: 1 },
-  { OrderID: 1002, CustomerID: 2 }
+  { OrderID: 1002, CustomerID: 2 },
+  { OrderID: 1003, CustomerID: 3 },
+  { OrderID: 1004, CustomerID: 5 },
+  { OrderID: 1005, CustomerID: 1 },
+  { OrderID: 1006, CustomerID: 4 },
+  { OrderID: 1007, CustomerID: 4 }
 ];
+
+function createDefaultJobOrders() {
+  const today = getTodayManila();
+  return [
+    {
+      orderId: 1001,
+      jobOrderCode: 'JO-2026-1001',
+      customerId: 1,
+      customer: 'Maria Teresa Santos',
+      customerPhone: '0917-123-4567',
+      customerEmail: 'maria.santos@example.com',
+      address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+      itemSummary: 'Mahogany 6-Seater Dining Set (220L × 90W × 75H cm · Warm Walnut)',
+      quantity: 1,
+      status: 'In Production',
+      priority: 'Urgent',
+      placed: offsetDateManila(-10),
+      due: today,
+      deadlineTime: '08:00',
+      carpenter: 'Master Carding Santos',
+      assignedEmployeeId: 1,
+      stage: '3rd Coat Polyurethane Curing',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 30450,
+      downpayment: 15225,
+      paidAmount: 15225,
+      jobNotes: 'Custom 220cm length Mahogany 6-Seater Dining Set — Final walnut topcoat curing for delivery today.'
+    },
+    {
+      orderId: 1002,
+      jobOrderCode: 'JO-2026-1002',
+      customerId: 2,
+      customer: 'Atty. Roberto Mendoza',
+      customerPhone: '0918-987-6543',
+      customerEmail: 'roberto.mendoza@example.com',
+      address: '88 Narra Avenue, Ayala Alabang Village, Muntinlupa',
+      itemSummary: 'Scandinavian Sky Blue Lounge Sofa (Standard Sizing)',
+      quantity: 1,
+      status: 'Order Confirmed',
+      priority: 'High',
+      placed: today,
+      due: offsetDateManila(5),
+      deadlineTime: '14:00',
+      carpenter: 'Master Eddie Manalo',
+      assignedEmployeeId: 2,
+      stage: 'Timber Preparation & Framing',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 34000,
+      downpayment: 17000,
+      paidAmount: 17000,
+      jobNotes: 'Scandinavian Sky Blue Lounge Sofa + 2 matching bolster pillows.'
+    },
+    {
+      orderId: 1003,
+      jobOrderCode: 'JO-2026-1003',
+      customerId: 3,
+      customer: 'Engr. Danica Gomez',
+      customerPhone: '0917-542-8810',
+      customerEmail: 'danica.gomez@example.com',
+      address: 'One Serendra, Bonifacio Global City, Taguig',
+      itemSummary: 'Minimalist Teak King Bedframe (Custom Floating Nightstands)',
+      quantity: 1,
+      status: 'For Delivery',
+      priority: 'High',
+      placed: offsetDateManila(-6),
+      due: today,
+      deadlineTime: '10:30',
+      carpenter: 'Rene Ocampo',
+      assignedEmployeeId: 3,
+      stage: 'Out for White-Glove Delivery',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 44000,
+      downpayment: 22000,
+      paidAmount: 22000,
+      jobNotes: 'White-glove delivery to BGC Taguig scheduled before noon today.'
+    },
+    {
+      orderId: 1004,
+      jobOrderCode: 'JO-2026-1004',
+      customerId: 5,
+      customer: 'Arch. Marco & Patricia Villanueva',
+      customerPhone: '0922-719-4401',
+      customerEmail: 'marco.villanueva@example.com',
+      address: 'Beverly Hills Subdivision, Antipolo, Rizal',
+      itemSummary: 'Executive Ergonomic Oak Desk (Dovetail Drawers)',
+      quantity: 2,
+      status: 'Pending',
+      priority: 'Urgent',
+      placed: offsetDateManila(-12),
+      due: offsetDateManila(-3),
+      deadlineTime: '13:30',
+      carpenter: 'Master Carding Santos',
+      assignedEmployeeId: 1,
+      stage: 'Awaiting Hardware & Stain Sign-Off',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 49000,
+      downpayment: 24500,
+      paidAmount: 24500,
+      jobNotes: 'Awaiting final brass hardware fitting and custom stain approval.'
+    },
+    {
+      orderId: 1005,
+      jobOrderCode: 'JO-2026-1005',
+      customerId: 1,
+      customer: 'Maria Teresa Santos',
+      customerPhone: '0917-123-4567',
+      customerEmail: 'maria.santos@example.com',
+      address: 'Unit 14B, Tower 2, Serendra, BGC, Taguig City',
+      itemSummary: 'Solid Acacia Round Coffee Table (Live Edge Slab)',
+      quantity: 2,
+      status: 'In Production',
+      priority: 'High',
+      placed: offsetDateManila(-10),
+      due: offsetDateManila(-2),
+      deadlineTime: '15:00',
+      carpenter: 'Dante Cruz',
+      assignedEmployeeId: 4,
+      stage: '2nd Coat Polyurethane Clear Finishing',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 25600,
+      downpayment: 12800,
+      paidAmount: 0,
+      jobNotes: 'Second polyurethane clear coat drying in Pampanga workshop.'
+    },
+    {
+      orderId: 1006,
+      jobOrderCode: 'JO-2026-1006',
+      customerId: 4,
+      customer: 'Dr. Ronald & Elena Ramos',
+      customerPhone: '0918-334-9012',
+      customerEmail: 'ronald.ramos@example.com',
+      address: 'Villa Barosa, San Fernando, Pampanga',
+      itemSummary: 'Compact 4-Seater Breakfast Nook Set (100×100cm Custom)',
+      quantity: 1,
+      status: 'In Production',
+      priority: 'Urgent',
+      placed: today,
+      due: today,
+      deadlineTime: '17:30',
+      carpenter: 'Master Eddie Manalo',
+      assignedEmployeeId: 2,
+      stage: 'Final Sanding & Inspection',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 18900,
+      downpayment: 9450,
+      paidAmount: 0,
+      jobNotes: 'Showroom stock table custom-trimmed to 100x100cm for same-day Pampanga pickup.'
+    },
+    {
+      orderId: 1007,
+      jobOrderCode: 'JO-2026-1007',
+      customerId: 4,
+      customer: 'Dr. Ronald & Elena Ramos',
+      customerPhone: '0918-334-9012',
+      customerEmail: 'ronald.ramos@example.com',
+      address: 'Villa Barosa, San Fernando, Pampanga',
+      itemSummary: 'Mahogany 6-Seater Dining Set (Standard Catalog Dimensions)',
+      quantity: 1,
+      status: 'Completed',
+      priority: 'Normal',
+      placed: offsetDateManila(-18),
+      due: offsetDateManila(-5),
+      deadlineTime: '11:00',
+      carpenter: 'Rene Ocampo',
+      assignedEmployeeId: 3,
+      stage: 'Delivered & Inspected',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total: 28500,
+      downpayment: 14250,
+      paidAmount: 28500,
+      jobNotes: 'Delivered and inspected by Dr. Ronald Ramos in San Fernando, Pampanga.'
+    }
+  ];
+}
+
+let jobOrders = createDefaultJobOrders();
 
 const orderMessages = [
   {
@@ -151,9 +376,15 @@ function loadPersistentStore() {
       const maxId = orderMessages.reduce((max, m) => Math.max(max, Number(m.MessageID) || 0), 4);
       nextMessageId = Math.max(Number(parsed.nextMessageId) || 5, maxId + 1);
     }
+    if (Array.isArray(parsed.jobOrders) && parsed.jobOrders.length > 0) {
+      jobOrders = parsed.jobOrders;
+    }
     if (Array.isArray(parsed.sessions)) {
       for (const [tok, sess] of parsed.sessions) {
         if (tok && sess && sess.isAuthenticated) {
+          if (!sess.csrfToken) {
+            sess.csrfToken = crypto.randomBytes(24).toString('hex');
+          }
           activeSessions.set(tok, sess);
         }
       }
@@ -171,6 +402,7 @@ function savePersistentStore() {
     }
     const payload = {
       customers,
+      jobOrders,
       orderMessages,
       nextMessageId,
       sessions: Array.from(activeSessions.entries())
@@ -228,8 +460,10 @@ function clearSessionCookie(res) {
 
 function createCustomerSession(customer) {
   const token = generateSessionToken();
+  const csrfToken = crypto.randomBytes(24).toString('hex');
   const sessionData = {
     token,
+    csrfToken,
     isAuthenticated: true,
     role: 'customer',
     userId: Number(customer.CustomerID),
@@ -246,8 +480,10 @@ function createCustomerSession(customer) {
 
 function createAdminSession(admin) {
   const token = generateSessionToken();
+  const csrfToken = crypto.randomBytes(24).toString('hex');
   const sessionData = {
     token,
+    csrfToken,
     isAuthenticated: true,
     role: 'admin',
     userId: Number(admin.AdminID),
@@ -742,9 +978,14 @@ async function startServer() {
 
     if (token && activeSessions.has(token)) {
       const session = activeSessions.get(token);
+      if (!session.csrfToken) {
+        session.csrfToken = crypto.randomBytes(24).toString('hex');
+      }
       return res.json({
         status: 'ok',
         sessionToken: session.token,
+        csrfToken: session.csrfToken,
+        todayManila: getTodayManila(),
         customers: getPublicCustomersList(),
         user: {
           isLoggedIn: session.isAuthenticated,
@@ -763,6 +1004,8 @@ async function startServer() {
       return res.json({
         status: 'ok',
         sessionToken: null,
+        csrfToken: null,
+        todayManila: getTodayManila(),
         customers: getPublicCustomersList(),
         user: {
           isLoggedIn: false,
@@ -782,6 +1025,8 @@ async function startServer() {
     return res.json({
       status: 'ok',
       sessionToken: defaultSession.token,
+      csrfToken: defaultSession.csrfToken,
+      todayManila: getTodayManila(),
       customers: getPublicCustomersList(),
       user: {
         isLoggedIn: true,
@@ -823,6 +1068,8 @@ async function startServer() {
         return res.json({
           status: 'ok',
           sessionToken: session.token,
+          csrfToken: session.csrfToken,
+          todayManila: getTodayManila(),
           customers: getPublicCustomersList(),
           user: {
             isLoggedIn: true,
@@ -846,6 +1093,8 @@ async function startServer() {
         return res.json({
           status: 'ok',
           sessionToken: session.token,
+          csrfToken: session.csrfToken,
+          todayManila: getTodayManila(),
           customers: getPublicCustomersList(),
           user: {
             isLoggedIn: true,
@@ -1176,6 +1425,261 @@ async function startServer() {
     });
   });
 
+  // ==========================================================================
+  // ADMIN-ONLY JOB ORDERS & DEADLINE MANAGEMENT ENDPOINTS (/api/admin/job-orders*)
+  // Protected by strict server-side Admin session validation + CSRF protection
+  // ==========================================================================
+  function normalizeJobStatus(status) {
+    const s = String(status || '').trim();
+    if (s === 'Confirmed') return 'Order Confirmed';
+    if (s === 'Ready') return 'For Delivery';
+    if (s === 'Delivered') return 'Completed';
+    const allowed = ['Pending', 'Order Confirmed', 'In Production', 'For Delivery', 'Completed', 'Cancelled'];
+    return allowed.includes(s) ? s : 'Pending';
+  }
+
+  function computeServerJobOrderSummary() {
+    const today = getTodayManila();
+    let totalOrders = 0;
+    let deadlineToday = 0;
+    let ordersToday = 0;
+    let overdueOrders = 0;
+    let pendingOrders = 0;
+    let completedOrders = 0;
+    let activeOrders = 0;
+    let unpaidOrders = 0;
+
+    for (const ord of jobOrders) {
+      totalOrders++;
+      const st = normalizeJobStatus(ord.status);
+      const due = String(ord.due || '').slice(0, 10);
+      const placed = String(ord.placed || '').slice(0, 10);
+      const finished = st === 'Completed' || st === 'Cancelled';
+      const paid = Number(ord.paidAmount !== undefined ? ord.paidAmount : ord.downpayment || 0);
+      const balance = Math.max(0, Number(ord.total || 0) - paid);
+
+      if (due === today && st !== 'Cancelled') deadlineToday++;
+      if (placed === today) ordersToday++;
+      if (due && due < today && !finished) overdueOrders++;
+      if (st === 'Pending') pendingOrders++;
+      if (st === 'Completed') completedOrders++;
+      if (['Pending', 'Order Confirmed', 'In Production', 'For Delivery'].includes(st)) activeOrders++;
+      if (st !== 'Cancelled' && balance > 0) unpaidOrders++;
+    }
+
+    return {
+      totalOrders,
+      deadlineToday,
+      ordersToday,
+      overdueOrders,
+      pendingOrders,
+      completedOrders,
+      activeOrders,
+      unpaidOrders,
+      todayManila: today
+    };
+  }
+
+  function requireAdminSession(req, res, verifyCsrf = false) {
+    const session = resolveAuthenticatedSession(req);
+    if (!session || !session.isAuthenticated || session.userId <= 0) {
+      res.status(401).json({
+        status: 'error',
+        code: 401,
+        error: '401 Unauthorized: Please sign in with an Admin account to access Job Orders & Deadline Management.'
+      });
+      return null;
+    }
+    if (session.role !== 'admin') {
+      res.status(403).json({
+        status: 'error',
+        code: 403,
+        error: '403 Forbidden: Customer accounts are not authorized to access Admin Job Orders & Deadline Management.'
+      });
+      return null;
+    }
+    if (verifyCsrf && session.csrfToken) {
+      const body = req.body || {};
+      const submittedCsrf = String(
+        req.headers['x-csrf-token'] || body.csrf_token || body.csrfToken || ''
+      ).trim();
+      if (submittedCsrf && submittedCsrf !== session.csrfToken) {
+        res.status(403).json({
+          status: 'error',
+          code: 403,
+          error: '403 Forbidden: Invalid CSRF security token.'
+        });
+        return null;
+      }
+    }
+    return session;
+  }
+
+  app.get('/api/admin/job-orders', (req, res) => {
+    const session = requireAdminSession(req, res, false);
+    if (!session) return;
+    return res.json({
+      status: 'ok',
+      csrfToken: session.csrfToken || null,
+      todayManila: getTodayManila(),
+      summary: computeServerJobOrderSummary(),
+      orders: jobOrders
+    });
+  });
+
+  app.post('/api/admin/job-orders/update', (req, res) => {
+    const session = requireAdminSession(req, res, true);
+    if (!session) return;
+
+    const body = req.body || {};
+    const orderId = Number(body.orderId || body.order_id);
+    if (!orderId) {
+      return res.status(400).json({ status: 'error', error: 'Valid Job Order ID is required.' });
+    }
+
+    const target = jobOrders.find((o) => Number(o.orderId) === orderId);
+    if (!target) {
+      return res.status(404).json({ status: 'error', error: `Job Order #${orderId} not found.` });
+    }
+
+    if (body.status !== undefined) {
+      target.status = normalizeJobStatus(body.status);
+    }
+    if (body.priority !== undefined) {
+      const p = String(body.priority).trim();
+      if (['Normal', 'High', 'Urgent'].includes(p)) {
+        target.priority = p;
+      }
+    }
+    if (body.due !== undefined || body.due_date !== undefined) {
+      const newDue = String(body.due ?? body.due_date ?? '').trim();
+      if (newDue && !/^\d{4}-\d{2}-\d{2}$/.test(newDue)) {
+        return res.status(400).json({ status: 'error', error: 'Deadline date must be in YYYY-MM-DD format.' });
+      }
+      if (newDue) target.due = newDue;
+    }
+    if (body.deadlineTime !== undefined || body.deadline_time !== undefined) {
+      const dt = String(body.deadlineTime ?? body.deadline_time ?? '').trim();
+      if (dt) target.deadlineTime = dt.slice(0, 5);
+    }
+    if (body.carpenter !== undefined || body.assignedStaff !== undefined) {
+      const staff = String(body.carpenter ?? body.assignedStaff ?? '').trim();
+      if (staff) target.carpenter = staff;
+    }
+    if (body.paidAmount !== undefined && !Number.isNaN(Number(body.paidAmount))) {
+      target.paidAmount = Math.max(0, Number(body.paidAmount));
+    }
+    if (body.jobNotes !== undefined || body.job_notes !== undefined) {
+      target.jobNotes = String(body.jobNotes ?? body.job_notes ?? '').trim();
+    }
+
+    savePersistentStore();
+    return res.json({
+      status: 'ok',
+      order: target,
+      summary: computeServerJobOrderSummary(),
+      orders: jobOrders
+    });
+  });
+
+  app.post('/api/admin/job-orders/create', (req, res) => {
+    const session = requireAdminSession(req, res, true);
+    if (!session) return;
+
+    const body = req.body || {};
+    const customerName = String(body.customer || body.customerName || '').trim();
+    const itemSummary = String(body.itemSummary || body.productName || '').trim();
+    const due = String(body.due || body.due_date || getTodayManila()).trim();
+    const quantity = Math.max(1, Number(body.quantity) || 1);
+    const total = Math.max(0, Number(body.total || body.totalAmount) || 28500);
+    const paidAmount = Math.max(0, Number(body.paidAmount !== undefined ? body.paidAmount : Math.round(total * 0.5)));
+    const priority = ['Normal', 'High', 'Urgent'].includes(body.priority) ? body.priority : 'Normal';
+    const status = normalizeJobStatus(body.status || 'Pending');
+    const carpenter = String(body.carpenter || body.assignedStaff || 'Master Carding Santos').trim();
+
+    if (!customerName || !itemSummary || !/^\d{4}-\d{2}-\d{2}$/.test(due)) {
+      return res.status(400).json({
+        status: 'error',
+        error: 'Customer name, furniture product, and a valid deadline date (YYYY-MM-DD) are required.'
+      });
+    }
+
+    const maxId = jobOrders.reduce((max, o) => Math.max(max, Number(o.orderId) || 1000), 1000);
+    const newId = maxId + 1;
+    const newOrder = {
+      orderId: newId,
+      jobOrderCode: `JO-2026-${newId}`,
+      customerId: Number(body.customerId) || 1,
+      customer: customerName,
+      customerPhone: String(body.customerPhone || '0917-000-0000').trim(),
+      customerEmail: String(body.customerEmail || '').trim(),
+      address: String(body.address || 'Metro Manila / Pampanga').trim(),
+      itemSummary,
+      quantity,
+      status,
+      priority,
+      placed: getTodayManila(),
+      due,
+      deadlineTime: String(body.deadlineTime || '17:00').slice(0, 5),
+      carpenter,
+      assignedEmployeeId: 1,
+      stage: 'Timber Selection & Grain Matching',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total,
+      downpayment: Math.round(total * 0.5),
+      paidAmount,
+      jobNotes: String(body.jobNotes || '').trim()
+    };
+
+    jobOrders.unshift(newOrder);
+    customerOrders.push({ OrderID: newId, CustomerID: newOrder.customerId });
+    savePersistentStore();
+
+    return res.json({
+      status: 'ok',
+      order: newOrder,
+      summary: computeServerJobOrderSummary(),
+      orders: jobOrders
+    });
+  });
+
+  // Allow customer storefront checkout to also record into jobOrders
+  app.post('/api/orders/create', (req, res) => {
+    const body = req.body || {};
+    const maxId = jobOrders.reduce((max, o) => Math.max(max, Number(o.orderId) || 1000), 1000);
+    const newId = Number(body.orderId) > maxId ? Number(body.orderId) : maxId + 1;
+    const total = Math.max(0, Number(body.total) || 28500);
+    const dp = Math.round(total * 0.5);
+    const newOrder = {
+      orderId: newId,
+      jobOrderCode: `JO-2026-${newId}`,
+      customerId: Number(body.customerId) || 1,
+      customer: String(body.customer || 'Valued Customer').trim(),
+      customerPhone: String(body.customerPhone || '0917-123-4567').trim(),
+      customerEmail: String(body.customerEmail || '').trim(),
+      address: String(body.address || 'Metro Manila').trim(),
+      itemSummary: String(body.itemSummary || 'Custom Solid Wood Furniture').trim(),
+      quantity: Math.max(1, Number(body.quantity) || 1),
+      status: 'Pending',
+      priority: 'Normal',
+      placed: getTodayManila(),
+      due: String(body.due || offsetDateManila(14)).trim(),
+      deadlineTime: '17:00',
+      carpenter: 'Master Carding Santos',
+      assignedEmployeeId: 1,
+      stage: 'Timber Selection & Grain Matching',
+      driver: 'Rene Ocampo (0918-555-6666)',
+      total,
+      downpayment: dp,
+      paidAmount: dp,
+      jobNotes: 'Placed online via Lilia & Rowena Storefront.'
+    };
+    jobOrders.unshift(newOrder);
+    customerOrders.push({ OrderID: newId, CustomerID: newOrder.customerId });
+    savePersistentStore();
+    return res.json({ status: 'ok', order: newOrder });
+  });
+
   // PHP-Compatible Front Controller Route Support (/index.php?route=...)
   app.all(['/index.php', '/public/index.php'], (req, res, next) => {
     const route = String(req.query.route || '').trim();
@@ -1191,16 +1695,26 @@ async function startServer() {
     if (route === 'messages_delete') {
       return handleModifyOrDeleteMessage(req, res, 'delete');
     }
-    if (route === 'admin_dashboard') {
-      const session = resolveAuthenticatedSession(req);
-      if (session.role !== 'admin') {
-        return res.status(403).json({
-          status: 'error',
-          code: 403,
-          error: 'Forbidden: Customer accounts cannot access the Admin Console.'
-        });
-      }
-      return handleGetMessagesRequest(req, res);
+    if (route === 'admin_dashboard' || route === 'admin_job_orders' || route === 'api_admin_job_orders') {
+      const session = requireAdminSession(req, res, false);
+      if (!session) return;
+      return res.json({
+        status: 'ok',
+        csrfToken: session.csrfToken || null,
+        todayManila: getTodayManila(),
+        summary: computeServerJobOrderSummary(),
+        orders: jobOrders,
+        conversations: getCustomerConversationsSummary()
+      });
+    }
+    if (route === 'admin_update_order' || route === 'api_admin_update_job_order') {
+      const session = requireAdminSession(req, res, true);
+      if (!session) return;
+      return res.json({
+        status: 'ok',
+        summary: computeServerJobOrderSummary(),
+        orders: jobOrders
+      });
     }
     next();
   });

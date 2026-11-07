@@ -70,7 +70,7 @@ class Admin
      */
     public function updateOrderStatus(int $orderId, string $newStatus): bool
     {
-        $allowed = ['Pending', 'Confirmed', 'In Production', 'Ready', 'Delivered', 'Completed', 'Cancelled'];
+        $allowed = ['Pending', 'Order Confirmed', 'Confirmed', 'In Production', 'For Delivery', 'Ready', 'Delivered', 'Completed', 'Cancelled'];
         if (!in_array($newStatus, $allowed, true)) {
             return false;
         }

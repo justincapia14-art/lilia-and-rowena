@@ -133,18 +133,26 @@ CREATE TABLE Admin (
 -- 8. Customer_Order: header of an order (the whole purchase)
 -- ---------------------------------------------------------------------
 CREATE TABLE Customer_Order (
-    OrderID     INT          NOT NULL AUTO_INCREMENT,
-    CustomerID  INT          NOT NULL,
-    OrderDate   DATE         NOT NULL DEFAULT (CURRENT_DATE),
-    DueDate     DATE         NULL,
-    Status      VARCHAR(20)  NOT NULL DEFAULT 'Pending',
+    OrderID             INT           NOT NULL AUTO_INCREMENT,
+    CustomerID          INT           NOT NULL,
+    OrderDate           DATE          NOT NULL DEFAULT (CURRENT_DATE),
+    DueDate             DATE          NULL,
+    DeadlineTime        TIME          NULL DEFAULT '17:00:00',
+    Status              VARCHAR(30)   NOT NULL DEFAULT 'Pending',
+    Priority            VARCHAR(20)   NOT NULL DEFAULT 'Normal',
+    AssignedEmployeeID  INT           NULL,
+    JobNotes            VARCHAR(255)  NULL,
     CONSTRAINT pk_order PRIMARY KEY (OrderID),
     CONSTRAINT chk_order_status CHECK (Status IN
-        ('Pending', 'Confirmed', 'In Production', 'Ready', 'Delivered', 'Completed', 'Cancelled')),
+        ('Pending', 'Order Confirmed', 'Confirmed', 'In Production', 'For Delivery', 'Ready', 'Delivered', 'Completed', 'Cancelled')),
+    CONSTRAINT chk_order_priority CHECK (Priority IN ('Normal', 'High', 'Urgent')),
     CONSTRAINT chk_order_dates CHECK (DueDate IS NULL OR DueDate >= OrderDate),
     CONSTRAINT fk_order_customer FOREIGN KEY (CustomerID)
         REFERENCES Customer (CustomerID)
-        ON UPDATE CASCADE ON DELETE RESTRICT
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_order_assigned_employee FOREIGN KEY (AssignedEmployeeID)
+        REFERENCES Employee (EmployeeID)
+        ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE = InnoDB;
 
 -- ---------------------------------------------------------------------

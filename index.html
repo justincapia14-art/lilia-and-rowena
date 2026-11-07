@@ -1007,95 +1007,354 @@
       </div>
     </div>
 
-    <!-- 5B. ADMIN WORKSHOP MANAGEMENT MODAL (Maps to Table: Admin) -->
+    <!-- 5B. ADMIN WORKSHOP & JOB ORDERS TRACKING MODAL (Maps to Table: Admin & Customer_Order) -->
     <div id="adminModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
-      <div class="modal-card modal-lg">
-        <div class="modal-header">
-          <div>
-            <span class="modal-kicker">Admin Management Console (Database Table: Admin)</span>
-            <h3 id="adminModalTitle" class="modal-title">Lilia &amp; Rowena Workshop Administration</h3>
-          </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <button type="button" class="btn-sm-primary" style="background-color: #dc2626;" onclick="handleUserLogout()">Logout Admin</button>
-            <button type="button" class="modal-close-btn" aria-label="Close admin panel" onclick="closeModal('adminModal')">✕</button>
-          </div>
-        </div>
+      <div class="modal-card modal-oms-xl">
+        <div class="oms-admin-shell">
+          <!-- LEFT SIDEBAR NAVIGATION (LILIA AND ROWENA FURNITURE OMS) -->
+          <aside class="oms-sidebar" aria-label="Admin Sidebar Navigation">
+            <div>
+              <div class="oms-sidebar-brand">
+                <div class="oms-brand-badge">L&amp;R</div>
+                <div>
+                  <strong class="oms-brand-name">LILIA &amp; ROWENA</strong>
+                  <span class="oms-brand-sub">Furniture Order Management</span>
+                </div>
+              </div>
 
-        <div class="modal-body">
-          <div class="price-banner-box">
-            <div style="font-size: 0.78rem;">
-              <strong>Logged in Admin Record (Table: <code>Admin</code>):</strong> <code>AdminID: 1</code> · <code>admin@liliaandrowena.com</code><br />
-              <span style="color: #475569;">Foreign Keys Linked: <code>ProductID</code>, <code>CategoryID</code>, <code>MaterialID</code>, <code>EmployeeID</code>, <code>SupplierID</code></span>
-            </div>
-            <span class="hero-est-tag">Active Session</span>
-          </div>
-
-          <div id="adminStatusNotice" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600; margin-bottom: 1rem;"></div>
-
-          <h4 style="font-family: 'Playfair Display', serif; font-size: 1.05rem; margin-bottom: 0.6rem;">1. Customer Orders &amp; Production Status (Table: <code>Customer_Order</code>)</h4>
-          <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1.25rem;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem;">
-              <thead>
-                <tr style="background: #f0f7ff; text-align: left; border-bottom: 1px solid #bae6fd;">
-                  <th style="padding: 0.65rem;">Order #</th>
-                  <th style="padding: 0.65rem;">Customer</th>
-                  <th style="padding: 0.65rem;">Ordered Piece</th>
-                  <th style="padding: 0.65rem;">Total</th>
-                  <th style="padding: 0.65rem;">Current Status</th>
-                  <th style="padding: 0.65rem;">Change Status</th>
-                </tr>
-              </thead>
-              <tbody id="adminOrdersTableBody">
-                <!-- Populated by renderAdminDashboard() in main.js -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- 2. PRIVATE CUSTOMER CONVERSATIONS IN ADMIN CONSOLE -->
-          <div style="border: 1px solid #bae6fd; border-radius: 10px; padding: 1rem; background: #f0f7ff; margin-bottom: 1.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.5rem;">
-              <h4 style="font-family: 'Playfair Display', serif; font-size: 1.05rem; margin: 0;">2. Private Customer-Admin Conversations (Table: <code>Order_Message</code>)</h4>
-              <span style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid #bbf7d0;">
-                ● Separate 1-on-1 Customer Threads
-              </span>
-            </div>
-            <p id="adminActiveThreadLabel" style="font-size: 0.75rem; color: #075985; margin-bottom: 0.5rem;">
-              Active Private Conversation: <strong>Maria Teresa Santos (Customer #1)</strong> ↔ <strong>Workshop Admin</strong>
-            </p>
-
-            <!-- Admin Customer Conversation Switcher List -->
-            <div id="adminConversationListInConsole" style="display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-              <!-- Populated by buildAdminConversationListHtml() in main.js -->
+              <nav class="oms-sidebar-nav">
+                <button type="button" id="omsNavDeadlineTodayBtn" class="oms-nav-item active" onclick="switchAdminOmsTab('deadline_today')">
+                  <span>⏰ Deadline Today</span>
+                  <span id="omsSidebarDueTodayCount" class="oms-nav-count">3</span>
+                </button>
+                <button type="button" id="omsNavAllOrdersBtn" class="oms-nav-item" onclick="switchAdminOmsTab('all')">
+                  <span>📋 Job Orders</span>
+                  <span id="omsSidebarTotalCount" class="oms-nav-count">7</span>
+                </button>
+                <button type="button" id="omsNavOverdueBtn" class="oms-nav-item" onclick="switchAdminOmsTab('overdue')">
+                  <span>⚠️ Overdue Orders</span>
+                  <span id="omsSidebarOverdueCount" class="oms-nav-count">2</span>
+                </button>
+                <button type="button" class="oms-nav-item" onclick="scrollToAdminSection('adminMessagesBlock')">
+                  <span>💬 Customer Messages</span>
+                </button>
+                <button type="button" class="oms-nav-item" onclick="scrollToAdminSection('adminInventoryBlock')">
+                  <span>🪵 Materials &amp; Staff</span>
+                </button>
+                <button type="button" class="oms-nav-item" onclick="closeModal('adminModal')">
+                  <span>🏠 Return to Storefront</span>
+                </button>
+              </nav>
             </div>
 
-            <div id="adminChatFeed" class="chat-feed-box" style="height: 210px; background: #f8fafc;">
-              <!-- Populated in real time by renderMessageFeeds() in main.js -->
+            <div class="oms-sidebar-footer">
+              <div class="oms-admin-identity">
+                <strong id="omsAdminEmailLabel">admin@liliaandrowena.com</strong>
+                <span>Authorized Workshop Admin · Asia/Manila</span>
+              </div>
+              <button type="button" class="oms-signout-btn" onclick="handleUserLogout()">
+                ⏻ Sign Out Admin
+              </button>
+            </div>
+          </aside>
+
+          <!-- MAIN ADMIN WORKSPACE -->
+          <div class="oms-main-content" id="omsMainScrollContainer">
+            <!-- TOP HEADER BAR -->
+            <div class="oms-topbar">
+              <div>
+                <span id="omsActiveTabKicker" class="oms-kicker">JOB ORDERS TRACKING: DEADLINE TODAY</span>
+                <h3 id="adminModalTitle" class="oms-page-title">Job Orders &amp; Deadline Management</h3>
+                <p class="oms-page-subtitle">
+                  <strong id="omsSubtitleDueTodayText">3 deadline today orders</strong>
+                  <span aria-hidden="true">·</span>
+                  <span>Timezone: <code>Asia/Manila (PHT)</code> (<span id="omsTodayManilaLabel">2026-11-07</span>)</span>
+                </p>
+              </div>
+              <div class="oms-topbar-actions">
+                <button type="button" class="btn-sm-soft" onclick="refreshAdminJobOrdersFromServer()">
+                  ↻ Refresh
+                </button>
+                <button type="button" class="btn-sm-primary" onclick="toggleNewJobOrderForm()">
+                  + New Job Order
+                </button>
+                <button type="button" class="btn-sm-primary" style="background-color: #dc2626;" onclick="handleUserLogout()">
+                  Logout Admin
+                </button>
+                <button type="button" class="modal-close-btn" aria-label="Close admin panel" onclick="closeModal('adminModal')">✕</button>
+              </div>
             </div>
 
-            <form onsubmit="return handleAdminReplySubmit(event)" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <select id="adminReplyTargetOrder" onchange="selectAdminConversation(this.value.split('|')[0])" style="padding: 0.5rem 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.76rem; background: #ffffff;">
-                <option value="1|1001|Order Follow-Up (#1001)">Reply Privately to Maria Teresa Santos (Customer #1)</option>
-                <option value="2|1002|Add Custom Request (#1002)">Reply Privately to Atty. Roberto Mendoza (Customer #2)</option>
-              </select>
-              <input type="text" id="adminReplyInput" required placeholder="Type official Admin reply (visible only to selected customer)..." style="flex: 1; min-width: 220px; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;" />
-              <button type="submit" class="btn-sm-primary">Send Private Reply →</button>
-            </form>
-          </div>
+            <!-- ADMIN FEEDBACK NOTICE BOX -->
+            <div id="adminStatusNotice" class="oms-alert-success" style="display: none;"></div>
+            <div id="adminErrorNotice" class="oms-alert-error" style="display: none;"></div>
 
-          <div class="form-row-2" style="font-size: 0.76rem;">
-            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #f8fafc;">
-              <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">🪵 Raw Materials &amp; Suppliers (Tables: <code>Material</code> &amp; <code>Supplier</code>)</strong>
-              <p>• <strong>Kiln-Dried Mahogany Planks:</strong> 850 Board Feet (Pampanga Hardwoods Inc.)</p>
-              <p>• <strong>Seasoned Teak Timber:</strong> 420 Board Feet (Pampanga Hardwoods Inc.)</p>
-              <p>• <strong>American White Ash Planks:</strong> 310 Board Feet (Luzon Timber Mill)</p>
-              <p>• <strong>Sky Blue Woven Linen Fabric:</strong> 120 Meters (Artisan Upholstery Co.)</p>
+            <!-- 4. DASHBOARD SUMMARY CARDS (Live from Database) -->
+            <div class="oms-kpi-grid" aria-label="Dashboard Summary Cards">
+              <button type="button" class="oms-kpi-card" onclick="switchAdminOmsTab('all')">
+                <span class="oms-kpi-label">Total Orders</span>
+                <strong id="kpiTotalOrders" class="oms-kpi-value">7</strong>
+                <span class="oms-kpi-foot">All furniture job orders</span>
+              </button>
+
+              <button type="button" class="oms-kpi-card kpi-due-today" onclick="switchAdminOmsTab('deadline_today')">
+                <span class="oms-kpi-label">Deadline Today</span>
+                <strong id="kpiDeadlineToday" class="oms-kpi-value">3</strong>
+                <span class="oms-kpi-foot">Scheduled due today (PHT)</span>
+              </button>
+
+              <button type="button" class="oms-kpi-card kpi-overdue" onclick="switchAdminOmsTab('overdue')">
+                <span class="oms-kpi-label">Overdue Orders</span>
+                <strong id="kpiOverdueOrders" class="oms-kpi-value">2</strong>
+                <span class="oms-kpi-foot">Unfinished past deadline</span>
+              </button>
+
+              <button type="button" class="oms-kpi-card kpi-pending" onclick="filterAdminByKpiStatus('Pending')">
+                <span class="oms-kpi-label">Pending Orders</span>
+                <strong id="kpiPendingOrders" class="oms-kpi-value">1</strong>
+                <span class="oms-kpi-foot">Awaiting confirmation</span>
+              </button>
+
+              <button type="button" class="oms-kpi-card kpi-completed" onclick="filterAdminByKpiStatus('Completed')">
+                <span class="oms-kpi-label">Completed Orders</span>
+                <strong id="kpiCompletedOrders" class="oms-kpi-value">1</strong>
+                <span class="oms-kpi-foot">Finished &amp; delivered</span>
+              </button>
             </div>
-            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #f8fafc;">
-              <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">👷 Workshop Employees (Table: <code>Employee</code>)</strong>
-              <p>• <strong>Master Carding Santos:</strong> Master Carpenter (Active)</p>
-              <p>• <strong>Master Eddie Manalo:</strong> Master Carpenter (Active)</p>
-              <p>• <strong>Dante Cruz:</strong> Master Finisher (Active)</p>
-              <p>• <strong>Rene Ocampo:</strong> In-House Delivery Driver (Active)</p>
+
+            <!-- COLLAPSIBLE "+ NEW JOB ORDER" FORM (CSRF Protected) -->
+            <div id="newJobOrderFormCard" class="oms-board-card" style="display: none; padding: 1.15rem; border: 2px solid #0284c7; background: #f0f9ff;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div>
+                  <span class="oms-kicker">Create Workshop Job Order</span>
+                  <h4 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; margin: 0;">Log New Furniture Job Order &amp; Deadline</h4>
+                </div>
+                <button type="button" class="btn-sm-soft" onclick="toggleNewJobOrderForm()">Cancel</button>
+              </div>
+              <form onsubmit="return handleCreateNewJobOrder(event)">
+                <input type="hidden" id="adminCsrfTokenInput" name="csrf_token" value="" />
+                <div class="dimensions-grid-3" style="margin-bottom: 0.65rem;">
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoCustomer">Customer Name *</label>
+                    <input type="text" id="newJoCustomer" required placeholder="e.g. Maria Teresa Santos" />
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoProduct">Furniture Product &amp; Specs *</label>
+                    <input type="text" id="newJoProduct" required placeholder="e.g. Mahogany 6-Seater Dining Set" />
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoQty">Quantity *</label>
+                    <input type="number" id="newJoQty" value="1" min="1" max="50" required />
+                  </div>
+                </div>
+                <div class="dimensions-grid-3" style="margin-bottom: 0.75rem;">
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoTotal">Total Amount (₱) *</label>
+                    <input type="number" id="newJoTotal" value="28500" min="1000" step="100" required />
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoPriority">Priority *</label>
+                    <select id="newJoPriority">
+                      <option value="Normal">Normal</option>
+                      <option value="High">High</option>
+                      <option value="Urgent" selected>Urgent</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoDeadline">Deadline Date (Asia/Manila) *</label>
+                    <input type="date" id="newJoDeadline" required />
+                  </div>
+                </div>
+                <div class="form-row-2" style="align-items: flex-end;">
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="newJoStaff">Assigned Master Carpenter / Staff</label>
+                    <select id="newJoStaff">
+                      <option value="Master Carding Santos">Master Carding Santos (Carpenter)</option>
+                      <option value="Master Eddie Manalo">Master Eddie Manalo (Carpenter)</option>
+                      <option value="Dante Cruz">Dante Cruz (Master Finisher)</option>
+                      <option value="Rene Ocampo">Rene Ocampo (Delivery Driver)</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn-primary">
+                    <span>✓ Save Job Order to Database</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- 2 & 3. MAIN JOB ORDERS TRACKING & DEADLINE TODAY BOARD -->
+            <div class="oms-board-card">
+              <!-- 6 TABS: 1. Deadline Today, 2. Orders Today, 3. Overdue Orders, 4. Active Orders, 5. Unpaid Orders, 6. All Orders -->
+              <div class="oms-tabs-bar" role="tablist" aria-label="Job Order Deadline Tabs">
+                <button type="button" id="omsTab_deadline_today" class="oms-tab-link active tab-danger" onclick="switchAdminOmsTab('deadline_today')">
+                  <span>🎯 Deadline Today</span>
+                  <span id="tabCount_deadline_today" class="oms-tab-badge badge-danger">3</span>
+                </button>
+                <button type="button" id="omsTab_orders_today" class="oms-tab-link" onclick="switchAdminOmsTab('orders_today')">
+                  <span>✨ Orders Today</span>
+                  <span id="tabCount_orders_today" class="oms-tab-badge">2</span>
+                </button>
+                <button type="button" id="omsTab_overdue" class="oms-tab-link" onclick="switchAdminOmsTab('overdue')">
+                  <span>⚠️ Overdue Orders</span>
+                  <span id="tabCount_overdue" class="oms-tab-badge badge-danger">2</span>
+                </button>
+                <button type="button" id="omsTab_active" class="oms-tab-link" onclick="switchAdminOmsTab('active')">
+                  <span>🔨 Active Orders</span>
+                  <span id="tabCount_active" class="oms-tab-badge">6</span>
+                </button>
+                <button type="button" id="omsTab_unpaid" class="oms-tab-link" onclick="switchAdminOmsTab('unpaid')">
+                  <span>💳 Unpaid Orders</span>
+                  <span id="tabCount_unpaid" class="oms-tab-badge">6</span>
+                </button>
+                <button type="button" id="omsTab_all" class="oms-tab-link" onclick="switchAdminOmsTab('all')">
+                  <span>🗂️ All Orders</span>
+                  <span id="tabCount_all" class="oms-tab-badge">7</span>
+                </button>
+              </div>
+
+              <!-- FINANCIAL SUMMARY STRIP (Matches PrintOMS Screenshot) -->
+              <div class="oms-financial-strip">
+                <div>
+                  <span>Total Amount:</span>
+                  <strong id="omsStripTotalAmount">₱93,350.00</strong>
+                </div>
+                <span class="oms-strip-sep">|</span>
+                <div>
+                  <span>Total Due (Unpaid Balance):</span>
+                  <strong id="omsStripTotalDue" style="color: #dc2626;">₱56,125.00</strong>
+                </div>
+                <span class="oms-strip-sep">|</span>
+                <div>
+                  <span>Paid:</span>
+                  <strong id="omsStripTotalPaid" style="color: #15803d;">₱37,225.00</strong>
+                </div>
+              </div>
+
+              <!-- SEARCH, FILTER & SORT CONTROLS -->
+              <div class="oms-filter-bar">
+                <div class="oms-search-input-wrap">
+                  <input
+                    type="text"
+                    id="omsSearchInput"
+                    oninput="renderAdminDashboard()"
+                    placeholder="Search by Job Order ID (e.g. JO-2026-1001 or 1001), customer name, furniture product, or phone..."
+                    aria-label="Search Job Orders by ID or Customer Name"
+                  />
+                </div>
+
+                <select id="omsStatusFilter" onchange="renderAdminDashboard()" aria-label="Filter by Order Status">
+                  <option value="ALL">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Order Confirmed">Order Confirmed</option>
+                  <option value="In Production">In Production</option>
+                  <option value="For Delivery">For Delivery</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+
+                <select id="omsPriorityFilter" onchange="renderAdminDashboard()" aria-label="Filter by Priority">
+                  <option value="ALL">All Priorities</option>
+                  <option value="Urgent">🔥 Urgent</option>
+                  <option value="High">⚡ High</option>
+                  <option value="Normal">Normal</option>
+                </select>
+
+                <select id="omsDeadlineFilter" onchange="renderAdminDashboard()" aria-label="Filter by Deadline">
+                  <option value="ALL">All Deadlines</option>
+                  <option value="DUE_TODAY">Due Today Only</option>
+                  <option value="OVERDUE">Overdue Only</option>
+                  <option value="UPCOMING">Upcoming Deadlines</option>
+                </select>
+
+                <select id="omsSortSelect" onchange="renderAdminDashboard()" aria-label="Sort Orders by Deadline">
+                  <option value="deadline_asc">Sort: Deadline Earliest ↑</option>
+                  <option value="deadline_desc">Sort: Deadline Latest ↓</option>
+                  <option value="priority_desc">Sort: Priority (Urgent First)</option>
+                  <option value="id_desc">Sort: Job Order ID ↓</option>
+                </select>
+
+                <button type="button" class="btn-sm-soft" onclick="resetAdminOmsFilters()">
+                  Reset Filters
+                </button>
+              </div>
+
+              <!-- JOB ORDERS TABLE (11 Required Columns) -->
+              <div class="oms-table-wrap">
+                <table class="oms-job-table">
+                  <thead>
+                    <tr>
+                      <th>Job Order ID</th>
+                      <th>Customer Name</th>
+                      <th>Furniture Product</th>
+                      <th>Quantity</th>
+                      <th>Order Status</th>
+                      <th>Total Amount</th>
+                      <th>Priority</th>
+                      <th>Order Date</th>
+                      <th>Assigned Staff</th>
+                      <th>Deadline ↑</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminOrdersTableBody">
+                    <!-- Populated dynamically by renderAdminDashboard() in main.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- VIEW / EDIT DETAILED JOB ORDER PANEL -->
+            <div id="adminJobOrderDetailPanel" class="oms-board-card" style="display: none; padding: 1.25rem; border: 2px solid #0284c7; background: #ffffff;">
+              <!-- Populated when Admin clicks View / Edit on any Job Order row -->
+            </div>
+
+            <!-- 2. PRIVATE CUSTOMER CONVERSATIONS IN ADMIN CONSOLE -->
+            <div id="adminMessagesBlock" style="border: 1px solid #bae6fd; border-radius: 10px; padding: 1rem; background: #f0f7ff;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h4 style="font-family: 'Playfair Display', serif; font-size: 1.05rem; margin: 0;">Private Customer-Admin Conversations (Table: <code>Order_Message</code>)</h4>
+                <span style="font-size: 0.72rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid #bbf7d0;">
+                  ● Separate 1-on-1 Customer Threads
+                </span>
+              </div>
+              <p id="adminActiveThreadLabel" style="font-size: 0.75rem; color: #075985; margin-bottom: 0.5rem;">
+                Active Private Conversation: <strong>Maria Teresa Santos (Customer #1)</strong> ↔ <strong>Workshop Admin</strong>
+              </p>
+
+              <!-- Admin Customer Conversation Switcher List -->
+              <div id="adminConversationListInConsole" style="display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                <!-- Populated by buildAdminConversationListHtml() in main.js -->
+              </div>
+
+              <div id="adminChatFeed" class="chat-feed-box" style="height: 190px; background: #f8fafc;">
+                <!-- Populated in real time by renderMessageFeeds() in main.js -->
+              </div>
+
+              <form onsubmit="return handleAdminReplySubmit(event)" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <select id="adminReplyTargetOrder" onchange="selectAdminConversation(this.value.split('|')[0])" style="padding: 0.5rem 0.65rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.76rem; background: #ffffff;">
+                  <option value="1|1001|Order Follow-Up (#1001)">Reply Privately to Maria Teresa Santos (Customer #1)</option>
+                  <option value="2|1002|Add Custom Request (#1002)">Reply Privately to Atty. Roberto Mendoza (Customer #2)</option>
+                </select>
+                <input type="text" id="adminReplyInput" required placeholder="Type official Admin reply (visible only to selected customer)..." style="flex: 1; min-width: 220px; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;" />
+                <button type="submit" class="btn-sm-primary">Send Private Reply →</button>
+              </form>
+            </div>
+
+            <!-- 3. RAW MATERIALS & WORKSHOP EMPLOYEES -->
+            <div id="adminInventoryBlock" class="form-row-2" style="font-size: 0.76rem;">
+              <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #ffffff;">
+                <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">🪵 Raw Materials &amp; Suppliers (Tables: <code>Material</code> &amp; <code>Supplier</code>)</strong>
+                <p>• <strong>Kiln-Dried Mahogany Planks:</strong> 850 Board Feet (Pampanga Hardwoods Inc.)</p>
+                <p>• <strong>Seasoned Teak Timber:</strong> 420 Board Feet (Pampanga Hardwoods Inc.)</p>
+                <p>• <strong>American White Ash Planks:</strong> 310 Board Feet (Luzon Timber Mill)</p>
+                <p>• <strong>Sky Blue Woven Linen Fabric:</strong> 120 Meters (Artisan Upholstery Co.)</p>
+              </div>
+              <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.9rem; background: #ffffff;">
+                <strong style="color: #075985; display: block; margin-bottom: 0.45rem;">👷 Workshop Employees (Table: <code>Employee</code>)</strong>
+                <p>• <strong>Master Carding Santos:</strong> Master Carpenter (Active)</p>
+                <p>• <strong>Master Eddie Manalo:</strong> Master Carpenter (Active)</p>
+                <p>• <strong>Dante Cruz:</strong> Master Finisher (Active)</p>
+                <p>• <strong>Rene Ocampo:</strong> In-House Delivery Driver (Active)</p>
+              </div>
             </div>
           </div>
         </div>

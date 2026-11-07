@@ -1809,3 +1809,721 @@ button, input, select, textarea {
     }
 }
 
+/* ==========================================================================
+   13. ADMIN JOB ORDERS TRACKING & DEADLINE MANAGEMENT (LILIA & ROWENA OMS)
+   ========================================================================== */
+.modal-card.modal-oms-xl {
+    max-width: 1400px;
+    width: 98vw;
+    max-height: 94vh;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.oms-admin-shell {
+    display: grid;
+    grid-template-columns: 205px 1fr;
+    min-height: 680px;
+    max-height: 90vh;
+    background-color: #f8fafc;
+    overflow: hidden;
+}
+
+.page-content .oms-admin-shell {
+    max-height: none;
+    min-height: calc(100vh - 120px);
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Sidebar Navigation */
+.oms-sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+    overflow-y: auto;
+}
+
+.oms-sidebar-brand {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    padding: 1.15rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.oms-brand-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.oms-brand-name {
+    display: block;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+}
+
+.oms-brand-sub {
+    display: block;
+    font-size: 0.68rem;
+    color: #e0f2fe;
+    margin-top: 0.1rem;
+}
+
+.oms-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.9rem 0.75rem;
+    flex-grow: 1;
+}
+
+.oms-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    padding: 0.65rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.oms-nav-item:hover {
+    background-color: #f0f9ff;
+    color: #0284c7;
+}
+
+.oms-nav-item.active {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border-color: #bae6fd;
+    font-weight: 700;
+}
+
+.oms-nav-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    font-variant-numeric: tabular-nums;
+}
+
+.oms-sidebar-footer {
+    padding: 0.9rem;
+    border-top: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.oms-admin-identity {
+    margin-bottom: 0.65rem;
+}
+
+.oms-admin-identity strong {
+    display: block;
+    font-size: 0.74rem;
+    color: #0f172a;
+    word-break: break-all;
+}
+
+.oms-admin-identity span {
+    display: block;
+    font-size: 0.68rem;
+    color: #64748b;
+}
+
+.oms-signout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.oms-signout-btn:hover {
+    background-color: #fee2e2;
+}
+
+/* Main Content Area */
+.oms-main-content {
+    padding: 1.35rem 1.6rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+}
+
+.oms-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+}
+
+.oms-kicker {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #0284c7;
+    margin-bottom: 0.15rem;
+}
+
+.oms-page-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.45rem;
+    color: #0f172a;
+    margin: 0;
+}
+
+.oms-page-subtitle {
+    font-size: 0.78rem;
+    color: #475569;
+    margin-top: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.oms-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* 5 Summary KPI Cards */
+.oms-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.85rem;
+}
+
+.oms-kpi-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.oms-kpi-card:hover {
+    transform: translateY(-1px);
+    border-color: #7dd3fc;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
+}
+
+.oms-kpi-card.kpi-due-today {
+    background-color: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.oms-kpi-card.kpi-overdue {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
+.oms-kpi-card.kpi-pending {
+    background-color: #f0f9ff;
+    border-color: #bae6fd;
+}
+
+.oms-kpi-card.kpi-completed {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.oms-kpi-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.oms-kpi-value {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0.2rem 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.oms-kpi-card.kpi-due-today .oms-kpi-value {
+    color: #ea580c;
+}
+
+.oms-kpi-card.kpi-overdue .oms-kpi-value {
+    color: #dc2626;
+}
+
+.oms-kpi-card.kpi-pending .oms-kpi-value {
+    color: #0284c7;
+}
+
+.oms-kpi-card.kpi-completed .oms-kpi-value {
+    color: #15803d;
+}
+
+.oms-kpi-foot {
+    font-size: 0.68rem;
+    color: #64748b;
+}
+
+/* Main Job Orders Board Card */
+.oms-board-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* 6 Tabs Bar (PrintOMS Reference Layout) */
+.oms-tabs-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.6rem 1rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    overflow-x: auto;
+}
+
+.oms-tab-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.95rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.oms-tab-link:hover {
+    color: #0284c7;
+    background-color: rgba(224, 242, 254, 0.45);
+}
+
+.oms-tab-link.active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
+    background-color: #ffffff;
+    font-weight: 700;
+}
+
+.oms-tab-link.active.tab-danger {
+    color: #dc2626;
+    border-bottom-color: #dc2626;
+}
+
+.oms-tab-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    background-color: #e2e8f0;
+    color: #334155;
+    font-variant-numeric: tabular-nums;
+}
+
+.oms-tab-link.active .oms-tab-badge {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.oms-tab-badge.badge-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+/* Financial Totals Strip */
+.oms-financial-strip {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.65rem 1.15rem;
+    background-color: #f0f9ff;
+    border-bottom: 1px solid #bae6fd;
+    font-size: 0.78rem;
+    color: #334155;
+    font-variant-numeric: tabular-nums;
+}
+
+.oms-strip-sep {
+    color: #94a3b8;
+}
+
+/* Search & Filter Bar */
+.oms-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    padding: 0.85rem 1.15rem;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #ffffff;
+}
+
+.oms-search-input-wrap {
+    flex: 1;
+    min-width: 240px;
+}
+
+.oms-search-input-wrap input {
+    width: 100%;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    background-color: #f8fafc;
+}
+
+.oms-search-input-wrap input:focus {
+    outline: none;
+    border-color: #0284c7;
+    background-color: #ffffff;
+}
+
+.oms-filter-bar select {
+    padding: 0.48rem 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
+/* Job Orders Table */
+.oms-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.oms-job-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.73rem;
+    text-align: left;
+}
+
+.oms-job-table thead tr {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.oms-job-table th {
+    padding: 0.55rem 0.45rem;
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.oms-job-table td {
+    padding: 0.55rem 0.45rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #0f172a;
+}
+
+.oms-job-table tbody tr:hover {
+    background-color: #f0f9ff;
+}
+
+/* Red Highlighting for Overdue Orders */
+.oms-job-table tbody tr.oms-row-overdue {
+    background-color: #fef2f2;
+}
+
+.oms-job-table tbody tr.oms-row-overdue:hover {
+    background-color: #fee2e2;
+}
+
+/* Orange Highlighting for Urgent / Due Today Orders */
+.oms-job-table tbody tr.oms-row-urgent {
+    background-color: #fff7ed;
+}
+
+.oms-job-table tbody tr.oms-row-urgent:hover {
+    background-color: #ffedd5;
+}
+
+.oms-jo-code,
+.oms-job-id {
+    display: block;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 0.76rem;
+    color: #0369a1;
+    white-space: nowrap;
+}
+
+.oms-sub-meta,
+.oms-job-items-sub,
+.oms-cust-meta,
+.oms-prod-notes,
+.oms-deadline-time {
+    display: block;
+    font-size: 0.66rem;
+    color: #64748b;
+    margin-top: 0.14rem;
+    line-height: 1.3;
+}
+
+.oms-cust-name,
+.oms-prod-name,
+.oms-amount-main,
+.oms-deadline-date {
+    display: block;
+    font-weight: 700;
+    font-size: 0.74rem;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.oms-prod-name,
+.oms-prod-notes {
+    max-width: 145px;
+}
+
+.oms-amount-sub {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-top: 0.12rem;
+    white-space: nowrap;
+}
+
+.oms-amount-sub.due {
+    color: #dc2626;
+}
+
+.oms-amount-sub.paid {
+    color: #15803d;
+}
+
+/* Color-Coded Order Status Labels */
+.oms-status-pill,
+.oms-status-badge {
+    display: inline-block;
+    padding: 0.18rem 0.45rem;
+    border-radius: 6px;
+    font-size: 0.67rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.oms-status-pending {
+    background-color: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.oms-status-confirmed {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.oms-status-production {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.oms-status-delivery {
+    background-color: #ffedd5;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+.oms-status-completed {
+    background-color: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.oms-status-cancelled {
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+/* Priority Labels */
+.oms-priority-pill,
+.oms-priority-badge {
+    display: inline-block;
+    padding: 0.16rem 0.42rem;
+    border-radius: 6px;
+    font-size: 0.67rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.oms-priority-urgent {
+    background-color: #ffedd5;
+    color: #ea580c;
+    border: 1px solid #fdba74;
+}
+
+.oms-priority-high {
+    background-color: #fef9c3;
+    color: #a16207;
+    border: 1px solid #fde047;
+}
+
+.oms-priority-normal {
+    background-color: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.oms-staff-chip {
+    display: inline-block;
+    font-size: 0.67rem;
+    font-weight: 600;
+    color: #0369a1;
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    padding: 0.16rem 0.42rem;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.oms-dl-tag,
+.oms-deadline-tag {
+    display: inline-block;
+    font-size: 0.61rem;
+    font-weight: 700;
+    padding: 0.1rem 0.36rem;
+    border-radius: 4px;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+}
+
+.oms-dl-tag.tag-overdue,
+.oms-deadline-tag.overdue {
+    background-color: #dc2626;
+    color: #ffffff;
+}
+
+.oms-dl-tag.tag-today,
+.oms-deadline-tag.today {
+    background-color: #ea580c;
+    color: #ffffff;
+}
+
+.oms-deadline-tag.ok {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.oms-alert-success {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.oms-alert-error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+    .oms-admin-shell {
+        grid-template-columns: 1fr;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .oms-sidebar {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .oms-sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .oms-nav-item {
+        width: auto;
+    }
+
+    .oms-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .oms-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
