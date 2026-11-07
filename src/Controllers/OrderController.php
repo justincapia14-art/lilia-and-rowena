@@ -74,8 +74,28 @@ class OrderController
         $address     = trim($_POST['address'] ?? '');
 
         if (empty($fullName) || empty($email) || empty($phoneNumber) || empty($address)) {
-            $_SESSION['checkout_error'] = 'Please fill in all recipient and delivery details.';
+            $_SESSION['checkout_error'] = 'Please Complete All Required Fields.';
+            $_SESSION['flash_toast'] = [
+                'type' => 'error',
+                'title' => 'Please Complete All Required Fields.',
+                'message' => 'Please fill in all recipient and delivery details.'
+            ];
             header('Location: index.php?route=checkout');
+            exit;
+        }
+
+        // Server-side duplicate order submission prevention (within 8 seconds)
+        $orderHash = hash('sha256', $fullName . '|' . $email . '|' . $address . '|' . json_encode($_SESSION['cart']));
+        $nowTs = time();
+        if (
+            !empty($_SESSION['last_order_hash']) &&
+            $_SESSION['last_order_hash'] === $orderHash &&
+            !empty($_SESSION['last_order_time']) &&
+            ($nowTs - (int)$_SESSION['last_order_time']) < 8 &&
+            !empty($_SESSION['recent_order_id'])
+        ) {
+            $existingOrderId = (int)$_SESSION['recent_order_id'];
+            header("Location: index.php?route=order_success&id={$existingOrderId}");
             exit;
         }
 
@@ -115,14 +135,26 @@ class OrderController
                 'items'           => $items,
             ]);
 
-            // Clear session cart
+            // Record deduplication state and clear session cart
+            $_SESSION['last_order_hash'] = $orderHash;
+            $_SESSION['last_order_time'] = $nowTs;
             $_SESSION['cart'] = [];
             $_SESSION['recent_order_id'] = $orderId;
+            $_SESSION['flash_toast'] = [
+                'type' => 'success',
+                'title' => 'Order Placed Successfully!',
+                'message' => "Order #{$orderId} has been confirmed and scheduled for production."
+            ];
 
             header("Location: index.php?route=order_success&id={$orderId}");
             exit;
         } catch (Exception $e) {
-            $_SESSION['checkout_error'] = 'Error placing order: ' . $e->getMessage();
+            $_SESSION['checkout_error'] = 'Unable to Process Your Order: ' . $e->getMessage();
+            $_SESSION['flash_toast'] = [
+                'type' => 'error',
+                'title' => 'Unable to Process Your Order.',
+                'message' => 'Please review your order details and try again.'
+            ];
             header('Location: index.php?route=checkout');
             exit;
         }

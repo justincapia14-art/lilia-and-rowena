@@ -30,7 +30,7 @@
                             <?= htmlspecialchars((string)$customer['FullName']) ?>
                         </div>
                         <a href="index.php?route=profile&amp;tab=profile&amp;edit=1" style="font-size: 0.8rem; color: #0284c7; text-decoration: none; font-weight: 600;">
-                            ✎ Edit Profile
+                            Edit Profile
                         </a>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                        style="display: flex; align-items: center; gap: 0.65rem; padding: 0.7rem 0.9rem; border-radius: 9px; text-decoration: none; font-weight: 600; font-size: 0.92rem; <?= $activeTab === 'password' ? 'background: #e0f2fe; color: #0369a1;' : 'color: #0f172a;' ?>">
                         <span>Change Password</span>
                     </a>
-                    <a href="index.php?route=logout"
+                    <a href="index.php?route=logout" data-ux-confirm="logout"
                        style="display: flex; align-items: center; gap: 0.65rem; padding: 0.7rem 0.9rem; border-radius: 9px; text-decoration: none; font-weight: 600; font-size: 0.92rem; color: #b91c1c; margin-top: 0.35rem; border-top: 1px solid #e2e8f0; padding-top: 0.85rem;">
                         <span>Logout</span>
                     </a>
@@ -78,12 +78,12 @@
                         </div>
                         <?php if (!$isEditing): ?>
                             <a href="index.php?route=profile&amp;tab=profile&amp;edit=1" class="btn-primary" style="text-decoration: none; padding: 0.6rem 1.2rem; font-size: 0.9rem;">
-                                ✎ Edit Profile
+                                Edit Profile
                             </a>
                         <?php endif; ?>
                     </div>
 
-                    <form method="POST" action="index.php?route=profile_update" enctype="multipart/form-data">
+                    <form method="POST" action="index.php?route=profile_update" enctype="multipart/form-data" data-ux-loading-text="Saving changes...">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                         <div style="display: grid; grid-template-columns: 1fr 220px; gap: 2rem; align-items: start;">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem;">
@@ -198,14 +198,19 @@
                                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.45rem; flex-shrink: 0;">
                                     <div style="display: flex; gap: 0.65rem;">
                                         <a href="index.php?route=profile&amp;tab=addresses&amp;edit_address_id=<?= (int)$addr['AddressID'] ?>#addressFormSection" style="font-size: 0.84rem; color: #0284c7; font-weight: 700; text-decoration: none;">Edit</a>
-                                        <form method="POST" action="index.php?route=address_delete" style="display: inline;">
+                                        <form method="POST" action="index.php?route=address_delete" style="display: inline;"
+                                              data-ux-confirm-title="Delete Delivery Address"
+                                              data-ux-confirm-message="Are you sure you want to delete this address?"
+                                              data-ux-confirm-button="Delete Address"
+                                              data-ux-confirm-variant="danger"
+                                              data-ux-loading-text="Deleting record...">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                                             <input type="hidden" name="address_id" value="<?= (int)$addr['AddressID'] ?>">
                                             <button type="submit" style="background: none; border: none; color: #b91c1c; font-size: 0.84rem; font-weight: 700; cursor: pointer; padding: 0;">Delete</button>
                                         </form>
                                     </div>
                                     <?php if ((int)$addr['IsDefault'] !== 1): ?>
-                                        <form method="POST" action="index.php?route=address_set_default">
+                                        <form method="POST" action="index.php?route=address_set_default" data-ux-loading-text="Saving changes...">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                                             <input type="hidden" name="address_id" value="<?= (int)$addr['AddressID'] ?>">
                                             <button type="submit" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 0.32rem 0.7rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: #0f172a;">
@@ -221,9 +226,9 @@
                     <!-- Add / Edit Address Form -->
                     <div id="addressFormSection" style="background: #f8fbff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.35rem;">
                         <h3 style="margin: 0 0 1rem; font-size: 1.1rem; color: #0f172a;">
-                            <?= $editAddress ? '✎ Edit Delivery Address' : '+ Add New Delivery Address' ?>
+                            <?= $editAddress ? 'Edit Delivery Address' : '+ Add New Delivery Address' ?>
                         </h3>
-                        <form method="POST" action="index.php?route=address_save">
+                        <form method="POST" action="index.php?route=address_save" data-ux-loading-text="Saving delivery address...">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                             <?php if ($editAddress): ?>
                                 <input type="hidden" name="address_id" value="<?= (int)$editAddress['AddressID'] ?>">
@@ -321,7 +326,7 @@
                         <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.9rem;">For your account's security, please verify your current password before setting a new one.</p>
                     </div>
 
-                    <form method="POST" action="index.php?route=profile_password" style="max-width: 480px; display: flex; flex-direction: column; gap: 1rem;">
+                    <form method="POST" action="index.php?route=profile_password" data-ux-loading-text="Saving changes..." style="max-width: 480px; display: flex; flex-direction: column; gap: 1rem;">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                         <div>
                             <label style="display:block;font-size:0.82rem;font-weight:700;color:#475569;margin-bottom:0.35rem;">Current Password *</label>

@@ -65,14 +65,21 @@
                                 </td>
                                 <td>₱<?= number_format($unitPrice, 2) ?></td>
                                 <td>
-                                    <form action="index.php?route=cart_update" method="POST" class="inline-qty-form">
+                                    <form action="index.php?route=cart_update" method="POST" class="inline-qty-form" data-ux-loading-text="Updating cart...">
                                         <input type="hidden" name="cart_key" value="<?= htmlspecialchars($key) ?>">
                                         <input type="number" name="quantity" value="<?= $item['quantity'] ?>" min="1" max="10" class="qty-field" onchange="this.form.submit()">
                                     </form>
                                 </td>
                                 <td class="price-strong">₱<?= number_format($lineTotal, 2) ?></td>
                                 <td>
-                                    <a href="index.php?route=cart_remove&key=<?= urlencode($key) ?>" class="btn-remove" title="Remove item">✕</a>
+                                    <form action="index.php?route=cart_remove&amp;key=<?= urlencode($key) ?>" method="POST" style="display:inline;"
+                                          data-ux-confirm-title="Remove Cart Item"
+                                          data-ux-confirm-message="Are you sure you want to remove this item from your cart?"
+                                          data-ux-confirm-button="Remove Item"
+                                          data-ux-confirm-variant="danger"
+                                          data-ux-loading-text="Removing item...">
+                                        <button type="submit" class="btn-remove" title="Remove item" style="background:none;border:none;cursor:pointer;">✕</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

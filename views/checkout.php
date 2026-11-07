@@ -13,7 +13,12 @@
     <div class="checkout-layout">
         <!-- Delivery Form Left -->
         <div class="checkout-form-panel">
-            <form action="index.php?route=place_order" method="POST" id="checkoutForm">
+            <form action="index.php?route=place_order" method="POST" id="checkoutForm"
+                  data-ux-confirm-title="Confirm Your Order"
+                  data-ux-confirm-message="Please review your order details. Do you want to place this order?"
+                  data-ux-confirm-button="Confirm &amp; Place Order"
+                  data-ux-confirm-variant="primary"
+                  data-ux-loading-text="Placing your order...">
                 <h3 class="form-section-title">1. Recipient &amp; Contact Information</h3>
 
                 <?php if (!empty($savedAddresses)): ?>

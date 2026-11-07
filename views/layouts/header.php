@@ -31,11 +31,36 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lilia &amp; Rowena Furniture | Handcrafted Fine Furniture</title>
-    <link rel="stylesheet" href="css/style.css?v=20261107_v5">
-    <link rel="stylesheet" href="public/css/style.css?v=20261107_v5">
+    <link rel="stylesheet" href="css/style.css?v=20261107_v7">
+    <link rel="stylesheet" href="public/css/style.css?v=20261107_v7">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <?php
+    $phpFlashToasts = [];
+    if (!empty($_SESSION['flash_toast']) && is_array($_SESSION['flash_toast'])) {
+        $phpFlashToasts[] = $_SESSION['flash_toast'];
+        unset($_SESSION['flash_toast']);
+    }
+    if (!empty($_SESSION['cart_message'])) {
+        $phpFlashToasts[] = ['type' => 'success', 'title' => 'Cart Updated Successfully!', 'message' => (string)$_SESSION['cart_message']];
+    }
+    if (!empty($_SESSION['profile_success'])) {
+        $phpFlashToasts[] = ['type' => 'success', 'title' => 'Profile Updated Successfully!', 'message' => (string)$_SESSION['profile_success']];
+    }
+    if (!empty($_SESSION['profile_error'])) {
+        $phpFlashToasts[] = ['type' => 'error', 'title' => 'Unable to Save Changes. Please Try Again.', 'message' => (string)$_SESSION['profile_error']];
+    }
+    if (!empty($_SESSION['admin_message'])) {
+        $phpFlashToasts[] = ['type' => 'success', 'title' => 'Changes Saved Successfully!', 'message' => (string)$_SESSION['admin_message']];
+    }
+    if (!empty($_SESSION['admin_error'])) {
+        $phpFlashToasts[] = ['type' => 'error', 'title' => 'Unable to Save Changes. Please Try Again.', 'message' => (string)$_SESSION['admin_error']];
+    }
+    ?>
+    <script>
+        window.__PHP_FLASH_TOASTS__ = <?= json_encode($phpFlashToasts, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    </script>
 </head>
 <body>
 
@@ -84,7 +109,7 @@ try {
                             <span class="unread-red-badge" style="margin-left: 0.35rem;"><?= (int)$headerUnreadCount ?></span>
                         <?php endif; ?>
                     </a>
-                    <a href="index.php?route=logout" class="btn-link-sm" style="color: #dc2626; font-weight: 700;">Logout</a>
+                    <a href="index.php?route=logout" data-ux-confirm="logout" class="btn-link-sm" style="color: #dc2626; font-weight: 700;">Logout</a>
                 </div>
             <?php elseif ($isCustomerLoggedIn): ?>
                 <!-- Customer Profile Dropdown (Matches attached reference image) -->
@@ -127,7 +152,7 @@ try {
                             <span>Change Password</span>
                         </a>
                         <div class="customer-profile-divider"></div>
-                        <a href="index.php?route=logout" class="customer-profile-item cp-logout" role="menuitem">
+                        <a href="index.php?route=logout" data-ux-confirm="logout" class="customer-profile-item cp-logout" role="menuitem">
                             <span>Logout</span>
                         </a>
                     </div>

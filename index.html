@@ -13,8 +13,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Pure CSS Stylesheet (Light Blue + Crisp White Palette) with Cache Buster -->
-    <link rel="stylesheet" href="public/css/style.css?v=20261107_v6" />
-    <link rel="stylesheet" href="css/style.css?v=20261107_v6" />
+    <link rel="stylesheet" href="public/css/style.css?v=20261107_v7" />
+    <link rel="stylesheet" href="css/style.css?v=20261107_v7" />
     <!-- Embedded Admin OMS & Customer Profile Stylesheet -->
     <style id="oms-admin-embedded-css">
       .modal-backdrop { z-index: 1200; }
@@ -504,6 +504,39 @@
       @media (max-width: 820px) {
         .customer-account-shell, .cp-profile-grid { grid-template-columns: 1fr !important; }
       }
+      @keyframes uxSpin { to { transform: rotate(360deg); } }
+      .btn-spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: inline-block; animation: uxSpin 0.65s linear infinite; vertical-align: middle; flex-shrink: 0; }
+      .is-loading-btn { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 0.45rem !important; opacity: 0.85 !important; pointer-events: none !important; cursor: wait !important; }
+      .ux-toast-container { position: fixed; top: 1.15rem; right: 1.15rem; z-index: 3500; display: flex; flex-direction: column; gap: 0.65rem; max-width: 390px; width: calc(100vw - 2.3rem); pointer-events: none; }
+      .ux-toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.9rem 1rem; border-radius: 10px; background-color: #ffffff; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14); border: 1px solid #e2e8f0; border-left-width: 4px; transition: opacity 0.2s ease, transform 0.2s ease; }
+      .ux-toast.ux-toast-hiding { opacity: 0; transform: translateY(-8px) scale(0.97); }
+      .ux-toast-success { border-left-color: #16a34a; }
+      .ux-toast-error { border-left-color: #dc2626; }
+      .ux-toast-warning { border-left-color: #d97706; }
+      .ux-toast-info { border-left-color: #0284c7; }
+      .ux-toast-icon { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; }
+      .ux-toast-success .ux-toast-icon { background-color: #dcfce7; color: #15803d; }
+      .ux-toast-error .ux-toast-icon { background-color: #fee2e2; color: #b91c1c; }
+      .ux-toast-warning .ux-toast-icon { background-color: #fef3c7; color: #b45309; }
+      .ux-toast-info .ux-toast-icon { background-color: #e0f2fe; color: #0369a1; }
+      .ux-toast-body { flex: 1; min-width: 0; }
+      .ux-toast-title { font-size: 0.84rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin: 0; }
+      .ux-toast-msg { font-size: 0.78rem; color: #475569; line-height: 1.45; margin: 0.2rem 0 0 0; }
+      .ux-toast-close { background: transparent; border: none; color: #64748b; font-size: 1rem; line-height: 1; padding: 0.15rem 0.3rem; border-radius: 4px; cursor: pointer; }
+      .ux-confirm-backdrop { position: fixed; inset: 0; z-index: 3200; background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 1.25rem; }
+      .ux-confirm-card { background-color: #ffffff; border-radius: 12px; max-width: 430px; width: 100%; padding: 1.5rem; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22); border: 1px solid #e2e8f0; }
+      .ux-confirm-header { display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 0.85rem; }
+      .ux-confirm-icon-wrap { width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0; }
+      .ux-confirm-icon-wrap.variant-primary { background-color: #e0f2fe; color: #0369a1; }
+      .ux-confirm-icon-wrap.variant-danger { background-color: #fee2e2; color: #dc2626; }
+      .ux-confirm-icon-wrap.variant-warning { background-color: #fef3c7; color: #b45309; }
+      .ux-confirm-title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0 0 0.25rem 0; line-height: 1.3; }
+      .ux-confirm-message { font-size: 0.86rem; color: #475569; line-height: 1.55; margin: 0; }
+      .ux-confirm-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.65rem; margin-top: 1.35rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; }
+      .btn-confirm-cancel { padding: 0.55rem 1.05rem; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #ffffff; color: #334155; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+      .btn-confirm-primary { padding: 0.55rem 1.15rem; border-radius: 8px; border: 1px solid #0284c7; background-color: #0284c7; color: #ffffff; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+      .btn-confirm-danger { padding: 0.55rem 1.15rem; border-radius: 8px; border: 1px solid #dc2626; background-color: #dc2626; color: #ffffff; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+      .input-field-error { border-color: #dc2626 !important; background-color: #fffafa !important; box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12) !important; }
     </style>
   </head>
   <body>
@@ -875,7 +908,7 @@
                     <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, 'public/images/product_dining_table.jpg', 180, 90, 75)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Mahogany 6-Seater Dining Set to cart" onclick="quickAddToCart(1, 'Mahogany 6-Seater Dining Set', 28500, 'public/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Mahogany 6-Seater Dining Set to cart" onclick="quickAddToCart(1, 'Mahogany 6-Seater Dining Set', 28500, 'public/images/product_dining_table.jpg', this)">+</button>
                   </div>
                 </div>
               </div>
@@ -908,7 +941,7 @@
                     <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(2, 'Scandinavian Sky Blue Lounge Sofa', 'Living Room', 34000, 'public/images/product_lounge_sofa.jpg', 210, 85, 80)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Scandinavian Sky Blue Lounge Sofa to cart" onclick="quickAddToCart(2, 'Scandinavian Sky Blue Lounge Sofa', 34000, 'public/images/product_lounge_sofa.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Scandinavian Sky Blue Lounge Sofa to cart" onclick="quickAddToCart(2, 'Scandinavian Sky Blue Lounge Sofa', 34000, 'public/images/product_lounge_sofa.jpg', this)">+</button>
                   </div>
                 </div>
               </div>
@@ -941,7 +974,7 @@
                     <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(3, 'Minimalist Teak King Bedframe', 'Bedroom Suite', 42500, 'public/images/product_wooden_bedframe.jpg', 200, 190, 95)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Minimalist Teak King Bedframe to cart" onclick="quickAddToCart(3, 'Minimalist Teak King Bedframe', 42500, 'public/images/product_wooden_bedframe.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Minimalist Teak King Bedframe to cart" onclick="quickAddToCart(3, 'Minimalist Teak King Bedframe', 42500, 'public/images/product_wooden_bedframe.jpg', this)">+</button>
                   </div>
                 </div>
               </div>
@@ -974,7 +1007,7 @@
                     <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(4, 'Solid Acacia Round Coffee Table', 'Living Room', 12800, 'public/images/product_dining_table.jpg', 90, 90, 45)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Solid Acacia Round Coffee Table to cart" onclick="quickAddToCart(4, 'Solid Acacia Round Coffee Table', 12800, 'public/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Solid Acacia Round Coffee Table to cart" onclick="quickAddToCart(4, 'Solid Acacia Round Coffee Table', 12800, 'public/images/product_dining_table.jpg', this)">+</button>
                   </div>
                 </div>
               </div>
@@ -1007,7 +1040,7 @@
                     <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(5, 'Executive Ergonomic Oak Desk', 'Home Office', 24500, 'public/images/product_dining_table.jpg', 150, 75, 75)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Executive Ergonomic Oak Desk to cart" onclick="quickAddToCart(5, 'Executive Ergonomic Oak Desk', 24500, 'public/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Executive Ergonomic Oak Desk to cart" onclick="quickAddToCart(5, 'Executive Ergonomic Oak Desk', 24500, 'public/images/product_dining_table.jpg', this)">+</button>
                   </div>
                 </div>
               </div>
@@ -1040,7 +1073,7 @@
                     <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(6, 'Compact 4-Seater Breakfast Nook Set', 'Dining Sets', 18900, 'public/images/product_dining_table.jpg', 100, 100, 75)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Compact 4-Seater Breakfast Nook Set to cart" onclick="quickAddToCart(6, 'Compact 4-Seater Breakfast Nook Set', 18900, 'public/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Compact 4-Seater Breakfast Nook Set to cart" onclick="quickAddToCart(6, 'Compact 4-Seater Breakfast Nook Set', 18900, 'public/images/product_dining_table.jpg', this)">+</button>
                   </div>
                 </div>
               </div>
@@ -1305,7 +1338,7 @@
                   <label for="customQty">Quantity</label>
                   <input type="number" id="customQty" value="1" min="1" max="10" />
                 </div>
-                <button type="button" class="btn-primary" onclick="addCustomizedToCart()">
+                <button type="button" id="customizerAddBtn" class="btn-primary" onclick="addCustomizedToCart(this)">
                   <span>Add Configured Piece to Cart</span>
                 </button>
               </div>
@@ -1424,7 +1457,7 @@
             </p>
           </div>
 
-          <button type="submit" class="btn-primary btn-block">
+          <button type="submit" id="checkoutSubmitBtn" class="btn-primary btn-block">
             <span>Confirm Order · <span id="checkoutBtnDpText">₱15,225</span> Downpayment</span>
           </button>
         </form>
@@ -1506,7 +1539,7 @@
                 <label for="loginPassInput">Password</label>
                 <input type="password" id="loginPassInput" required value="password123" />
               </div>
-              <button type="submit" class="btn-primary btn-block" style="margin-bottom: 1rem;">
+              <button type="submit" id="loginSubmitBtn" class="btn-primary btn-block" style="margin-bottom: 1rem;">
                 Sign In to Account
               </button>
             </form>
@@ -1553,7 +1586,7 @@
                 <label for="regAddress">Delivery Address *</label>
                 <textarea id="regAddress" rows="2" required placeholder="House #, Street, Barangay, City"></textarea>
               </div>
-              <button type="submit" class="btn-primary btn-block">
+              <button type="submit" id="registerSubmitBtn" class="btn-primary btn-block">
                 Create Customer Account
               </button>
             </form>
@@ -1734,7 +1767,7 @@
                       <option value="Rene Ocampo">Rene Ocampo (Delivery Driver)</option>
                     </select>
                   </div>
-                  <button type="submit" class="btn-primary">
+                  <button type="submit" id="newJobOrderSubmitBtn" class="btn-primary">
                     <span>✓ Save Job Order to Database</span>
                   </button>
                 </div>
@@ -1896,7 +1929,7 @@
                   <option value="2|1002|Add Custom Request (#1002)">Reply Privately to Atty. Roberto Mendoza (Customer #2)</option>
                 </select>
                 <input type="text" id="adminReplyInput" required placeholder="Type your reply to the selected customer..." style="flex: 1; min-width: 240px; padding: 0.55rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; background: #ffffff;" />
-                <button type="submit" class="btn-sm-primary" style="padding: 0.55rem 1rem;">
+                <button type="submit" id="adminReplySubmitBtn" class="btn-sm-primary" style="padding: 0.55rem 1rem;">
                   Send Reply to Customer →
                 </button>
               </form>
@@ -2010,7 +2043,7 @@
 
             <div style="display: flex; gap: 0.55rem;">
               <input type="text" id="customerChatInput" required placeholder="Send a private message to Workshop Admin..." style="flex: 1; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.83rem; background: #ffffff;" />
-              <button type="submit" class="btn-primary">
+              <button type="submit" id="chatSendSubmitBtn" class="btn-primary">
                 <span>Send Private Message →</span>
               </button>
             </div>
@@ -2140,7 +2173,7 @@
                     </div>
 
                     <div id="cpProfileFormActions" style="display: none; gap: 0.65rem; margin-top: 1rem;">
-                      <button type="submit" class="btn-primary">
+                      <button type="submit" id="cpSaveProfileBtn" class="btn-primary">
                         <span>Save Profile Changes</span>
                       </button>
                       <button type="button" class="btn-outline" onclick="toggleCustomerProfileEditMode(false)">
@@ -2159,7 +2192,7 @@
                       style="display: none;"
                       onchange="handleProfileImageFileChange(this)"
                     />
-                    <button type="button" class="btn-sm-soft" onclick="document.getElementById('cpAvatarFileInput').click()">
+                    <button type="button" id="cpSelectAvatarBtn" class="btn-sm-soft" onclick="document.getElementById('cpAvatarFileInput').click()">
                       Select Image
                     </button>
                     <div style="font-size: 0.7rem; color: #64748b; line-height: 1.45;">
@@ -2243,7 +2276,7 @@
                       <input type="checkbox" id="addrIsDefault" />
                       <span>Set as Default Delivery Address</span>
                     </label>
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" id="cpSaveAddressBtn" class="btn-primary">
                       <span>✓ Save Delivery Address</span>
                     </button>
                   </div>
@@ -2288,7 +2321,7 @@
                   <label for="cpConfirmPassword">Confirm New Password *</label>
                   <input type="password" id="cpConfirmPassword" required minlength="6" placeholder="Re-enter new password" />
                 </div>
-                <button type="submit" class="btn-primary">
+                <button type="submit" id="cpUpdatePasswordBtn" class="btn-primary">
                   <span>Update Password</span>
                 </button>
               </form>
@@ -2373,7 +2406,27 @@
       </div>
     </div>
 
+    <!-- 7. GLOBAL TOAST NOTIFICATION STACK -->
+    <div id="globalToastContainer" class="ux-toast-container" aria-live="polite" aria-atomic="false"></div>
+
+    <!-- 8. REUSABLE CONFIRMATION DIALOG MODAL -->
+    <div id="uxConfirmModal" class="ux-confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="uxConfirmTitle" aria-describedby="uxConfirmMessage" style="display: none;" onclick="if(event.target===this){closeConfirmModal();}">
+      <div class="ux-confirm-card">
+        <div class="ux-confirm-header">
+          <div id="uxConfirmIconWrap" class="ux-confirm-icon-wrap variant-primary" aria-hidden="true">!</div>
+          <div style="flex: 1; min-width: 0;">
+            <h3 id="uxConfirmTitle" class="ux-confirm-title">Confirm Action</h3>
+            <p id="uxConfirmMessage" class="ux-confirm-message">Are you sure you want to proceed?</p>
+          </div>
+        </div>
+        <div class="ux-confirm-actions">
+          <button type="button" id="uxConfirmCancelBtn" class="btn-confirm-cancel" onclick="closeConfirmModal()">Cancel</button>
+          <button type="button" id="uxConfirmActionBtn" class="btn-confirm-primary" onclick="executeConfirmModalAction()">Confirm</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Plain Minimal Vanilla JavaScript (No React, No TypeScript/TSX) -->
-    <script src="public/js/main.js?v=20261107_v6" onerror="var s=document.createElement('script');s.src='js/main.js?v=20261107_v6';document.body.appendChild(s);"></script>
+    <script src="public/js/main.js?v=20261107_v7" onerror="var s=document.createElement('script');s.src='js/main.js?v=20261107_v7';document.body.appendChild(s);"></script>
   </body>
 </html>

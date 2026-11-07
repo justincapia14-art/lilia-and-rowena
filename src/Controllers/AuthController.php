@@ -68,6 +68,11 @@ class AuthController
                 $_SESSION['admin_id'] = (int)$admin['AdminID'];
                 $_SESSION['admin_email'] = $admin['Email'];
                 $_SESSION['user_role'] = 'admin';
+                $_SESSION['flash_toast'] = [
+                    'type' => 'success',
+                    'title' => 'Login Successful!',
+                    'message' => 'Welcome back to Lilia & Rowena Order Management.'
+                ];
                 header('Location: index.php?route=admin_dashboard');
                 exit;
             }
@@ -87,6 +92,11 @@ class AuthController
                 $_SESSION['customer_phone'] = $customer['PhoneNumber'];
                 $_SESSION['customer_address'] = $customer['Address'];
                 $_SESSION['user_role'] = 'customer';
+                $_SESSION['flash_toast'] = [
+                    'type' => 'success',
+                    'title' => 'Login Successful!',
+                    'message' => 'Welcome back, ' . $customer['FullName'] . '.'
+                ];
 
                 $redirect = $_SESSION['redirect_after_login'] ?? 'index.php?route=home';
                 unset($_SESSION['redirect_after_login']);
@@ -95,7 +105,12 @@ class AuthController
             }
         }
 
-        $_SESSION['auth_error'] = 'Invalid email address or password. Please check your credentials and try again.';
+        $_SESSION['auth_error'] = 'Invalid Email or Password. Please check your credentials and try again.';
+        $_SESSION['flash_toast'] = [
+            'type' => 'error',
+            'title' => 'Invalid Email or Password.',
+            'message' => 'Please verify your email address and password.'
+        ];
         header('Location: index.php?route=login');
         exit;
     }
@@ -130,13 +145,23 @@ class AuthController
         $address     = trim($_POST['address'] ?? '');
 
         if (empty($fullName) || empty($email) || empty($password) || empty($phoneNumber) || empty($address)) {
-            $_SESSION['register_error'] = 'All fields are required to register your account.';
+            $_SESSION['register_error'] = 'Please Complete All Required Fields.';
+            $_SESSION['flash_toast'] = [
+                'type' => 'error',
+                'title' => 'Please Complete All Required Fields.',
+                'message' => 'All fields are required to register your account.'
+            ];
             header('Location: index.php?route=register');
             exit;
         }
 
         if ($this->customerModel->findByEmail($email)) {
             $_SESSION['register_error'] = 'An account with this email address already exists. Please log in.';
+            $_SESSION['flash_toast'] = [
+                'type' => 'error',
+                'title' => 'Unable to Save Changes. Please Try Again.',
+                'message' => 'An account with this email address already exists.'
+            ];
             header('Location: index.php?route=register');
             exit;
         }
@@ -150,6 +175,11 @@ class AuthController
         $_SESSION['customer_phone'] = $phoneNumber;
         $_SESSION['customer_address'] = $address;
         $_SESSION['user_role'] = 'customer';
+        $_SESSION['flash_toast'] = [
+            'type' => 'success',
+            'title' => 'Account Created Successfully!',
+            'message' => 'Welcome to Lilia & Rowena Furniture, ' . $fullName . '.'
+        ];
 
         header('Location: index.php?route=home');
         exit;
@@ -170,6 +200,11 @@ class AuthController
             $_SESSION['admin_email'],
             $_SESSION['user_role']
         );
+        $_SESSION['flash_toast'] = [
+            'type' => 'success',
+            'title' => 'Logged Out',
+            'message' => 'You have been logged out successfully.'
+        ];
         header('Location: index.php?route=home');
         exit;
     }

@@ -2299,22 +2299,41 @@ async function startServer() {
     });
   });
 
-  // Allow customer storefront checkout to also record into jobOrders
+  // Allow customer storefront checkout to also record into jobOrders (with duplicate submission guard)
+  const recentOrderSubmissionCache = new Map();
   app.post('/api/orders/create', (req, res) => {
     const body = req.body || {};
+    const customerName = String(body.customerName || body.customer || 'Valued Customer').trim();
+    const customerPhone = String(body.customerPhone || '0917-123-4567').trim();
+    const customerEmail = String(body.customerEmail || '').trim();
+    const address = String(body.address || 'Metro Manila').trim();
+    const itemSummary = String(body.itemSummary || body.productName || 'Custom Solid Wood Furniture').trim();
+    const total = Math.max(0, Number(body.total) || 28500);
+    const idempotencyKey = String(body.idempotencyKey || `${customerEmail}|${customerName}|${itemSummary}|${total}`).trim();
+
+    const nowMs = Date.now();
+    for (const [key, entry] of recentOrderSubmissionCache.entries()) {
+      if (nowMs - entry.timestamp > 8000) {
+        recentOrderSubmissionCache.delete(key);
+      }
+    }
+    if (recentOrderSubmissionCache.has(idempotencyKey)) {
+      const cached = recentOrderSubmissionCache.get(idempotencyKey);
+      return res.json({ status: 'ok', deduplicated: true, order: cached.order });
+    }
+
     const maxId = jobOrders.reduce((max, o) => Math.max(max, Number(o.orderId) || 1000), 1000);
     const newId = Number(body.orderId) > maxId ? Number(body.orderId) : maxId + 1;
-    const total = Math.max(0, Number(body.total) || 28500);
     const dp = Math.round(total * 0.5);
     const newOrder = {
       orderId: newId,
       jobOrderCode: `JO-2026-${newId}`,
       customerId: Number(body.customerId) || 1,
-      customer: String(body.customer || 'Valued Customer').trim(),
-      customerPhone: String(body.customerPhone || '0917-123-4567').trim(),
-      customerEmail: String(body.customerEmail || '').trim(),
-      address: String(body.address || 'Metro Manila').trim(),
-      itemSummary: String(body.itemSummary || 'Custom Solid Wood Furniture').trim(),
+      customer: customerName,
+      customerPhone,
+      customerEmail,
+      address,
+      itemSummary,
       quantity: Math.max(1, Number(body.quantity) || 1),
       status: 'Pending',
       priority: 'Normal',
@@ -2332,6 +2351,7 @@ async function startServer() {
     };
     jobOrders.unshift(newOrder);
     customerOrders.push({ OrderID: newId, CustomerID: newOrder.customerId });
+    recentOrderSubmissionCache.set(idempotencyKey, { timestamp: nowMs, order: newOrder });
     savePersistentStore();
     return res.json({ status: 'ok', order: newOrder });
   });

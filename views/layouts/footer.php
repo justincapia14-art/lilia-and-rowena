@@ -49,7 +49,27 @@
     </div>
 </footer>
 
+<!-- Global Toast Notification Stack -->
+<div id="globalToastContainer" class="ux-toast-container" aria-live="polite" aria-atomic="false"></div>
+
+<!-- Reusable Confirmation Dialog Modal -->
+<div id="uxConfirmModal" class="ux-confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="uxConfirmTitle" aria-describedby="uxConfirmMessage" style="display: none;" onclick="if(event.target===this){closeConfirmModal();}">
+    <div class="ux-confirm-card">
+        <div class="ux-confirm-header">
+            <div id="uxConfirmIconWrap" class="ux-confirm-icon-wrap variant-primary" aria-hidden="true">!</div>
+            <div style="flex: 1; min-width: 0;">
+                <h3 id="uxConfirmTitle" class="ux-confirm-title">Confirm Action</h3>
+                <p id="uxConfirmMessage" class="ux-confirm-message">Are you sure you want to proceed?</p>
+            </div>
+        </div>
+        <div class="ux-confirm-actions">
+            <button type="button" id="uxConfirmCancelBtn" class="btn-confirm-cancel" onclick="closeConfirmModal()">Cancel</button>
+            <button type="button" id="uxConfirmActionBtn" class="btn-confirm-primary" onclick="executeConfirmModalAction()">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <!-- Clean, simple Vanilla JavaScript -->
-<script src="js/main.js?v=20261107_v4" onerror="var s=document.createElement('script');s.src='public/js/main.js?v=20261107_v4';document.body.appendChild(s);"></script>
+<script src="js/main.js?v=20261107_v7" onerror="var s=document.createElement('script');s.src='public/js/main.js?v=20261107_v7';document.body.appendChild(s);"></script>
 </body>
 </html>

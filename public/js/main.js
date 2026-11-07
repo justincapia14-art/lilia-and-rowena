@@ -663,30 +663,344 @@ function renderAuthHeaderState() {
     }
 }
 
-function handleUserLogout() {
-    fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: getAuthRequestHeaders()
-    }).catch(function () {
-        fetch('public/index.php?route=api_logout', { method: 'POST' }).catch(function () {});
-    });
+// ============================================================================
+// 3B. PROFESSIONAL LOADING EFFECTS, CONFIRMATION DIALOGS & TOAST NOTIFICATIONS
+// ============================================================================
+var activeConfirmModalConfig = null;
+var isConfirmModalActionInFlight = false;
+var isOrderSubmissionInFlight = false;
+var isMessageSendInFlight = false;
 
-    isExplicitlyLoggedOut = true;
-    currentSessionToken = null;
-    liveOrderMessages = [];
-    adminConversationsList = [];
-    currentUserSession = {
-        isLoggedIn: false,
-        id: null,
-        role: 'guest',
-        name: '',
-        email: '',
-        phone: '',
-        address: ''
+function ensureToastContainerExists() {
+    var container = document.getElementById('globalToastContainer');
+    if (!container && typeof document !== 'undefined' && document.body) {
+        container = document.createElement('div');
+        container.id = 'globalToastContainer';
+        container.className = 'ux-toast-container';
+        container.setAttribute('aria-live', 'polite');
+        container.setAttribute('aria-atomic', 'false');
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+function dismissToast(toastEl) {
+    if (!toastEl || toastEl.dataset.dismissed === '1') return;
+    toastEl.dataset.dismissed = '1';
+    toastEl.classList.add('ux-toast-hiding');
+    setTimeout(function () {
+        if (toastEl && toastEl.parentNode) {
+            toastEl.parentNode.removeChild(toastEl);
+        }
+    }, 220);
+}
+
+function showToast(type, title, message, durationMs) {
+    var variant = String(type || 'success').toLowerCase();
+    if (variant !== 'success' && variant !== 'error' && variant !== 'warning' && variant !== 'info') {
+        variant = 'info';
+    }
+    var container = ensureToastContainerExists();
+    if (!container) return null;
+
+    // Limit concurrent visible toasts to 4 so the screen never clutters
+    var existingToasts = container.querySelectorAll('.ux-toast');
+    if (existingToasts.length >= 4) {
+        dismissToast(existingToasts[0]);
+    }
+
+    var iconMap = {
+        success: '✓',
+        error: '✕',
+        warning: '!',
+        info: 'i'
     };
-    savePersistedClientDatabase();
-    renderAuthHeaderState();
-    closeModal('adminModal');
+
+    var toast = document.createElement('div');
+    toast.className = 'ux-toast ux-toast-' + variant;
+    toast.setAttribute('role', variant === 'error' ? 'alert' : 'status');
+    toast.setAttribute('aria-live', variant === 'error' ? 'assertive' : 'polite');
+
+    var safeTitle = escapeHtmlText(title || (variant === 'error' ? 'Action Failed' : 'Notification'));
+    var safeMsg = message ? escapeHtmlText(message) : '';
+
+    toast.innerHTML =
+        '<div class="ux-toast-icon" aria-hidden="true">' + (iconMap[variant] || '✓') + '</div>' +
+        '<div class="ux-toast-body">' +
+            '<p class="ux-toast-title">' + safeTitle + '</p>' +
+            (safeMsg ? '<p class="ux-toast-msg">' + safeMsg + '</p>' : '') +
+        '</div>' +
+        '<button type="button" class="ux-toast-close" aria-label="Dismiss notification">✕</button>';
+
+    var closeBtn = toast.querySelector('.ux-toast-close');
+    if (closeBtn) {
+        closeBtn.onclick = function () {
+            dismissToast(toast);
+        };
+    }
+
+    container.appendChild(toast);
+
+    var timeoutDuration = typeof durationMs === 'number'
+        ? durationMs
+        : (variant === 'error' ? 5500 : 4000);
+
+    if (timeoutDuration > 0) {
+        setTimeout(function () {
+            dismissToast(toast);
+        }, timeoutDuration);
+    }
+
+    return toast;
+}
+
+function showSuccessToast(title, message, durationMs) {
+    return showToast('success', title, message, durationMs);
+}
+
+function showErrorToast(title, message, durationMs) {
+    return showToast('error', title, message, durationMs);
+}
+
+function showWarningToast(title, message, durationMs) {
+    return showToast('warning', title, message, durationMs);
+}
+
+function showInfoToast(title, message, durationMs) {
+    return showToast('info', title, message, durationMs);
+}
+
+function setButtonLoading(btnEl, isLoading, loadingText) {
+    if (!btnEl) return;
+    if (isLoading) {
+        if (!btnEl.getAttribute('data-ux-orig-html')) {
+            btnEl.setAttribute('data-ux-orig-html', btnEl.innerHTML);
+        }
+        btnEl.disabled = true;
+        btnEl.setAttribute('aria-busy', 'true');
+        btnEl.classList.add('is-loading-btn');
+        var label = loadingText || 'Processing...';
+        btnEl.innerHTML =
+            '<span class="btn-spinner" aria-hidden="true"></span>' +
+            '<span>' + escapeHtmlText(label) + '</span>';
+    } else {
+        var origHtml = btnEl.getAttribute('data-ux-orig-html');
+        if (origHtml !== null) {
+            btnEl.innerHTML = origHtml;
+            btnEl.removeAttribute('data-ux-orig-html');
+        }
+        btnEl.disabled = false;
+        btnEl.removeAttribute('aria-busy');
+        btnEl.classList.remove('is-loading-btn');
+    }
+}
+
+function markFieldInvalid(inputEl, isInvalid) {
+    if (!inputEl) return;
+    if (isInvalid) {
+        inputEl.classList.add('input-field-error');
+        if (!inputEl.dataset.uxErrorBound) {
+            inputEl.dataset.uxErrorBound = '1';
+            inputEl.addEventListener('input', function () {
+                inputEl.classList.remove('input-field-error');
+            });
+            inputEl.addEventListener('change', function () {
+                inputEl.classList.remove('input-field-error');
+            });
+        }
+    } else {
+        inputEl.classList.remove('input-field-error');
+    }
+}
+
+function ensureConfirmModalExists() {
+    var modal = document.getElementById('uxConfirmModal');
+    if (!modal && typeof document !== 'undefined' && document.body) {
+        modal = document.createElement('div');
+        modal.id = 'uxConfirmModal';
+        modal.className = 'ux-confirm-backdrop';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'uxConfirmTitle');
+        modal.setAttribute('aria-describedby', 'uxConfirmMessage');
+        modal.style.display = 'none';
+        modal.onclick = function (e) {
+            if (e.target === modal) closeConfirmModal();
+        };
+        modal.innerHTML =
+            '<div class="ux-confirm-card">' +
+                '<div class="ux-confirm-header">' +
+                    '<div id="uxConfirmIconWrap" class="ux-confirm-icon-wrap variant-primary" aria-hidden="true">!</div>' +
+                    '<div style="flex: 1; min-width: 0;">' +
+                        '<h3 id="uxConfirmTitle" class="ux-confirm-title">Confirm Action</h3>' +
+                        '<p id="uxConfirmMessage" class="ux-confirm-message">Are you sure you want to proceed?</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ux-confirm-actions">' +
+                    '<button type="button" id="uxConfirmCancelBtn" class="btn-confirm-cancel" onclick="closeConfirmModal()">Cancel</button>' +
+                    '<button type="button" id="uxConfirmActionBtn" class="btn-confirm-primary" onclick="executeConfirmModalAction()">Confirm</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(modal);
+    }
+    return modal;
+}
+
+function openConfirmModal(options) {
+    var opts = options || {};
+    var modal = ensureConfirmModalExists();
+    if (!modal) {
+        if (typeof opts.onConfirm === 'function') {
+            opts.onConfirm();
+        }
+        return;
+    }
+
+    isConfirmModalActionInFlight = false;
+    activeConfirmModalConfig = opts;
+
+    var titleEl = document.getElementById('uxConfirmTitle');
+    var msgEl = document.getElementById('uxConfirmMessage');
+    var cancelBtn = document.getElementById('uxConfirmCancelBtn');
+    var actionBtn = document.getElementById('uxConfirmActionBtn');
+    var iconWrap = document.getElementById('uxConfirmIconWrap');
+
+    var variant = opts.variant || 'primary';
+    if (titleEl) titleEl.textContent = opts.title || 'Confirm Action';
+    if (msgEl) msgEl.textContent = opts.message || 'Are you sure you want to proceed?';
+
+    if (cancelBtn) {
+        cancelBtn.disabled = false;
+        cancelBtn.textContent = opts.cancelText || 'Cancel';
+    }
+    if (actionBtn) {
+        setButtonLoading(actionBtn, false);
+        actionBtn.textContent = opts.confirmText || 'Confirm';
+        actionBtn.className = (variant === 'danger') ? 'btn-confirm-danger' : 'btn-confirm-primary';
+    }
+    if (iconWrap) {
+        iconWrap.className = 'ux-confirm-icon-wrap variant-' + (variant === 'danger' ? 'danger' : (variant === 'warning' ? 'warning' : 'primary'));
+        iconWrap.textContent = (variant === 'danger') ? '!' : '✓';
+    }
+
+    modal.style.display = 'flex';
+    if (actionBtn) {
+        setTimeout(function () {
+            if (actionBtn && !actionBtn.disabled) actionBtn.focus();
+        }, 20);
+    }
+}
+
+function closeConfirmModal(forceClose) {
+    if (isConfirmModalActionInFlight && !forceClose) return;
+    var modal = document.getElementById('uxConfirmModal');
+    var cfg = activeConfirmModalConfig;
+    activeConfirmModalConfig = null;
+    isConfirmModalActionInFlight = false;
+
+    var actionBtn = document.getElementById('uxConfirmActionBtn');
+    var cancelBtn = document.getElementById('uxConfirmCancelBtn');
+    if (actionBtn) setButtonLoading(actionBtn, false);
+    if (cancelBtn) cancelBtn.disabled = false;
+    if (modal) modal.style.display = 'none';
+
+    if (!forceClose && cfg && typeof cfg.onCancel === 'function') {
+        cfg.onCancel();
+    }
+}
+
+function executeConfirmModalAction() {
+    if (!activeConfirmModalConfig || isConfirmModalActionInFlight) return;
+    var cfg = activeConfirmModalConfig;
+    var actionBtn = document.getElementById('uxConfirmActionBtn');
+    var cancelBtn = document.getElementById('uxConfirmCancelBtn');
+
+    isConfirmModalActionInFlight = true;
+    if (cancelBtn) cancelBtn.disabled = true;
+    if (actionBtn) {
+        setButtonLoading(actionBtn, true, cfg.loadingText || 'Processing...');
+    }
+
+    var finishAndClose = function () {
+        closeConfirmModal(true);
+    };
+
+    try {
+        var result = (typeof cfg.onConfirm === 'function') ? cfg.onConfirm(actionBtn) : null;
+        if (result && typeof result.then === 'function') {
+            result.then(function () {
+                finishAndClose();
+            }).catch(function () {
+                finishAndClose();
+            });
+        } else {
+            finishAndClose();
+        }
+    } catch (err) {
+        finishAndClose();
+    }
+}
+
+function performConfirmedUserLogout() {
+    return new Promise(function (resolve) {
+        var finalizeLogoutState = function () {
+            isExplicitlyLoggedOut = true;
+            currentSessionToken = null;
+            liveOrderMessages = [];
+            adminConversationsList = [];
+            currentUserSession = {
+                isLoggedIn: false,
+                id: null,
+                role: 'guest',
+                name: '',
+                email: '',
+                phone: '',
+                address: ''
+            };
+            savePersistedClientDatabase();
+            renderAuthHeaderState();
+            closeModal('adminModal');
+            closeModal('customerProfileModal');
+            closeModal('liveChatModal');
+            closeModal('checkoutModal');
+            showSuccessToast('Logged Out', 'You have been logged out successfully.');
+            resolve();
+        };
+
+        fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: getAuthRequestHeaders()
+        })
+        .then(function () {
+            setTimeout(finalizeLogoutState, 180);
+        })
+        .catch(function () {
+            fetch('public/index.php?route=api_logout', { method: 'POST' })
+                .catch(function () {})
+                .finally(function () {
+                    setTimeout(finalizeLogoutState, 180);
+                });
+        });
+    });
+}
+
+function handleUserLogout(event) {
+    if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
+    }
+    closeCustomerProfileDropdown();
+    openConfirmModal({
+        title: 'Confirm Logout',
+        message: 'Are you sure you want to log out of your account?',
+        cancelText: 'Cancel',
+        confirmText: 'Yes, Log Out',
+        loadingText: 'Logging out...',
+        variant: 'danger',
+        onConfirm: function () {
+            return performConfirmedUserLogout();
+        }
+    });
+    return false;
 }
 
 function tryLocalOrPhpLogin(email, password, role, openAdminOnSuccess) {
@@ -942,41 +1256,89 @@ function fillPresetLogin(role) {
 
 function handleCustomerLogin(event) {
     event.preventDefault();
-    var email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
-    var password = document.getElementById('loginPassInput').value;
-    var selectedRole = document.getElementById('loginRoleInput').value;
+    var emailIn = document.getElementById('loginEmailInput');
+    var passIn = document.getElementById('loginPassInput');
+    var roleIn = document.getElementById('loginRoleInput');
+    var submitBtn = document.getElementById('loginSubmitBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
     var errEl = document.getElementById('authErrorBox');
 
+    var email = emailIn ? emailIn.value.trim().toLowerCase() : '';
+    var password = passIn ? passIn.value : '';
+    var selectedRole = roleIn ? roleIn.value : 'auto';
+
+    markFieldInvalid(emailIn, !email);
+    markFieldInvalid(passIn, !password);
+
+    if (!email || !password) {
+        if (errEl) {
+            errEl.style.display = 'block';
+            errEl.textContent = 'Please Complete All Required Fields.';
+        }
+        showErrorToast('Please Complete All Required Fields.', 'Enter both your email address and password to sign in.');
+        return false;
+    }
+
+    setButtonLoading(submitBtn, true, 'Logging in...');
+
     performServerLogin(email, password, selectedRole, true).then(function (ok) {
+        setButtonLoading(submitBtn, false);
         if (ok) {
             if (errEl) errEl.style.display = 'none';
+            markFieldInvalid(emailIn, false);
+            markFieldInvalid(passIn, false);
             closeModal('authModal');
-        } else if (errEl) {
-            errEl.style.display = 'block';
-            errEl.textContent = 'Invalid email or password. Use Customer #1 (maria.santos@example.com / password123), Customer #2 (roberto.mendoza@example.com / password123), or Admin (admin@liliaandrowena.com / admin123).';
+            showSuccessToast('Login Successful!', 'Welcome back, ' + (currentUserSession.name || 'Valued Client') + '.');
+        } else {
+            markFieldInvalid(emailIn, true);
+            markFieldInvalid(passIn, true);
+            if (errEl) {
+                errEl.style.display = 'block';
+                errEl.textContent = 'Invalid Email or Password. Use Customer #1 (maria.santos@example.com / password123), Customer #2 (roberto.mendoza@example.com / password123), or Admin (admin@liliaandrowena.com / admin123).';
+            }
+            showErrorToast('Invalid Email or Password.', 'Please check your email and password and try again.');
         }
+    }).catch(function () {
+        setButtonLoading(submitBtn, false);
+        showErrorToast('Invalid Email or Password.', 'Unable to sign in at this moment. Please try again.');
     });
     return false;
 }
 
 function handleCustomerRegister(event) {
     event.preventDefault();
-    var fullName = document.getElementById('regFullName').value.trim();
-    var email = document.getElementById('regEmail').value.trim().toLowerCase();
-    var password = document.getElementById('regPassword').value;
-    var phone = document.getElementById('regPhone').value.trim();
-    var address = document.getElementById('regAddress').value.trim();
+    var nameIn = document.getElementById('regFullName');
+    var emailIn = document.getElementById('regEmail');
+    var passIn = document.getElementById('regPassword');
+    var phoneIn = document.getElementById('regPhone');
+    var addrIn = document.getElementById('regAddress');
+    var submitBtn = document.getElementById('registerSubmitBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
     var errEl = document.getElementById('authErrorBox');
+
+    var fullName = nameIn ? nameIn.value.trim() : '';
+    var email = emailIn ? emailIn.value.trim().toLowerCase() : '';
+    var password = passIn ? passIn.value : '';
+    var phone = phoneIn ? phoneIn.value.trim() : '';
+    var address = addrIn ? addrIn.value.trim() : '';
+
+    markFieldInvalid(nameIn, !fullName);
+    markFieldInvalid(emailIn, !email);
+    markFieldInvalid(passIn, !password);
+    markFieldInvalid(phoneIn, !phone);
+    markFieldInvalid(addrIn, !address);
 
     if (!fullName || !email || !password || !phone || !address) {
         if (errEl) {
             errEl.style.display = 'block';
-            errEl.textContent = 'Please complete all required fields to create your customer account.';
+            errEl.textContent = 'Please Complete All Required Fields.';
         }
+        showErrorToast('Please Complete All Required Fields.', 'Please fill out all required fields to create your customer account.');
         return false;
     }
 
+    setButtonLoading(submitBtn, true, 'Creating your account...');
+
     function finalizeClientRegistration(assignedId, tokenFromServer, serverCustomers) {
+        setButtonLoading(submitBtn, false);
         var numericId = Number(assignedId) || (registeredCustomers.length + 1);
         var existingIdx = -1;
         for (var i = 0; i < registeredCustomers.length; i++) {
@@ -1020,15 +1382,16 @@ function handleCustomerRegister(event) {
         if (errEl) errEl.style.display = 'none';
 
         // Clear registration inputs
-        document.getElementById('regFullName').value = '';
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regPhone').value = '';
-        document.getElementById('regAddress').value = '';
+        if (nameIn) nameIn.value = '';
+        if (emailIn) emailIn.value = '';
+        if (passIn) passIn.value = '';
+        if (phoneIn) phoneIn.value = '';
+        if (addrIn) addrIn.value = '';
 
         renderAuthHeaderState();
         fetchAuthorizedConversationMessages();
         closeModal('authModal');
+        showSuccessToast('Account Created Successfully!', 'Welcome to Lilia & Rowena Furniture, ' + fullName + '.');
     }
 
     fetch('/api/auth/register', {
@@ -1050,19 +1413,26 @@ function handleCustomerRegister(event) {
     .then(function (result) {
         if (result.status === 200 && result.data && result.data.status === 'ok' && result.data.user) {
             finalizeClientRegistration(result.data.user.id, result.data.sessionToken, result.data.customers);
-        } else if (errEl) {
-            errEl.style.display = 'block';
-            errEl.textContent = (result.data && result.data.error) ? result.data.error : 'Unable to register customer account.';
+        } else {
+            setButtonLoading(submitBtn, false);
+            var errMsg = (result.data && result.data.error) ? result.data.error : 'Unable to Save Changes. Please Try Again.';
+            if (errEl) {
+                errEl.style.display = 'block';
+                errEl.textContent = errMsg;
+            }
+            showErrorToast('Unable to Save Changes. Please Try Again.', errMsg);
         }
     })
     .catch(function () {
         // Check duplicate in localStorage first
         for (var i = 0; i < registeredCustomers.length; i++) {
             if (String(registeredCustomers[i].email).toLowerCase() === email) {
+                setButtonLoading(submitBtn, false);
                 if (errEl) {
                     errEl.style.display = 'block';
                     errEl.textContent = 'An account with this email address already exists.';
                 }
+                showErrorToast('Unable to Save Changes. Please Try Again.', 'An account with this email address already exists.');
                 return;
             }
         }
@@ -1088,10 +1458,12 @@ function handleCustomerRegister(event) {
             if (phpResult.status === 200 && phpResult.data && phpResult.data.status === 'ok' && phpResult.data.user) {
                 finalizeClientRegistration(phpResult.data.user.id, null, phpResult.data.customers);
             } else if (phpResult.status === 409 && phpResult.data && phpResult.data.error) {
+                setButtonLoading(submitBtn, false);
                 if (errEl) {
                     errEl.style.display = 'block';
                     errEl.textContent = phpResult.data.error;
                 }
+                showErrorToast('Unable to Save Changes. Please Try Again.', phpResult.data.error);
             } else {
                 var maxId = 2;
                 for (var k = 0; k < registeredCustomers.length; k++) {
@@ -1414,7 +1786,11 @@ function syncJobOrderUpdateToServer(orderId, updateFields, noticeMsg) {
         csrf_token: currentCsrfToken
     };
 
-    fetch('/api/admin/job-orders/update', {
+    if (!currentUserSession || !currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
+        return Promise.resolve(null);
+    }
+
+    return fetch('/api/admin/job-orders/update', {
         method: 'POST',
         headers: getAuthRequestHeaders(),
         body: JSON.stringify(bodyPayload)
@@ -1425,9 +1801,10 @@ function syncJobOrderUpdateToServer(orderId, updateFields, noticeMsg) {
             mergeServerJobOrdersIntoClient(result.data.orders);
             renderAdminDashboard();
         }
+        return result;
     })
     .catch(function () {
-        fetch('public/index.php?route=api_admin_update_job_order', {
+        return fetch('public/index.php?route=api_admin_update_job_order', {
             method: 'POST',
             headers: getAuthRequestHeaders(),
             body: JSON.stringify(bodyPayload)
@@ -1435,12 +1812,42 @@ function syncJobOrderUpdateToServer(orderId, updateFields, noticeMsg) {
     });
 }
 
-function quickUpdateJobOrderStatus(orderId, newStatus) {
-    syncJobOrderUpdateToServer(
-        orderId,
-        { status: newStatus },
-        '✓ Job Order #JO-' + orderId + ' status updated to "' + newStatus + '" in Customer_Order.'
-    );
+function quickUpdateJobOrderStatus(orderId, newStatus, selectEl) {
+    var record = sampleOrders[String(orderId)];
+    var prevStatus = record ? record.status : 'Pending';
+    if (record && String(record.status) === String(newStatus)) {
+        return;
+    }
+
+    var isCancelling = String(newStatus).toLowerCase() === 'cancelled';
+    openConfirmModal({
+        title: isCancelling ? 'Cancel Job Order' : 'Update Order Status',
+        message: isCancelling
+            ? 'Are you sure you want to cancel this order?'
+            : 'Are you sure you want to update this order status?',
+        cancelText: 'Cancel',
+        confirmText: isCancelling ? 'Yes, Cancel Order' : 'Update Status',
+        loadingText: 'Updating order status...',
+        variant: isCancelling ? 'danger' : 'primary',
+        onCancel: function () {
+            if (selectEl) {
+                selectEl.value = prevStatus;
+            } else {
+                renderAdminDashboard();
+            }
+        },
+        onConfirm: function () {
+            return Promise.resolve(
+                syncJobOrderUpdateToServer(
+                    orderId,
+                    { status: newStatus },
+                    '✓ Job Order #JO-' + orderId + ' status updated to "' + newStatus + '" in Customer_Order.'
+                )
+            ).then(function () {
+                showSuccessToast('Order Status Updated Successfully!', 'Job Order #JO-' + orderId + ' is now marked as "' + newStatus + '".');
+            });
+        }
+    });
 }
 
 function updateAdminOrderStatus(orderId, newStatus) {
@@ -1448,28 +1855,40 @@ function updateAdminOrderStatus(orderId, newStatus) {
 }
 
 function quickUpdateJobOrderPriority(orderId, newPriority) {
-    syncJobOrderUpdateToServer(
-        orderId,
-        { priority: newPriority },
-        '✓ Job Order #JO-' + orderId + ' priority set to "' + newPriority + '".'
-    );
+    Promise.resolve(
+        syncJobOrderUpdateToServer(
+            orderId,
+            { priority: newPriority },
+            '✓ Job Order #JO-' + orderId + ' priority set to "' + newPriority + '".'
+        )
+    ).then(function () {
+        showSuccessToast('Changes Saved Successfully!', 'Job Order #JO-' + orderId + ' priority set to "' + newPriority + '".');
+    });
 }
 
 function quickUpdateJobOrderDeadline(orderId, newDueDate) {
     if (!newDueDate) return;
-    syncJobOrderUpdateToServer(
-        orderId,
-        { due: newDueDate },
-        '✓ Job Order #JO-' + orderId + ' deadline updated to ' + formatReadableDateManila(newDueDate) + ' (' + newDueDate + ').'
-    );
+    Promise.resolve(
+        syncJobOrderUpdateToServer(
+            orderId,
+            { due: newDueDate },
+            '✓ Job Order #JO-' + orderId + ' deadline updated to ' + formatReadableDateManila(newDueDate) + ' (' + newDueDate + ').'
+        )
+    ).then(function () {
+        showSuccessToast('Deadline Updated Successfully!', 'Job Order #JO-' + orderId + ' deadline set to ' + formatReadableDateManila(newDueDate) + '.');
+    });
 }
 
 function quickUpdateJobOrderStaff(orderId, newStaff) {
-    syncJobOrderUpdateToServer(
-        orderId,
-        { carpenter: newStaff },
-        '✓ Job Order #JO-' + orderId + ' assigned to ' + newStaff + '.'
-    );
+    Promise.resolve(
+        syncJobOrderUpdateToServer(
+            orderId,
+            { carpenter: newStaff },
+            '✓ Job Order #JO-' + orderId + ' assigned to ' + newStaff + '.'
+        )
+    ).then(function () {
+        showSuccessToast('Changes Saved Successfully!', 'Job Order #JO-' + orderId + ' assigned to ' + newStaff + '.');
+    });
 }
 
 function renderAdminDashboard() {
@@ -1799,7 +2218,7 @@ function renderAdminDashboard() {
                 // 5. Order Status
                 '<td>' +
                     '<div><span class="oms-status-badge ' + getStatusBadgeClassName(status) + '">' + escapeAdminHtml(status) + '</span></div>' +
-                    '<select aria-label="Status for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.15rem 0.2rem; font-size:0.65rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:100px;">' +
+                    '<select aria-label="Status for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', this.value, this)" style="margin-top:0.22rem; padding:0.15rem 0.2rem; font-size:0.65rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:100px;">' +
                         statusOpts +
                     '</select>' +
                 '</td>' +
@@ -2007,6 +2426,7 @@ function closeAdminJobOrderDetail() {
 
 function saveAdminJobOrderDetail(event, orderId) {
     event.preventDefault();
+    var submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
     var statusEl = document.getElementById('detailEditStatus');
     var prioEl = document.getElementById('detailEditPriority');
     var dueEl = document.getElementById('detailEditDueDate');
@@ -2015,19 +2435,34 @@ function saveAdminJobOrderDetail(event, orderId) {
     var paidEl = document.getElementById('detailEditPaidAmount');
     var notesEl = document.getElementById('detailEditJobNotes');
 
-    syncJobOrderUpdateToServer(
-        orderId,
-        {
-            status: statusEl ? statusEl.value : 'In Production',
-            priority: prioEl ? prioEl.value : 'Normal',
-            due: dueEl ? dueEl.value : getTodayManilaClient(),
-            deadlineTime: timeEl ? timeEl.value.trim() : '05:00 PM',
-            carpenter: staffEl ? staffEl.value : 'Master Carding Santos',
-            downpayment: paidEl ? Number(paidEl.value) : 0,
-            jobNotes: notesEl ? notesEl.value.trim() : ''
-        },
-        '✓ Saved full Job Order #JO-' + orderId + ' details, deadline, and priority.'
-    );
+    var newStatus = statusEl ? statusEl.value : 'In Production';
+    var newDue = dueEl ? dueEl.value : getTodayManilaClient();
+    if (!newDue) {
+        markFieldInvalid(dueEl, true);
+        showErrorToast('Please Complete All Required Fields.', 'Please select a valid deadline date for this job order.');
+        return false;
+    }
+
+    setButtonLoading(submitBtn, true, 'Saving changes...');
+
+    Promise.resolve(
+        syncJobOrderUpdateToServer(
+            orderId,
+            {
+                status: newStatus,
+                priority: prioEl ? prioEl.value : 'Normal',
+                due: newDue,
+                deadlineTime: timeEl ? timeEl.value.trim() : '05:00 PM',
+                carpenter: staffEl ? staffEl.value : 'Master Carding Santos',
+                downpayment: paidEl ? Number(paidEl.value) : 0,
+                jobNotes: notesEl ? notesEl.value.trim() : ''
+            },
+            '✓ Saved full Job Order #JO-' + orderId + ' details, deadline, and priority.'
+        )
+    ).finally(function () {
+        setButtonLoading(submitBtn, false);
+        showSuccessToast('Changes Saved Successfully!', 'Job Order #JO-' + orderId + ' status, deadline, and notes have been updated.');
+    });
     return false;
 }
 
@@ -2049,9 +2484,11 @@ function handleCreateNewJobOrder(event) {
     event.preventDefault();
     if (!currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
         showChatSecurityAlert('403 Forbidden: Only Admin accounts can create Job Orders.');
+        showErrorToast('Unable to Save Changes. Please Try Again.', 'Only authorized Administrators can create Job Orders.');
         return false;
     }
 
+    var submitBtn = document.getElementById('newJobOrderSubmitBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
     var custNameEl = document.getElementById('newJoCustomer') || document.getElementById('newJobCustomerName');
     var prodNameEl = document.getElementById('newJoProduct') || document.getElementById('newJobProductSelect');
     var qtyEl = document.getElementById('newJoQty') || document.getElementById('newJobQty');
@@ -2060,7 +2497,7 @@ function handleCreateNewJobOrder(event) {
     var dueEl = document.getElementById('newJoDeadline') || document.getElementById('newJobDueDate');
     var staffEl = document.getElementById('newJoStaff') || document.getElementById('newJobStaffSelect');
 
-    var custName = custNameEl ? custNameEl.value.trim() : 'Showroom Client';
+    var custName = custNameEl ? custNameEl.value.trim() : '';
     var prodName = prodNameEl ? prodNameEl.value.trim() : 'Custom Solid Wood Furniture';
     var qty = qtyEl ? (parseInt(qtyEl.value, 10) || 1) : 1;
     var total = totalEl ? (parseFloat(totalEl.value) || 28500) : 28500;
@@ -2071,6 +2508,14 @@ function handleCreateNewJobOrder(event) {
     var deadlineTime = '05:00 PM';
     var staff = staffEl ? staffEl.value : 'Master Carding Santos';
     var notes = 'Created by Admin in Job Orders Console.';
+
+    if (!custName) {
+        markFieldInvalid(custNameEl, true);
+        showErrorToast('Please Complete All Required Fields.', 'Please enter the customer name for the new Job Order.');
+        return false;
+    }
+
+    setButtonLoading(submitBtn, true, 'Saving changes...');
 
     var maxId = 1007;
     var keys = Object.keys(sampleOrders);
@@ -2106,9 +2551,6 @@ function handleCreateNewJobOrder(event) {
     };
 
     savePersistedClientDatabase();
-    toggleNewJobOrderForm();
-    renderAdminDashboard();
-    showAdminOmsNotice('✓ Created new Job Order #JO-' + newId + ' for ' + custName + ' (Deadline: ' + formatReadableDateManila(due) + ').');
 
     fetch('/api/admin/job-orders/create', {
         method: 'POST',
@@ -2133,10 +2575,16 @@ function handleCreateNewJobOrder(event) {
     .then(function (data) {
         if (data && data.status === 'ok' && Array.isArray(data.orders)) {
             mergeServerJobOrdersIntoClient(data.orders);
-            renderAdminDashboard();
         }
     })
-    .catch(function () {});
+    .catch(function () {})
+    .finally(function () {
+        setButtonLoading(submitBtn, false);
+        toggleNewJobOrderForm();
+        renderAdminDashboard();
+        showAdminOmsNotice('✓ Created new Job Order #JO-' + newId + ' for ' + custName + ' (Deadline: ' + formatReadableDateManila(due) + ').');
+        showSuccessToast('Changes Saved Successfully!', 'Job Order #JO-' + newId + ' created for ' + custName + '.');
+    });
 
     return false;
 }
@@ -2248,22 +2696,36 @@ function updateProductPrice() {
 }
 
 // --- 7. SHOPPING CART FUNCTIONS (Add, Update Qty, Remove) ---
-function quickAddToCart(id, name, basePrice, image) {
-    shoppingCart.push({
-        id: id,
-        name: name,
-        basePrice: basePrice,
-        extraCost: 0,
-        qty: 1,
-        image: image,
-        specs: 'Standard Catalog Dimensions'
-    });
-    savePersistedClientDatabase();
-    renderCartDrawer();
-    openModal('cartDrawerBackdrop');
+function quickAddToCart(id, name, basePrice, image, btnEl) {
+    var finalizeAdd = function () {
+        if (btnEl) {
+            setButtonLoading(btnEl, false);
+        }
+        shoppingCart.push({
+            id: id,
+            name: name,
+            basePrice: basePrice,
+            extraCost: 0,
+            qty: 1,
+            image: image,
+            specs: 'Standard Catalog Dimensions'
+        });
+        savePersistedClientDatabase();
+        renderCartDrawer();
+        openModal('cartDrawerBackdrop');
+        showSuccessToast('Product Added to Cart!', name + ' has been added to your cart.');
+    };
+
+    if (btnEl) {
+        setButtonLoading(btnEl, true, '');
+        setTimeout(finalizeAdd, 180);
+    } else {
+        finalizeAdd();
+    }
 }
 
-function addCustomizedToCart() {
+function addCustomizedToCart(btnEl) {
+    var targetBtn = btnEl || document.getElementById('customizerAddBtn');
     var isCustom = document.getElementById('isCustomCheckbox').checked;
     var len = document.getElementById('customLength').value;
     var wid = document.getElementById('customWidth').value;
@@ -2277,36 +2739,65 @@ function addCustomizedToCart() {
         ? (len + 'L × ' + wid + 'W × ' + hei + 'H cm · ' + finish)
         : 'Standard Catalog Dimensions';
 
-    shoppingCart.push({
-        id: currentSelectedProduct.id,
-        name: currentSelectedProduct.name,
-        basePrice: currentSelectedProduct.basePrice,
-        extraCost: extraCost,
-        qty: qty,
-        image: currentSelectedProduct.image,
-        specs: specsText
-    });
+    setButtonLoading(targetBtn, true, 'Adding to cart...');
 
-    savePersistedClientDatabase();
-    closeModal('customizerModal');
-    renderCartDrawer();
-    openModal('cartDrawerBackdrop');
+    setTimeout(function () {
+        setButtonLoading(targetBtn, false);
+        shoppingCart.push({
+            id: currentSelectedProduct.id,
+            name: currentSelectedProduct.name,
+            basePrice: currentSelectedProduct.basePrice,
+            extraCost: extraCost,
+            qty: qty,
+            image: currentSelectedProduct.image,
+            specs: specsText
+        });
+
+        savePersistedClientDatabase();
+        closeModal('customizerModal');
+        renderCartDrawer();
+        openModal('cartDrawerBackdrop');
+        showSuccessToast('Product Added to Cart!', currentSelectedProduct.name + ' (' + specsText + ') added to cart.');
+    }, 220);
 }
 
 function changeCartQty(index, delta) {
     if (!shoppingCart[index]) return;
-    shoppingCart[index].qty += delta;
-    if (shoppingCart[index].qty <= 0) {
-        shoppingCart.splice(index, 1);
+    var nextQty = (Number(shoppingCart[index].qty) || 1) + delta;
+    if (nextQty <= 0) {
+        removeCartItem(index);
+        return;
     }
+    shoppingCart[index].qty = nextQty;
     savePersistedClientDatabase();
     renderCartDrawer();
+    showSuccessToast('Cart Updated Successfully!', shoppingCart[index].name + ' quantity updated to ' + nextQty + '.');
 }
 
 function removeCartItem(index) {
-    shoppingCart.splice(index, 1);
-    savePersistedClientDatabase();
-    renderCartDrawer();
+    if (!shoppingCart[index]) return;
+    var itemToRemove = shoppingCart[index];
+    openConfirmModal({
+        title: 'Remove Cart Item',
+        message: 'Are you sure you want to remove this item from your cart?',
+        cancelText: 'Cancel',
+        confirmText: 'Remove Item',
+        loadingText: 'Removing item...',
+        variant: 'danger',
+        onConfirm: function () {
+            return new Promise(function (resolve) {
+                setTimeout(function () {
+                    if (shoppingCart[index]) {
+                        shoppingCart.splice(index, 1);
+                    }
+                    savePersistedClientDatabase();
+                    renderCartDrawer();
+                    showSuccessToast('Item Removed Successfully!', (itemToRemove ? itemToRemove.name : 'Item') + ' was removed from your cart.');
+                    resolve();
+                }, 180);
+            });
+        }
+    });
 }
 
 function renderCartDrawer() {
@@ -2387,90 +2878,153 @@ function proceedToCheckoutModal() {
 
 function submitLiveOrder(event) {
     event.preventDefault();
+    if (isOrderSubmissionInFlight) {
+        return false;
+    }
+
     var nameIn = document.getElementById('chkFullName');
+    var emailIn = document.getElementById('chkEmail');
     var phoneIn = document.getElementById('chkPhone');
     var addrIn = document.getElementById('chkAddress');
+    var submitBtn = document.getElementById('checkoutSubmitBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
     var errBox = document.getElementById('checkoutErrorMsg');
 
-    if (!nameIn.value.trim() || phoneIn.value.trim().length < 10 || addrIn.value.trim().length < 8) {
+    var fullNameVal = nameIn ? nameIn.value.trim() : '';
+    var emailVal = emailIn ? emailIn.value.trim() : (currentUserSession.email || 'client@example.com');
+    var phoneVal = phoneIn ? phoneIn.value.trim() : '';
+    var addrVal = addrIn ? addrIn.value.trim() : '';
+
+    var nameInvalid = fullNameVal.length < 2;
+    var emailInvalid = !emailVal || emailVal.indexOf('@') === -1;
+    var phoneInvalid = phoneVal.replace(/[^0-9]/g, '').length < 10;
+    var addrInvalid = addrVal.length < 8;
+
+    markFieldInvalid(nameIn, nameInvalid);
+    markFieldInvalid(emailIn, emailInvalid);
+    markFieldInvalid(phoneIn, phoneInvalid);
+    markFieldInvalid(addrIn, addrInvalid);
+
+    if (nameInvalid || emailInvalid || phoneInvalid || addrInvalid) {
         if (errBox) {
             errBox.style.display = 'block';
-            errBox.textContent = 'Please provide your full name, a valid mobile number, and complete delivery address.';
+            errBox.textContent = 'Please Complete All Required Fields. Provide your full name, valid email, mobile number, and complete delivery address.';
         }
+        showErrorToast('Please Complete All Required Fields.', 'Please verify your recipient name, email, mobile number, and delivery address.');
+        return false;
+    }
+
+    if (shoppingCart.length === 0) {
+        showErrorToast('Unable to Process Your Order.', 'Your shopping cart is currently empty.');
         return false;
     }
 
     if (errBox) errBox.style.display = 'none';
 
-    var subtotal = 0;
-    var totalQty = 0;
-    for (var i = 0; i < shoppingCart.length; i++) {
-        subtotal += (shoppingCart[i].basePrice + shoppingCart[i].extraCost) * shoppingCart[i].qty;
-        totalQty += (Number(shoppingCart[i].qty) || 1);
-    }
-    var grandTotal = subtotal + (subtotal >= 15000 ? 0 : 850);
-    var dp = Math.round(grandTotal * 0.5);
-    var firstProdName = shoppingCart[0] ? shoppingCart[0].name : 'Custom Furniture Order';
-    var firstItemName = shoppingCart[0] ? (shoppingCart[0].name + ' (' + shoppingCart[0].specs + ')') : 'Custom Furniture Order';
+    openConfirmModal({
+        title: 'Confirm Your Order',
+        message: 'Please review your order details. Do you want to place this order?',
+        cancelText: 'Cancel',
+        confirmText: 'Confirm & Place Order',
+        loadingText: 'Placing your order...',
+        variant: 'primary',
+        onConfirm: function () {
+            isOrderSubmissionInFlight = true;
+            setButtonLoading(submitBtn, true, 'Placing your order...');
 
-    var maxId = 1007;
-    var keys = Object.keys(sampleOrders);
-    for (var k = 0; k < keys.length; k++) {
-        var num = Number(keys[k]);
-        if (num > maxId) maxId = num;
-    }
-    var newOrderId = String(maxId + 1);
-    var todayManila = getTodayManilaClient();
-    var targetDue = offsetDateManilaClient(14);
+            var subtotal = 0;
+            var totalQty = 0;
+            for (var i = 0; i < shoppingCart.length; i++) {
+                subtotal += (shoppingCart[i].basePrice + shoppingCart[i].extraCost) * shoppingCart[i].qty;
+                totalQty += (Number(shoppingCart[i].qty) || 1);
+            }
+            var grandTotal = subtotal + (subtotal >= 15000 ? 0 : 850);
+            var dp = Math.round(grandTotal * 0.5);
+            var firstProdName = shoppingCart[0] ? shoppingCart[0].name : 'Custom Furniture Order';
+            var firstItemName = shoppingCart[0] ? (shoppingCart[0].name + ' (' + shoppingCart[0].specs + ')') : 'Custom Furniture Order';
 
-    sampleOrders[newOrderId] = {
-        orderId: newOrderId,
-        customerId: currentUserSession.isLoggedIn ? (Number(currentUserSession.id) || 1) : 1,
-        customer: nameIn.value.trim(),
-        customerPhone: phoneIn.value.trim(),
-        customerEmail: currentUserSession.email || 'client@example.com',
-        placed: todayManila,
-        due: targetDue,
-        deadlineTime: '04:00 PM',
-        status: 'Pending',
-        priority: 'Normal',
-        quantity: totalQty || 1,
-        stepIndex: 0,
-        carpenter: 'Master Carding Santos',
-        stage: 'Timber Selection & Grain Matching',
-        driver: 'Rene Ocampo (0918-555-6666)',
-        address: addrIn.value.trim(),
-        productName: firstProdName,
-        itemSummary: firstItemName,
-        jobNotes: 'Online Storefront Order — 50% Downpayment Recorded.',
-        total: grandTotal,
-        downpayment: dp
-    };
+            var maxId = 1007;
+            var keys = Object.keys(sampleOrders);
+            for (var k = 0; k < keys.length; k++) {
+                var num = Number(keys[k]);
+                if (num > maxId) maxId = num;
+            }
+            var newOrderId = String(maxId + 1);
+            var todayManila = getTodayManilaClient();
+            var targetDue = offsetDateManilaClient(14);
+            var idempotencyKey = 'ord_' + (currentUserSession.id || 'guest') + '_' + grandTotal + '_' + Date.now();
 
-    fetch('/api/orders/create', {
-        method: 'POST',
-        headers: getAuthRequestHeaders(),
-        body: JSON.stringify({
-            customerName: nameIn.value.trim(),
-            customerPhone: phoneIn.value.trim(),
-            customerEmail: currentUserSession.email || 'client@example.com',
-            address: addrIn.value.trim(),
-            productName: firstProdName,
-            itemSummary: firstItemName,
-            quantity: totalQty || 1,
-            total: grandTotal,
-            downpayment: dp,
-            due: targetDue
-        })
-    }).catch(function () {});
+            var localRecord = {
+                orderId: newOrderId,
+                customerId: currentUserSession.isLoggedIn ? (Number(currentUserSession.id) || 1) : 1,
+                customer: fullNameVal,
+                customerPhone: phoneVal,
+                customerEmail: emailVal,
+                placed: todayManila,
+                due: targetDue,
+                deadlineTime: '04:00 PM',
+                status: 'Pending',
+                priority: 'Normal',
+                quantity: totalQty || 1,
+                stepIndex: 0,
+                carpenter: 'Master Carding Santos',
+                stage: 'Timber Selection & Grain Matching',
+                driver: 'Rene Ocampo (0918-555-6666)',
+                address: addrVal,
+                productName: firstProdName,
+                itemSummary: firstItemName,
+                jobNotes: 'Online Storefront Order — 50% Downpayment Recorded.',
+                total: grandTotal,
+                downpayment: dp
+            };
 
-    shoppingCart = [];
-    savePersistedClientDatabase();
-    renderCartDrawer();
-    renderAdminDashboard();
-    closeModal('checkoutModal');
-    lookupOrderById(newOrderId);
-    openModal('trackOrderModal');
+            return fetch('/api/orders/create', {
+                method: 'POST',
+                headers: getAuthRequestHeaders(),
+                body: JSON.stringify({
+                    idempotencyKey: idempotencyKey,
+                    customerName: fullNameVal,
+                    customerPhone: phoneVal,
+                    customerEmail: emailVal,
+                    address: addrVal,
+                    productName: firstProdName,
+                    itemSummary: firstItemName,
+                    quantity: totalQty || 1,
+                    total: grandTotal,
+                    downpayment: dp,
+                    due: targetDue
+                })
+            })
+            .then(function (res) {
+                return res.json().then(function (data) {
+                    return { status: res.status, data: data };
+                });
+            })
+            .then(function (result) {
+                if (result.status === 200 && result.data && result.data.order) {
+                    var srvOrd = result.data.order;
+                    newOrderId = String(srvOrd.orderId || newOrderId);
+                    localRecord.orderId = newOrderId;
+                }
+                sampleOrders[newOrderId] = localRecord;
+            })
+            .catch(function () {
+                sampleOrders[newOrderId] = localRecord;
+            })
+            .finally(function () {
+                isOrderSubmissionInFlight = false;
+                setButtonLoading(submitBtn, false);
+                shoppingCart = [];
+                savePersistedClientDatabase();
+                renderCartDrawer();
+                renderAdminDashboard();
+                closeModal('checkoutModal');
+                lookupOrderById(newOrderId);
+                openModal('trackOrderModal');
+                showSuccessToast('Order Placed Successfully!', 'Order #' + newOrderId + ' has been confirmed and scheduled for workshop production.');
+            });
+        }
+    });
+
     return false;
 }
 
@@ -3404,52 +3958,81 @@ function sendLiveOrderMessage(payload) {
 
 function handleCustomerChatSubmit(event) {
     event.preventDefault();
+    if (isMessageSendInFlight) return false;
     if (!currentUserSession.isLoggedIn || !currentUserSession.id) {
         openModal('authModal');
+        showWarningToast('Sign In Required', 'Please sign in to your account to send a private message.');
         return false;
     }
 
     var inputEl = document.getElementById('customerChatInput');
     var orderSelect = document.getElementById('chatOrderSelect');
     var topicSelect = document.getElementById('chatTopicSelect');
+    var submitBtn = document.getElementById('chatSendSubmitBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
 
     var text = inputEl ? inputEl.value.trim() : '';
-    if (!text) return false;
+    if (!text) {
+        markFieldInvalid(inputEl, true);
+        showErrorToast('Please Complete All Required Fields.', 'Please enter a message before sending.');
+        return false;
+    }
+    markFieldInvalid(inputEl, false);
 
     var orderId = (orderSelect && orderSelect.value) ? Number(orderSelect.value) : null;
     var topic = (topicSelect && topicSelect.value) ? topicSelect.value : 'Order Follow-Up';
 
-    if (currentUserSession.role === 'admin') {
-        sendLiveOrderMessage({
+    isMessageSendInFlight = true;
+    setButtonLoading(submitBtn, true, 'Sending message...');
+
+    var payload = (currentUserSession.role === 'admin')
+        ? {
             CustomerID: Number(selectedAdminConversationCustomerId) || 1,
             OrderID: orderId,
             Topic: topic,
             MessageText: text
-        });
-    } else {
-        sendLiveOrderMessage({
+        }
+        : {
             OrderID: orderId,
             Topic: topic,
             MessageText: text
-        });
-    }
+        };
 
-    if (inputEl) inputEl.value = '';
+    Promise.resolve(sendLiveOrderMessage(payload))
+        .then(function () {
+            if (inputEl) inputEl.value = '';
+            showSuccessToast('Message Sent Successfully!', 'Your private message has been delivered.');
+        })
+        .catch(function () {
+            showErrorToast('Failed to Send Message.', 'Unable to send your message right now. Please try again.');
+        })
+        .finally(function () {
+            isMessageSendInFlight = false;
+            setButtonLoading(submitBtn, false);
+        });
+
     return false;
 }
 
 function handleAdminReplySubmit(event) {
     event.preventDefault();
+    if (isMessageSendInFlight) return false;
     if (!currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
         showChatSecurityAlert('403 Forbidden: Only Admin accounts can send Admin replies.');
+        showErrorToast('Failed to Send Message.', 'Only authorized Admin accounts can send Admin replies.');
         return false;
     }
 
     var replyInput = document.getElementById('adminReplyInput');
     var targetSelect = document.getElementById('adminReplyTargetOrder');
+    var submitBtn = document.getElementById('adminReplySubmitBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
 
     var text = replyInput ? replyInput.value.trim() : '';
-    if (!text) return false;
+    if (!text) {
+        markFieldInvalid(replyInput, true);
+        showErrorToast('Please Complete All Required Fields.', 'Please enter a reply message for the customer.');
+        return false;
+    }
+    markFieldInvalid(replyInput, false);
 
     var parts = (targetSelect && targetSelect.value)
         ? targetSelect.value.split('|')
@@ -3459,52 +4042,83 @@ function handleAdminReplySubmit(event) {
     var topic = parts[2] || 'Workshop Admin Reply';
 
     selectedAdminConversationCustomerId = custId;
+    isMessageSendInFlight = true;
+    setButtonLoading(submitBtn, true, 'Sending message...');
 
-    sendLiveOrderMessage({
-        CustomerID: custId,
-        OrderID: ordId,
-        Topic: topic,
-        MessageText: text
+    Promise.resolve(
+        sendLiveOrderMessage({
+            CustomerID: custId,
+            OrderID: ordId,
+            Topic: topic,
+            MessageText: text
+        })
+    )
+    .then(function () {
+        if (replyInput) replyInput.value = '';
+        var msgBox = document.getElementById('adminStatusNotice');
+        var targetCust = getCustomerRecordById(custId);
+        if (msgBox) {
+            msgBox.style.display = 'block';
+            msgBox.textContent = '✓ Private Admin reply sent to ' + targetCust.fullName + ' (Customer #' + custId + ') — visible only in Customer #' + custId + '\'s conversation.';
+        }
+        showSuccessToast('Message Sent Successfully!', 'Reply delivered to ' + targetCust.fullName + '.');
+    })
+    .catch(function () {
+        showErrorToast('Failed to Send Message.', 'Could not deliver reply. Please try again.');
+    })
+    .finally(function () {
+        isMessageSendInFlight = false;
+        setButtonLoading(submitBtn, false);
     });
 
-    if (replyInput) replyInput.value = '';
-
-    var msgBox = document.getElementById('adminStatusNotice');
-    var targetCust = getCustomerRecordById(custId);
-    if (msgBox) {
-        msgBox.style.display = 'block';
-        msgBox.textContent = '✓ Private Admin reply sent to ' + targetCust.fullName + ' (Customer #' + custId + ') — visible only in Customer #' + custId + '\'s conversation.';
-    }
     return false;
 }
 
 // Reply to Customer directly from inside Order Management Job Order Detail panel
 function handleAdminDetailReplySubmit(event, customerId, orderId) {
     event.preventDefault();
+    if (isMessageSendInFlight) return false;
     if (!currentUserSession.isLoggedIn || currentUserSession.role !== 'admin') {
         return false;
     }
     var inputEl = document.getElementById('adminDetailReplyInput');
+    var submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
     var text = inputEl ? inputEl.value.trim() : '';
-    if (!text) return false;
+    if (!text) {
+        markFieldInvalid(inputEl, true);
+        showErrorToast('Please Complete All Required Fields.', 'Please enter a reply message before sending.');
+        return false;
+    }
+    markFieldInvalid(inputEl, false);
 
     var cid = Number(customerId) || 1;
     var oid = Number(orderId) || 1001;
     selectedAdminConversationCustomerId = cid;
 
-    sendLiveOrderMessage({
-        CustomerID: cid,
-        OrderID: oid,
-        Topic: 'Order Follow-Up (#' + oid + ')',
-        MessageText: text
-    }).then(function () {
+    isMessageSendInFlight = true;
+    setButtonLoading(submitBtn, true, 'Sending message...');
+
+    Promise.resolve(
+        sendLiveOrderMessage({
+            CustomerID: cid,
+            OrderID: oid,
+            Topic: 'Order Follow-Up (#' + oid + ')',
+            MessageText: text
+        })
+    ).then(function () {
+        if (inputEl) inputEl.value = '';
         if (selectedAdminDetailOrderId) {
             renderAdminJobOrderDetailContent(selectedAdminDetailOrderId);
         }
+        showAdminOmsNotice('✓ Order reply sent to Customer #' + cid + ' for Job Order #JO-' + oid + '.');
+        showSuccessToast('Message Sent Successfully!', 'Order reply delivered for Job Order #JO-' + oid + '.');
+    }).catch(function () {
+        showErrorToast('Failed to Send Message.', 'Unable to send order reply. Please try again.');
+    }).finally(function () {
+        isMessageSendInFlight = false;
+        setButtonLoading(submitBtn, false);
     });
 
-    if (inputEl) inputEl.value = '';
-    showAdminOmsNotice('✓ Order reply sent to Customer #' + cid + ' for Job Order #JO-' + oid + '.');
     return false;
 }
 
@@ -3949,17 +4563,22 @@ function toggleCustomerProfileEditMode(enable) {
 function handleProfileImageFileChange(fileInput) {
     if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
     var file = fileInput.files[0];
+    var selectBtn = document.getElementById('cpSelectAvatarBtn');
     var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (allowedTypes.indexOf(String(file.type).toLowerCase()) === -1) {
-        showCustomerProfileNotice('Invalid image file type. Please choose a JPG, PNG, or WEBP image.', true);
+        showCustomerProfileNotice('The Selected File Is Not Supported. Please choose a JPG, PNG, or WEBP image.', true);
+        showErrorToast('The Selected File Is Not Supported.', 'Allowed image formats are .JPG, .JPEG, .PNG, and .WEBP.');
         fileInput.value = '';
         return;
     }
     if (file.size > 2 * 1024 * 1024) {
-        showCustomerProfileNotice('Image size exceeds the 2 MB maximum limit. Please select a smaller image.', true);
+        showCustomerProfileNotice('The Selected File Is Not Supported. Maximum allowed file size is 2 MB.', true);
+        showErrorToast('The Selected File Is Not Supported.', 'Image size exceeds the 2 MB maximum limit.');
         fileInput.value = '';
         return;
     }
+
+    setButtonLoading(selectBtn, true, 'Uploading profile picture...');
 
     var reader = new FileReader();
     reader.onload = function (e) {
@@ -3974,7 +4593,6 @@ function handleProfileImageFileChange(fileInput) {
         savePersistedClientDatabase();
         populateCustomerProfileModalFields();
         renderAuthHeaderState();
-        showCustomerProfileNotice('✓ Profile picture updated! Click "Save Profile Changes" or it is automatically saved to your account.', false);
 
         fetch('/api/profile/update', {
             method: 'POST',
@@ -3990,37 +4608,52 @@ function handleProfileImageFileChange(fileInput) {
                 profileImage: dataUrl,
                 csrf_token: currentCsrfToken
             })
-        }).catch(function () {});
+        })
+        .catch(function () {})
+        .finally(function () {
+            setButtonLoading(selectBtn, false);
+            showCustomerProfileNotice('✓ Profile picture updated and saved to your account.', false);
+            showSuccessToast('Profile Updated Successfully!', 'Your profile picture has been uploaded and saved.');
+        });
+    };
+    reader.onerror = function () {
+        setButtonLoading(selectBtn, false);
+        showErrorToast('The Selected File Is Not Supported.', 'Could not read the selected image file.');
     };
     reader.readAsDataURL(file);
 }
 
 function saveCustomerProfileForm(event) {
     event.preventDefault();
-    var fullName = (document.getElementById('cpFullName').value || '').trim();
-    var username = (document.getElementById('cpUsername').value || '').trim();
-    var email = (document.getElementById('cpEmail').value || '').trim().toLowerCase();
-    var phone = (document.getElementById('cpPhone').value || '').trim();
-    var gender = (document.getElementById('cpGender').value || '').trim();
-    var birthday = (document.getElementById('cpBirthday').value || '').trim();
-    var defaultAddress = (document.getElementById('cpDefaultAddress').value || '').trim();
+    var nameIn = document.getElementById('cpFullName');
+    var userIn = document.getElementById('cpUsername');
+    var emailIn = document.getElementById('cpEmail');
+    var phoneIn = document.getElementById('cpPhone');
+    var genderIn = document.getElementById('cpGender');
+    var bdayIn = document.getElementById('cpBirthday');
+    var addrIn = document.getElementById('cpDefaultAddress');
+    var saveBtn = document.getElementById('cpSaveProfileBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
 
-    if (fullName.length < 2) {
-        showCustomerProfileNotice('Full Name must be at least 2 characters.', true);
+    var fullName = (nameIn ? nameIn.value : '').trim();
+    var username = (userIn ? userIn.value : '').trim();
+    var email = (emailIn ? emailIn.value : '').trim().toLowerCase();
+    var phone = (phoneIn ? phoneIn.value : '').trim();
+    var gender = (genderIn ? genderIn.value : '').trim();
+    var birthday = (bdayIn ? bdayIn.value : '').trim();
+    var defaultAddress = (addrIn ? addrIn.value : '').trim();
+
+    markFieldInvalid(nameIn, fullName.length < 2);
+    markFieldInvalid(emailIn, !email || email.indexOf('@') === -1);
+    markFieldInvalid(phoneIn, phone.replace(/[^0-9]/g, '').length < 10);
+    markFieldInvalid(addrIn, defaultAddress.length < 5);
+
+    if (fullName.length < 2 || !email || email.indexOf('@') === -1 || phone.replace(/[^0-9]/g, '').length < 10 || defaultAddress.length < 5) {
+        showCustomerProfileNotice('Please Complete All Required Fields before saving your profile.', true);
+        showErrorToast('Please Complete All Required Fields.', 'Please enter a valid full name, email address, mobile number, and default delivery address.');
         return false;
     }
-    if (!email || email.indexOf('@') === -1) {
-        showCustomerProfileNotice('Please enter a valid email address.', true);
-        return false;
-    }
-    if (phone.replace(/[^0-9]/g, '').length < 10) {
-        showCustomerProfileNotice('Please enter a valid mobile number (at least 10 digits).', true);
-        return false;
-    }
-    if (defaultAddress.length < 5) {
-        showCustomerProfileNotice('Please provide a complete Default Delivery Address.', true);
-        return false;
-    }
+
+    setButtonLoading(saveBtn, true, 'Saving changes...');
 
     currentUserSession.name = fullName;
     currentUserSession.username = username || email.split('@')[0];
@@ -4073,10 +4706,6 @@ function saveCustomerProfileForm(event) {
     }
 
     savePersistedClientDatabase();
-    toggleCustomerProfileEditMode(false);
-    populateCustomerProfileModalFields();
-    renderAuthHeaderState();
-    showCustomerProfileNotice('✓ Your profile information and default delivery address have been saved.', false);
 
     fetch('/api/profile/update', {
         method: 'POST',
@@ -4099,11 +4728,10 @@ function saveCustomerProfileForm(event) {
             var others = customerSavedAddresses.filter(function (ad) { return Number(ad.CustomerID) !== cid; });
             customerSavedAddresses = others.concat(data.addresses);
             savePersistedClientDatabase();
-            renderAuthHeaderState();
         }
     })
     .catch(function () {
-        fetch('public/index.php?route=api_profile_update', {
+        return fetch('public/index.php?route=api_profile_update', {
             method: 'POST',
             headers: getAuthRequestHeaders(),
             body: JSON.stringify({
@@ -4117,6 +4745,14 @@ function saveCustomerProfileForm(event) {
                 csrf_token: currentCsrfToken
             })
         }).catch(function () {});
+    })
+    .finally(function () {
+        setButtonLoading(saveBtn, false);
+        toggleCustomerProfileEditMode(false);
+        populateCustomerProfileModalFields();
+        renderAuthHeaderState();
+        showCustomerProfileNotice('✓ Profile Updated Successfully! Your personal details and default address have been saved.', false);
+        showSuccessToast('Profile Updated Successfully!', 'Your personal information and default delivery address have been saved.');
     });
 
     return false;
@@ -4218,21 +4854,41 @@ function saveCustomerAddressForm(event) {
     event.preventDefault();
     var cid = Number(currentUserSession.id) || 1;
     var editId = document.getElementById('addrEditId').value.trim();
-    var recipientName = document.getElementById('addrRecipientName').value.trim();
-    var phoneNumber = document.getElementById('addrPhoneNumber').value.trim();
-    var streetAddress = document.getElementById('addrStreet').value.trim();
-    var barangay = document.getElementById('addrBarangay').value.trim();
-    var city = document.getElementById('addrCity').value.trim();
-    var province = document.getElementById('addrProvince').value.trim();
-    var postalCode = document.getElementById('addrPostalCode').value.trim();
-    var deliveryNotes = document.getElementById('addrNotes').value.trim();
-    var addressLabel = document.getElementById('addrLabel').value || 'Home';
+    var recIn = document.getElementById('addrRecipientName');
+    var phoneIn = document.getElementById('addrPhoneNumber');
+    var streetIn = document.getElementById('addrStreet');
+    var brgyIn = document.getElementById('addrBarangay');
+    var cityIn = document.getElementById('addrCity');
+    var provIn = document.getElementById('addrProvince');
+    var postalIn = document.getElementById('addrPostalCode');
+    var notesIn = document.getElementById('addrNotes');
+    var labelIn = document.getElementById('addrLabel');
+    var saveBtn = document.getElementById('cpSaveAddressBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
+
+    var recipientName = recIn ? recIn.value.trim() : '';
+    var phoneNumber = phoneIn ? phoneIn.value.trim() : '';
+    var streetAddress = streetIn ? streetIn.value.trim() : '';
+    var barangay = brgyIn ? brgyIn.value.trim() : '';
+    var city = cityIn ? cityIn.value.trim() : '';
+    var province = provIn ? provIn.value.trim() : '';
+    var postalCode = postalIn ? postalIn.value.trim() : '';
+    var deliveryNotes = notesIn ? notesIn.value.trim() : '';
+    var addressLabel = labelIn ? (labelIn.value || 'Home') : 'Home';
     var isDefault = document.getElementById('addrIsDefault').checked ? 1 : 0;
 
+    markFieldInvalid(recIn, !recipientName);
+    markFieldInvalid(phoneIn, !phoneNumber);
+    markFieldInvalid(streetIn, !streetAddress);
+    markFieldInvalid(cityIn, !city);
+    markFieldInvalid(provIn, !province);
+
     if (!recipientName || !phoneNumber || !streetAddress || !city || !province) {
-        showCustomerProfileNotice('Please complete all required delivery address fields.', true);
+        showCustomerProfileNotice('Please Complete All Required Fields for your delivery address.', true);
+        showErrorToast('Please Complete All Required Fields.', 'Please enter recipient name, contact number, street address, city, and province.');
         return false;
     }
+
+    setButtonLoading(saveBtn, true, 'Saving delivery address...');
 
     var myAddresses = getAddressesForCustomer(cid);
     if (myAddresses.length === 0) {
@@ -4303,11 +4959,6 @@ function saveCustomerAddressForm(event) {
     }
 
     savePersistedClientDatabase();
-    closeCustomerAddressEditor();
-    renderCustomerAddressesList();
-    populateCustomerProfileModalFields();
-    renderAuthHeaderState();
-    showCustomerProfileNotice('✓ Delivery address saved successfully.', false);
 
     fetch('/api/addresses/save', {
         method: 'POST',
@@ -4333,11 +4984,18 @@ function saveCustomerAddressForm(event) {
             var others = customerSavedAddresses.filter(function (ad) { return Number(ad.CustomerID) !== cid; });
             customerSavedAddresses = others.concat(data.addresses);
             savePersistedClientDatabase();
-            renderCustomerAddressesList();
-            renderAuthHeaderState();
         }
     })
-    .catch(function () {});
+    .catch(function () {})
+    .finally(function () {
+        setButtonLoading(saveBtn, false);
+        closeCustomerAddressEditor();
+        renderCustomerAddressesList();
+        populateCustomerProfileModalFields();
+        renderAuthHeaderState();
+        showCustomerProfileNotice('✓ Changes Saved Successfully! Delivery address saved.', false);
+        showSuccessToast('Changes Saved Successfully!', 'Delivery address has been saved to your address book.');
+    });
 
     return false;
 }
@@ -4370,6 +5028,7 @@ function setCustomerDefaultAddress(addressId) {
     populateCustomerProfileModalFields();
     renderAuthHeaderState();
     showCustomerProfileNotice('✓ Default delivery address updated.', false);
+    showSuccessToast('Changes Saved Successfully!', 'Default delivery address updated.');
 
     fetch('/api/addresses/default', {
         method: 'POST',
@@ -4379,38 +5038,52 @@ function setCustomerDefaultAddress(addressId) {
 }
 
 function deleteCustomerAddress(addressId) {
-    var cid = Number(currentUserSession.id) || 1;
-    var remaining = [];
-    var removedWasDefault = false;
-    for (var i = 0; i < customerSavedAddresses.length; i++) {
-        var a = customerSavedAddresses[i];
-        if (Number(a.CustomerID) === cid && Number(a.AddressID) === Number(addressId)) {
-            if (Number(a.IsDefault) === 1) removedWasDefault = true;
-            continue;
-        }
-        remaining.push(a);
-    }
-    customerSavedAddresses = remaining;
-    if (removedWasDefault) {
-        for (var j = 0; j < customerSavedAddresses.length; j++) {
-            if (Number(customerSavedAddresses[j].CustomerID) === cid) {
-                customerSavedAddresses[j].IsDefault = 1;
-                currentUserSession.address = formatFullSavedAddressLine(customerSavedAddresses[j]);
-                break;
+    openConfirmModal({
+        title: 'Delete Delivery Address',
+        message: 'Are you sure you want to delete this address?',
+        cancelText: 'Cancel',
+        confirmText: 'Delete Address',
+        loadingText: 'Deleting record...',
+        variant: 'danger',
+        onConfirm: function () {
+            var cid = Number(currentUserSession.id) || 1;
+            var remaining = [];
+            var removedWasDefault = false;
+            for (var i = 0; i < customerSavedAddresses.length; i++) {
+                var a = customerSavedAddresses[i];
+                if (Number(a.CustomerID) === cid && Number(a.AddressID) === Number(addressId)) {
+                    if (Number(a.IsDefault) === 1) removedWasDefault = true;
+                    continue;
+                }
+                remaining.push(a);
             }
-        }
-    }
-    savePersistedClientDatabase();
-    renderCustomerAddressesList();
-    populateCustomerProfileModalFields();
-    renderAuthHeaderState();
-    showCustomerProfileNotice('✓ Address removed from your saved addresses.', false);
+            customerSavedAddresses = remaining;
+            if (removedWasDefault) {
+                for (var j = 0; j < customerSavedAddresses.length; j++) {
+                    if (Number(customerSavedAddresses[j].CustomerID) === cid) {
+                        customerSavedAddresses[j].IsDefault = 1;
+                        currentUserSession.address = formatFullSavedAddressLine(customerSavedAddresses[j]);
+                        break;
+                    }
+                }
+            }
+            savePersistedClientDatabase();
 
-    fetch('/api/addresses/delete', {
-        method: 'POST',
-        headers: getAuthRequestHeaders(),
-        body: JSON.stringify({ addressId: Number(addressId), csrf_token: currentCsrfToken })
-    }).catch(function () {});
+            return fetch('/api/addresses/delete', {
+                method: 'POST',
+                headers: getAuthRequestHeaders(),
+                body: JSON.stringify({ addressId: Number(addressId), csrf_token: currentCsrfToken })
+            })
+            .catch(function () {})
+            .finally(function () {
+                renderCustomerAddressesList();
+                populateCustomerProfileModalFields();
+                renderAuthHeaderState();
+                showCustomerProfileNotice('✓ Address removed from your saved addresses.', false);
+                showSuccessToast('Item Removed Successfully!', 'Delivery address deleted from your address book.');
+            });
+        }
+    });
 }
 
 // --- CHECKOUT SAVED ADDRESS SELECTOR INTEGRATION ---
@@ -4545,20 +5218,32 @@ function renderCustomerMyOrdersList() {
 // --- CHANGE PASSWORD IN MY PROFILE MODAL ---
 function handleCustomerChangePassword(event) {
     event.preventDefault();
-    var curPass = document.getElementById('cpCurrentPassword').value;
-    var newPass = document.getElementById('cpNewPassword').value;
-    var confirmPass = document.getElementById('cpConfirmPassword').value;
+    var curIn = document.getElementById('cpCurrentPassword');
+    var newIn = document.getElementById('cpNewPassword');
+    var confIn = document.getElementById('cpConfirmPassword');
+    var submitBtn = document.getElementById('cpUpdatePasswordBtn') || (event.target && event.target.querySelector('button[type="submit"]'));
+
+    var curPass = curIn ? curIn.value : '';
+    var newPass = newIn ? newIn.value : '';
+    var confirmPass = confIn ? confIn.value : '';
+
+    markFieldInvalid(curIn, !curPass);
+    markFieldInvalid(newIn, !newPass || newPass.length < 6);
+    markFieldInvalid(confIn, !confirmPass || newPass !== confirmPass);
 
     if (!curPass || !newPass || !confirmPass) {
-        showCustomerProfileNotice('Please fill in all password fields.', true);
+        showCustomerProfileNotice('Please Complete All Required Fields.', true);
+        showErrorToast('Please Complete All Required Fields.', 'Please fill in your current password, new password, and confirmation password.');
         return false;
     }
     if (newPass.length < 6) {
         showCustomerProfileNotice('New password must be at least 6 characters long.', true);
+        showErrorToast('Unable to Save Changes. Please Try Again.', 'New password must be at least 6 characters long.');
         return false;
     }
     if (newPass !== confirmPass) {
         showCustomerProfileNotice('New password and confirmation password do not match.', true);
+        showErrorToast('Unable to Save Changes. Please Try Again.', 'New password and confirmation password do not match.');
         return false;
     }
 
@@ -4572,19 +5257,18 @@ function handleCustomerChangePassword(event) {
     }
 
     if (custRec && custRec.password && custRec.password !== curPass) {
+        markFieldInvalid(curIn, true);
         showCustomerProfileNotice('Current password is incorrect. Please verify and try again.', true);
+        showErrorToast('Invalid Email or Password.', 'Your current password is incorrect. Please verify and try again.');
         return false;
     }
+
+    setButtonLoading(submitBtn, true, 'Saving changes...');
 
     if (custRec) {
         custRec.password = newPass;
     }
     savePersistedClientDatabase();
-
-    document.getElementById('cpCurrentPassword').value = '';
-    document.getElementById('cpNewPassword').value = '';
-    document.getElementById('cpConfirmPassword').value = '';
-    showCustomerProfileNotice('✓ Your account password has been updated securely.', false);
 
     fetch('/api/profile/password', {
         method: 'POST',
@@ -4595,9 +5279,116 @@ function handleCustomerChangePassword(event) {
             confirmPassword: confirmPass,
             csrf_token: currentCsrfToken
         })
-    }).catch(function () {});
+    })
+    .catch(function () {})
+    .finally(function () {
+        setButtonLoading(submitBtn, false);
+        if (curIn) curIn.value = '';
+        if (newIn) newIn.value = '';
+        if (confIn) confIn.value = '';
+        showCustomerProfileNotice('✓ Password Changed Successfully! Your account password has been updated securely.', false);
+        showSuccessToast('Password Changed Successfully!', 'Your account password has been updated securely.');
+    });
 
     return false;
+}
+
+// Progressive enhancement for multi-page PHP views (Logout confirmation, Destructive actions, Form loading spinners)
+function initPhpPageUxEnhancements() {
+    // 1. Intercept PHP Logout links (a[href*="route=logout"] or [data-ux-confirm="logout"])
+    var logoutLinks = document.querySelectorAll('a[href*="route=logout"], [data-ux-confirm="logout"]');
+    for (var i = 0; i < logoutLinks.length; i++) {
+        (function (linkEl) {
+            if (linkEl.dataset.uxBound === '1') return;
+            linkEl.dataset.uxBound = '1';
+            linkEl.addEventListener('click', function (e) {
+                e.preventDefault();
+                var targetHref = linkEl.getAttribute('href') || 'index.php?route=logout';
+                openConfirmModal({
+                    title: 'Confirm Logout',
+                    message: 'Are you sure you want to log out of your account?',
+                    cancelText: 'Cancel',
+                    confirmText: 'Yes, Log Out',
+                    loadingText: 'Logging out...',
+                    variant: 'danger',
+                    onConfirm: function () {
+                        return new Promise(function () {
+                            window.location.href = targetHref;
+                        });
+                    }
+                });
+            });
+        })(logoutLinks[i]);
+    }
+
+    // 2. Intercept PHP forms with data-ux-confirm-title (e.g., Remove Cart Item, Delete Address, Place Order)
+    var confirmForms = document.querySelectorAll('form[data-ux-confirm-title]');
+    for (var j = 0; j < confirmForms.length; j++) {
+        (function (formEl) {
+            if (formEl.dataset.uxBound === '1') return;
+            formEl.dataset.uxBound = '1';
+            formEl.addEventListener('submit', function (e) {
+                if (formEl.dataset.uxConfirmed === '1') {
+                    var btn = formEl.querySelector('button[type="submit"]');
+                    if (btn && formEl.dataset.uxLoadingText) {
+                        setButtonLoading(btn, true, formEl.dataset.uxLoadingText);
+                    }
+                    return true;
+                }
+                e.preventDefault();
+                openConfirmModal({
+                    title: formEl.dataset.uxConfirmTitle || 'Confirm Action',
+                    message: formEl.dataset.uxConfirmMessage || 'Are you sure you want to proceed?',
+                    cancelText: 'Cancel',
+                    confirmText: formEl.dataset.uxConfirmButton || 'Confirm',
+                    loadingText: formEl.dataset.uxLoadingText || 'Processing...',
+                    variant: formEl.dataset.uxConfirmVariant || 'primary',
+                    onConfirm: function () {
+                        return new Promise(function () {
+                            formEl.dataset.uxConfirmed = '1';
+                            var submitBtn = formEl.querySelector('button[type="submit"]');
+                            if (submitBtn && formEl.dataset.uxLoadingText) {
+                                setButtonLoading(submitBtn, true, formEl.dataset.uxLoadingText);
+                            }
+                            formEl.submit();
+                        });
+                    }
+                });
+                return false;
+            });
+        })(confirmForms[j]);
+    }
+
+    // 3. Add loading spinners to standard PHP forms with data-ux-loading-text
+    var loadingForms = document.querySelectorAll('form[data-ux-loading-text]:not([data-ux-confirm-title])');
+    for (var k = 0; k < loadingForms.length; k++) {
+        (function (formEl) {
+            if (formEl.dataset.uxLoadingBound === '1') return;
+            formEl.dataset.uxLoadingBound = '1';
+            formEl.addEventListener('submit', function (e) {
+                if (formEl.dataset.uxSubmitting === '1') {
+                    e.preventDefault();
+                    return false;
+                }
+                formEl.dataset.uxSubmitting = '1';
+                var submitBtn = formEl.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    setButtonLoading(submitBtn, true, formEl.dataset.uxLoadingText || 'Processing...');
+                }
+            });
+        })(loadingForms[k]);
+    }
+
+    // 4. Display any server-rendered PHP flash toast embedded in window.__PHP_FLASH_TOASTS__
+    if (typeof window !== 'undefined' && Array.isArray(window.__PHP_FLASH_TOASTS__)) {
+        for (var f = 0; f < window.__PHP_FLASH_TOASTS__.length; f++) {
+            var item = window.__PHP_FLASH_TOASTS__[f];
+            if (item && (item.title || item.message)) {
+                showToast(item.type || 'success', item.title || 'Notification', item.message || '');
+            }
+        }
+        window.__PHP_FLASH_TOASTS__ = [];
+    }
 }
 
 // Initialize listeners on page load
@@ -4616,7 +5407,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (finishSelect) finishSelect.addEventListener('change', updateProductPrice);
     if (isCustomCheckbox) isCustomCheckbox.addEventListener('change', updateProductPrice);
 
-    // Close Customer Profile Dropdown when clicking outside or pressing Escape
+    // Close Customer Profile Dropdown or Confirmation Modal when pressing Escape
     document.addEventListener('click', function (e) {
         var wrap = document.getElementById('customerProfileDropdownWrap');
         if (wrap && !wrap.contains(e.target)) {
@@ -4626,6 +5417,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeCustomerProfileDropdown();
+            closeConfirmModal();
         }
     });
 
@@ -4634,6 +5426,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderAdminDashboard();
     lookupOrderById('1001');
     initRealTimeMessaging();
+    initPhpPageUxEnhancements();
 });
 
 

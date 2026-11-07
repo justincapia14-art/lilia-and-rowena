@@ -64,6 +64,19 @@
       "ProfileImage": null,
       "Address": "Beverly Hills Subdivision, Antipolo, Rizal",
       "DefaultOrderID": 1004
+    },
+    {
+      "CustomerID": 6,
+      "FullName": "Justin Capua",
+      "Username": "justincapia14",
+      "Email": "justincapia14@gmail.com",
+      "Password": "justin123",
+      "PhoneNumber": "23423423",
+      "Gender": "Prefer not to say",
+      "Birthday": null,
+      "ProfileImage": null,
+      "Address": "sdfsdfSDfs",
+      "DefaultOrderID": null
     }
   ],
   "customerAddresses": [
@@ -108,9 +121,23 @@
       "PostalCode": "1780",
       "DeliveryNotes": "Notify village security gate upon arrival",
       "IsDefault": 1
+    },
+    {
+      "AddressID": 104,
+      "CustomerID": 6,
+      "AddressLabel": "Home",
+      "RecipientName": "Justin Capua",
+      "PhoneNumber": "23423423",
+      "HouseStreet": "sdfsdfSDfs",
+      "Barangay": "Poblacion",
+      "City": "Metro Manila",
+      "Province": "Metro Manila",
+      "PostalCode": "1000",
+      "DeliveryNotes": "",
+      "IsDefault": 1
     }
   ],
-  "nextAddressId": 104,
+  "nextAddressId": 105,
   "jobOrders": [
     {
       "orderId": 1001,
@@ -382,6 +409,36 @@
         "email": "admin@liliaandrowena.com",
         "phone": "0917-889-4211",
         "address": "MacArthur Highway, San Fernando, Pampanga",
+        "activeCustomerId": 1
+      }
+    ],
+    [
+      "9611f0eb7dc04e42c282236ddd0829a693f5e0a5f897cb9f",
+      {
+        "token": "9611f0eb7dc04e42c282236ddd0829a693f5e0a5f897cb9f",
+        "csrfToken": "4a3091e4b70bdbdc03f6e945d1f2033232fd0431ecc2a8a5",
+        "isAuthenticated": true,
+        "role": "customer",
+        "userId": 1,
+        "name": "Maria Teresa Santos",
+        "email": "maria.santos@example.com",
+        "phone": "0917-123-4567",
+        "address": "Unit 14B, Tower 2, Serendra, Fort Bonifacio, Taguig City, Metro Manila 1634",
+        "activeCustomerId": 1
+      }
+    ],
+    [
+      "ace434a1e28f63cc4c11422c6ee8b8f2ccf9a061dbe25f94",
+      {
+        "token": "ace434a1e28f63cc4c11422c6ee8b8f2ccf9a061dbe25f94",
+        "csrfToken": "7c9be7c0544b842be4a14a8bce2d09108b863ffb3ad62cef",
+        "isAuthenticated": true,
+        "role": "customer",
+        "userId": 1,
+        "name": "Maria Teresa Santos",
+        "email": "maria.santos@example.com",
+        "phone": "0917-123-4567",
+        "address": "Unit 14B, Tower 2, Serendra, Fort Bonifacio, Taguig City, Metro Manila 1634",
         "activeCustomerId": 1
       }
     ]
