@@ -36,8 +36,7 @@ CREATE TABLE Supplier (
     ContactPersonName  VARCHAR(100)  NULL,
     Phone              VARCHAR(20)   NOT NULL,
     Address            VARCHAR(255)  NULL,
-    CONSTRAINT pk_supplier PRIMARY KEY (SupplierID),
-    CONSTRAINT uq_supplier_email UNIQUE (Email)
+    CONSTRAINT pk_supplier PRIMARY KEY (SupplierID)
 ) ENGINE = InnoDB;
 
 -- ---------------------------------------------------------------------
