@@ -58,7 +58,7 @@ var currentSelectedProduct = {
     name: 'Mahogany 6-Seater Dining Set',
     category: 'Dining Sets',
     basePrice: 28500,
-    image: '/images/product_dining_table.jpg',
+    image: 'public/images/product_dining_table.jpg',
     stdL: 180,
     stdW: 90,
     stdH: 75
@@ -71,7 +71,7 @@ var shoppingCart = [
         basePrice: 28500,
         extraCost: 1950,
         qty: 1,
-        image: '/images/product_dining_table.jpg',
+        image: 'public/images/product_dining_table.jpg',
         specs: '200L × 90W × 75H cm · Warm Walnut Stain'
     }
 ];
@@ -240,7 +240,7 @@ function handleUserLogout() {
     closeModal('adminModal');
 }
 
-// Authenticate account via backend /api/auth/login and isolate conversation state
+// Authenticate account via backend /api/auth/login (with local fallback when opened on static GitHub Pages / file://)
 function performServerLogin(email, password, role, openAdminOnSuccess) {
     return fetch('/api/auth/login', {
         method: 'POST',
@@ -273,6 +273,53 @@ function performServerLogin(email, password, role, openAdminOnSuccess) {
                 openModal('adminModal');
             }
             return true;
+        }
+        return false;
+    })
+    .catch(function () {
+        // Static GitHub Pages / file:// fallback when Node server.js is not running
+        var normEmail = String(email || '').trim().toLowerCase();
+        var selRole = String(role || 'auto').toLowerCase();
+        if (selRole === 'admin' || selRole === 'auto') {
+            for (var a = 0; a < databaseAdmins.length; a++) {
+                if (databaseAdmins[a].email.toLowerCase() === normEmail && databaseAdmins[a].password === password) {
+                    currentUserSession = {
+                        isLoggedIn: true,
+                        id: databaseAdmins[a].adminId,
+                        role: 'admin',
+                        name: databaseAdmins[a].name,
+                        email: databaseAdmins[a].email,
+                        phone: '0917-889-4211',
+                        address: 'MacArthur Highway, San Fernando, Pampanga'
+                    };
+                    selectedAdminConversationCustomerId = 1;
+                    syncStaticFallbackMessages();
+                    renderAuthHeaderState();
+                    if (openAdminOnSuccess) {
+                        renderAdminDashboard();
+                        openModal('adminModal');
+                    }
+                    return true;
+                }
+            }
+        }
+        if (selRole === 'customer' || selRole === 'auto') {
+            for (var c = 0; c < registeredCustomers.length; c++) {
+                if (registeredCustomers[c].email.toLowerCase() === normEmail && registeredCustomers[c].password === password) {
+                    currentUserSession = {
+                        isLoggedIn: true,
+                        id: registeredCustomers[c].id,
+                        role: 'customer',
+                        name: registeredCustomers[c].fullName,
+                        email: registeredCustomers[c].email,
+                        phone: registeredCustomers[c].phone,
+                        address: registeredCustomers[c].address
+                    };
+                    syncStaticFallbackMessages();
+                    renderAuthHeaderState();
+                    return true;
+                }
+            }
         }
         return false;
     });
@@ -429,6 +476,32 @@ function handleCustomerRegister(event) {
             errEl.style.display = 'block';
             errEl.textContent = (result.data && result.data.error) ? result.data.error : 'Unable to register customer account.';
         }
+    })
+    .catch(function () {
+        // Static GitHub Pages / file:// fallback when Node server.js is not running
+        var newId = registeredCustomers.length + 1;
+        var fallbackCust = {
+            id: newId,
+            fullName: fullName,
+            email: email,
+            password: password,
+            phone: phone,
+            address: address
+        };
+        registeredCustomers.push(fallbackCust);
+        currentUserSession = {
+            isLoggedIn: true,
+            id: newId,
+            role: 'customer',
+            name: fullName,
+            email: email,
+            phone: phone,
+            address: address
+        };
+        if (errEl) errEl.style.display = 'none';
+        syncStaticFallbackMessages();
+        renderAuthHeaderState();
+        closeModal('authModal');
     });
 
     return false;
@@ -535,7 +608,10 @@ function openProductCustomizer(id, name, category, basePrice, image, stdL, stdW,
 
     if (titleEl) titleEl.textContent = name;
     if (catEl) catEl.textContent = category + ' · Custom Sizing Studio';
-    if (imgEl) imgEl.src = image;
+    if (imgEl) {
+        imgEl.dataset.fb = '';
+        imgEl.src = image;
+    }
     if (baseEl) baseEl.textContent = basePrice;
     if (lenIn) lenIn.value = stdL;
     if (widIn) widIn.value = stdW;
@@ -665,7 +741,7 @@ function renderCartDrawer() {
         subtotal += lineTotal;
 
         html += '<div class="cart-item-card">' +
-            '<img src="' + item.image + '" alt="' + item.name + '" class="cart-item-thumb">' +
+            '<img src="' + item.image + '" onerror="if(!this.dataset.fb){this.dataset.fb=\'1\';this.src=this.src.replace(\'public/images/\',\'images/\');}" alt="' + item.name + '" class="cart-item-thumb">' +
             '<div class="cart-item-details">' +
                 '<div class="cart-item-top">' +
                     '<h4>' + item.name + '</h4>' +
@@ -849,8 +925,90 @@ function switchHubTab(tabId, btnEl) {
 
 // --- 10. PRIVATE 1-ON-1 CUSTOMER <-> ADMIN MESSAGING (Table: Order_Message) ---
 // Initial messages from database/02_sample_data.sql (synced with WebSocket & REST backend)
-// Client-side message store starts empty and only ever holds messages returned by the backend for the authorized conversation
 var liveOrderMessages = [];
+
+// Static fallback store used ONLY when opened on static GitHub Pages / file:// without server.js
+var staticFallbackMessagesStore = [
+    {
+        MessageID: 1,
+        CustomerID: 1,
+        OrderID: 1001,
+        AdminID: null,
+        SenderID: 1,
+        SenderRole: 'Customer',
+        SenderName: 'Maria Teresa Santos',
+        Topic: 'Order Follow-Up (#1001)',
+        MessageText: 'Good day! I would like to follow up on Order #1001 (220cm Mahogany Dining Set). Can we also add 2 extra matching dining chairs and felt floor protectors to our order?',
+        CreatedAt: '2026-11-06 09:15:00'
+    },
+    {
+        MessageID: 2,
+        CustomerID: 1,
+        OrderID: 1001,
+        AdminID: 1,
+        SenderID: 1,
+        SenderRole: 'Admin',
+        SenderName: 'Rowena & Lilia (Workshop Admin)',
+        Topic: 'Order Follow-Up (#1001)',
+        MessageText: 'Hello Maria! Master Finisher Dante Cruz is currently applying the final walnut coat to your table. Yes, we can add 2 matching slatted mahogany chairs (+₱4,200) and complimentary felt pads before driver Rene Ocampo delivers on Nov 9!',
+        CreatedAt: '2026-11-06 09:22:00'
+    },
+    {
+        MessageID: 3,
+        CustomerID: 2,
+        OrderID: 1002,
+        AdminID: null,
+        SenderID: 2,
+        SenderRole: 'Customer',
+        SenderName: 'Atty. Roberto Mendoza',
+        Topic: 'Add Custom Request (#1002)',
+        MessageText: 'Hello Admin, for my Order #1002 (Scandinavian Sky Blue Lounge Sofa), can we include 2 extra bolster throw pillows in the same sky blue linen fabric?',
+        CreatedAt: '2026-11-06 10:05:00'
+    },
+    {
+        MessageID: 4,
+        CustomerID: 2,
+        OrderID: 1002,
+        AdminID: 1,
+        SenderID: 1,
+        SenderRole: 'Admin',
+        SenderName: 'Rowena & Lilia (Workshop Admin)',
+        Topic: 'Add Custom Request (#1002)',
+        MessageText: 'Good morning Atty. Roberto! We have reserved the extra Sky Blue Woven Linen fabric from Artisan Upholstery Co. and will hand-stitch 2 matching bolster pillows (+₱1,800) for your Order #1002.',
+        CreatedAt: '2026-11-06 10:14:00'
+    }
+];
+
+function syncStaticFallbackMessages() {
+    if (!currentUserSession.isLoggedIn) {
+        liveOrderMessages = [];
+        adminConversationsList = [];
+        renderMessageFeeds();
+        return;
+    }
+    var targetCid = (currentUserSession.role === 'admin')
+        ? (Number(selectedAdminConversationCustomerId) || 1)
+        : (Number(currentUserSession.id) || 1);
+    var filtered = [];
+    for (var i = 0; i < staticFallbackMessagesStore.length; i++) {
+        if (Number(staticFallbackMessagesStore[i].CustomerID) === targetCid) {
+            filtered.push(staticFallbackMessagesStore[i]);
+        }
+    }
+    liveOrderMessages = filtered;
+    if (currentUserSession.role === 'admin') {
+        adminConversationsList = registeredCustomers.map(function (c) {
+            var count = 0;
+            for (var j = 0; j < staticFallbackMessagesStore.length; j++) {
+                if (Number(staticFallbackMessagesStore[j].CustomerID) === Number(c.id)) count++;
+            }
+            return { CustomerID: c.id, FullName: c.fullName, MessageCount: count };
+        });
+    } else {
+        adminConversationsList = [];
+    }
+    renderMessageFeeds();
+}
 
 // Tracks which Customer conversation the Admin currently has open (1 = Maria Santos, 2 = Atty. Roberto, etc.)
 var selectedAdminConversationCustomerId = 1;
@@ -895,6 +1053,7 @@ function fetchAuthorizedConversationMessages(explicitCustomerIdForAdmin) {
         return result;
     })
     .catch(function () {
+        syncStaticFallbackMessages();
         return null;
     });
 }
@@ -1319,7 +1478,10 @@ function initRealTimeMessaging() {
             }
             return null;
         })
-        .catch(function () {});
+        .catch(function () {
+            // Static GitHub Pages / file:// fallback when /api/auth/session is unavailable
+            syncStaticFallbackMessages();
+        });
 
     try {
         var protocol = (window.location.protocol === 'https:') ? 'wss:' : 'ws:';
@@ -1450,6 +1612,24 @@ function sendLiveOrderMessage(payload) {
         return result;
     })
     .catch(function () {
+        // Static GitHub Pages / file:// fallback when /api/messages is unavailable
+        var fallbackCid = (currentUserSession.role === 'admin')
+            ? (Number(payload.CustomerID || selectedAdminConversationCustomerId) || 1)
+            : (Number(currentUserSession.id) || 1);
+        var newFallbackMsg = {
+            MessageID: staticFallbackMessagesStore.length + 10,
+            CustomerID: fallbackCid,
+            OrderID: payload.OrderID || null,
+            AdminID: (currentUserSession.role === 'admin') ? Number(currentUserSession.id) : null,
+            SenderID: Number(currentUserSession.id) || 1,
+            SenderRole: (currentUserSession.role === 'admin') ? 'Admin' : 'Customer',
+            SenderName: currentUserSession.name || 'User',
+            Topic: payload.Topic || 'Order Follow-Up',
+            MessageText: payload.MessageText || '',
+            CreatedAt: 'Just now'
+        };
+        staticFallbackMessagesStore.push(newFallbackMsg);
+        syncStaticFallbackMessages();
         return null;
     });
 }

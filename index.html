@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Pure CSS Stylesheet (Light Blue + Crisp White Palette) -->
+    <link rel="stylesheet" href="public/css/style.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
@@ -116,7 +117,7 @@
 
           <div class="hero-visual">
             <div class="hero-image-card">
-              <img src="/images/hero_furniture_showroom.jpg" alt="Lilia and Rowena Furniture Showroom" class="hero-image" />
+              <img src="public/images/hero_furniture_showroom.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/hero_furniture_showroom.jpg';}" alt="Lilia and Rowena Furniture Showroom" class="hero-image" />
               <div class="hero-floating-card">
                 <div>
                   <strong>Solid Mahogany, Teak &amp; Ash</strong>
@@ -177,7 +178,7 @@
               </div>
               <div class="service-footer">
                 <span class="service-highlight">Tailored to your floorplan</span>
-                <button type="button" class="card-link" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, '/images/product_dining_table.jpg', 180, 90, 75)">Configure →</button>
+                <button type="button" class="card-link" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, 'public/images/product_dining_table.jpg', 180, 90, 75)">Configure →</button>
               </div>
             </div>
 
@@ -269,7 +270,7 @@
             </div>
 
             <div class="benefits-image-box">
-              <img src="/images/product_dining_table.jpg" alt="Solid oak dining table showing fine joinery" class="benefits-img" />
+              <img src="public/images/product_dining_table.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_dining_table.jpg';}" alt="Solid oak dining table showing fine joinery" class="benefits-img" />
               <div class="benefits-img-caption">
                 <small>Authentic Joinery</small>
                 <strong>Hand-Cut Mortise &amp; Tenon Assembly</strong>
@@ -310,7 +311,7 @@
             <!-- Product 1 -->
             <div class="product-card" data-category="Dining Sets">
               <div class="product-image-wrap">
-                <img src="/images/product_dining_table.jpg" alt="Mahogany 6-Seater Dining Set" class="product-image" />
+                <img src="public/images/product_dining_table.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_dining_table.jpg';}" alt="Mahogany 6-Seater Dining Set" class="product-image" />
                 <span class="custom-tag">Custom Sizing Available</span>
               </div>
               <div class="product-info">
@@ -331,10 +332,10 @@
                     <span class="product-price">₱28,500</span>
                   </div>
                   <div class="product-card-actions">
-                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, '/images/product_dining_table.jpg', 180, 90, 75)">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(1, 'Mahogany 6-Seater Dining Set', 'Dining Sets', 28500, 'public/images/product_dining_table.jpg', 180, 90, 75)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Mahogany 6-Seater Dining Set to cart" onclick="quickAddToCart(1, 'Mahogany 6-Seater Dining Set', 28500, '/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Mahogany 6-Seater Dining Set to cart" onclick="quickAddToCart(1, 'Mahogany 6-Seater Dining Set', 28500, 'public/images/product_dining_table.jpg')">+</button>
                   </div>
                 </div>
               </div>
@@ -343,7 +344,7 @@
             <!-- Product 2 -->
             <div class="product-card" data-category="Living Room">
               <div class="product-image-wrap">
-                <img src="/images/product_lounge_sofa.jpg" alt="Scandinavian Sky Blue Lounge Sofa" class="product-image" />
+                <img src="public/images/product_lounge_sofa.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_lounge_sofa.jpg';}" alt="Scandinavian Sky Blue Lounge Sofa" class="product-image" />
                 <span class="custom-tag">Custom Sizing Available</span>
               </div>
               <div class="product-info">
@@ -364,10 +365,10 @@
                     <span class="product-price">₱34,000</span>
                   </div>
                   <div class="product-card-actions">
-                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(2, 'Scandinavian Sky Blue Lounge Sofa', 'Living Room', 34000, '/images/product_lounge_sofa.jpg', 210, 85, 80)">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(2, 'Scandinavian Sky Blue Lounge Sofa', 'Living Room', 34000, 'public/images/product_lounge_sofa.jpg', 210, 85, 80)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Scandinavian Sky Blue Lounge Sofa to cart" onclick="quickAddToCart(2, 'Scandinavian Sky Blue Lounge Sofa', 34000, '/images/product_lounge_sofa.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Scandinavian Sky Blue Lounge Sofa to cart" onclick="quickAddToCart(2, 'Scandinavian Sky Blue Lounge Sofa', 34000, 'public/images/product_lounge_sofa.jpg')">+</button>
                   </div>
                 </div>
               </div>
@@ -376,7 +377,7 @@
             <!-- Product 3 -->
             <div class="product-card" data-category="Bedroom Suite">
               <div class="product-image-wrap">
-                <img src="/images/product_wooden_bedframe.jpg" alt="Minimalist Teak King Bedframe" class="product-image" />
+                <img src="public/images/product_wooden_bedframe.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_wooden_bedframe.jpg';}" alt="Minimalist Teak King Bedframe" class="product-image" />
                 <span class="custom-tag">Custom Sizing Available</span>
               </div>
               <div class="product-info">
@@ -397,10 +398,10 @@
                     <span class="product-price">₱42,500</span>
                   </div>
                   <div class="product-card-actions">
-                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(3, 'Minimalist Teak King Bedframe', 'Bedroom Suite', 42500, '/images/product_wooden_bedframe.jpg', 200, 190, 95)">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(3, 'Minimalist Teak King Bedframe', 'Bedroom Suite', 42500, 'public/images/product_wooden_bedframe.jpg', 200, 190, 95)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Minimalist Teak King Bedframe to cart" onclick="quickAddToCart(3, 'Minimalist Teak King Bedframe', 42500, '/images/product_wooden_bedframe.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Minimalist Teak King Bedframe to cart" onclick="quickAddToCart(3, 'Minimalist Teak King Bedframe', 42500, 'public/images/product_wooden_bedframe.jpg')">+</button>
                   </div>
                 </div>
               </div>
@@ -409,7 +410,7 @@
             <!-- Product 4 -->
             <div class="product-card" data-category="Living Room">
               <div class="product-image-wrap">
-                <img src="/images/product_dining_table.jpg" alt="Solid Acacia Round Coffee Table" class="product-image" />
+                <img src="public/images/product_dining_table.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_dining_table.jpg';}" alt="Solid Acacia Round Coffee Table" class="product-image" />
                 <span class="custom-tag">Custom Sizing Available</span>
               </div>
               <div class="product-info">
@@ -430,10 +431,10 @@
                     <span class="product-price">₱12,800</span>
                   </div>
                   <div class="product-card-actions">
-                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(4, 'Solid Acacia Round Coffee Table', 'Living Room', 12800, '/images/product_dining_table.jpg', 90, 90, 45)">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(4, 'Solid Acacia Round Coffee Table', 'Living Room', 12800, 'public/images/product_dining_table.jpg', 90, 90, 45)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Solid Acacia Round Coffee Table to cart" onclick="quickAddToCart(4, 'Solid Acacia Round Coffee Table', 12800, '/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Solid Acacia Round Coffee Table to cart" onclick="quickAddToCart(4, 'Solid Acacia Round Coffee Table', 12800, 'public/images/product_dining_table.jpg')">+</button>
                   </div>
                 </div>
               </div>
@@ -442,7 +443,7 @@
             <!-- Product 5 -->
             <div class="product-card" data-category="Home Office">
               <div class="product-image-wrap">
-                <img src="/images/product_dining_table.jpg" alt="Executive Ergonomic Oak Desk" class="product-image" />
+                <img src="public/images/product_dining_table.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_dining_table.jpg';}" alt="Executive Ergonomic Oak Desk" class="product-image" />
                 <span class="custom-tag">Custom Sizing Available</span>
               </div>
               <div class="product-info">
@@ -463,10 +464,10 @@
                     <span class="product-price">₱24,500</span>
                   </div>
                   <div class="product-card-actions">
-                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(5, 'Executive Ergonomic Oak Desk', 'Home Office', 24500, '/images/product_dining_table.jpg', 150, 75, 75)">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(5, 'Executive Ergonomic Oak Desk', 'Home Office', 24500, 'public/images/product_dining_table.jpg', 150, 75, 75)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Executive Ergonomic Oak Desk to cart" onclick="quickAddToCart(5, 'Executive Ergonomic Oak Desk', 24500, '/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Executive Ergonomic Oak Desk to cart" onclick="quickAddToCart(5, 'Executive Ergonomic Oak Desk', 24500, 'public/images/product_dining_table.jpg')">+</button>
                   </div>
                 </div>
               </div>
@@ -475,7 +476,7 @@
             <!-- Product 6 -->
             <div class="product-card" data-category="Dining Sets">
               <div class="product-image-wrap">
-                <img src="/images/product_dining_table.jpg" alt="Compact 4-Seater Breakfast Nook Set" class="product-image" />
+                <img src="public/images/product_dining_table.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='images/product_dining_table.jpg';}" alt="Compact 4-Seater Breakfast Nook Set" class="product-image" />
                 <span class="custom-tag">Custom Sizing Available</span>
               </div>
               <div class="product-info">
@@ -496,10 +497,10 @@
                     <span class="product-price">₱18,900</span>
                   </div>
                   <div class="product-card-actions">
-                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(6, 'Compact 4-Seater Breakfast Nook Set', 'Dining Sets', 18900, '/images/product_dining_table.jpg', 100, 100, 75)">
+                    <button type="button" class="btn-sm-soft" onclick="openProductCustomizer(6, 'Compact 4-Seater Breakfast Nook Set', 'Dining Sets', 18900, 'public/images/product_dining_table.jpg', 100, 100, 75)">
                       Customize
                     </button>
-                    <button type="button" class="btn-icon-plus" aria-label="Add Compact 4-Seater Breakfast Nook Set to cart" onclick="quickAddToCart(6, 'Compact 4-Seater Breakfast Nook Set', 18900, '/images/product_dining_table.jpg')">+</button>
+                    <button type="button" class="btn-icon-plus" aria-label="Add Compact 4-Seater Breakfast Nook Set to cart" onclick="quickAddToCart(6, 'Compact 4-Seater Breakfast Nook Set', 18900, 'public/images/product_dining_table.jpg')">+</button>
                   </div>
                 </div>
               </div>
@@ -684,7 +685,7 @@
 
       <div class="footer-bottom">
         <p>© 2026 Lilia and Rowena Furniture. All rights reserved. Database-backed PHP PSR-4 Shop Management System.</p>
-        <a href="/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" style="color: #38bdf8; font-weight: 600;">
+        <a href="public/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" style="color: #38bdf8; font-weight: 600;">
           Download Full PHP Project (.zip)
         </a>
       </div>
@@ -708,7 +709,7 @@
         <div class="modal-body">
           <div class="customizer-split">
             <div>
-              <img id="custModalImg" src="/images/product_dining_table.jpg" alt="Selected Furniture Piece" style="width: 100%; border-radius: 10px; aspect-ratio: 4/3; object-fit: cover; border: 1px solid #e2e8f0; margin-bottom: 1rem;" />
+              <img id="custModalImg" src="public/images/product_dining_table.jpg" onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src=this.src.replace('public/images/','images/');}" alt="Selected Furniture Piece" style="width: 100%; border-radius: 10px; aspect-ratio: 4/3; object-fit: cover; border: 1px solid #e2e8f0; margin-bottom: 1rem;" />
               <div style="background: #f0f7ff; padding: 0.9rem; border-radius: 8px; border: 1px solid #bae6fd; font-size: 0.78rem; color: #0f172a;">
                 <p style="margin-bottom: 0.35rem;">✓ 100% Seasoned Kiln-Dried Hardwood</p>
                 <p style="margin-bottom: 0.35rem;">✓ Hand-Cut Mortise &amp; Tenon Joinery</p>
@@ -1228,7 +1229,7 @@
               <p style="font-size: 0.84rem; color: #e0f2fe; max-width: 540px; margin: 0 auto 1.25rem;">
                 Complete Composer PSR-4 folder structure (`src/Config`, `src/Models`, `src/Controllers`), HTML5 `views/`, Light Blue + White `style.css`, simple vanilla `main.js`, and MySQL `.sql` scripts.
               </p>
-              <a href="/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" class="btn-primary-white" style="display: inline-block;">
+              <a href="public/downloads/lilia_and_rowena_furniture_php_project.zip" download="lilia_and_rowena_furniture_php_project.zip" class="btn-primary-white" style="display: inline-block;">
                 ⬇ Download Complete PHP Project (.zip)
               </a>
             </div>
@@ -1278,6 +1279,6 @@
     </div>
 
     <!-- Plain Minimal Vanilla JavaScript (No React, No TypeScript/TSX) -->
-    <script src="/js/main.js"></script>
+    <script src="public/js/main.js" onerror="var s=document.createElement('script');s.src='js/main.js';document.body.appendChild(s);"></script>
   </body>
 </html>

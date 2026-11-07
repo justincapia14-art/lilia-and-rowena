@@ -1085,10 +1085,14 @@ async function startServer() {
     next();
   });
 
+  // Serve static assets under both /public/* (for GitHub Pages / direct HTML compatibility) and /*
+  const publicPath = path.join(__dirname, 'public');
+  app.use('/public', express.static(publicPath));
+  app.use(express.static(publicPath));
+
   if (process.env.NODE_ENV === 'production') {
     const distPath = path.join(__dirname, 'dist');
     app.use(express.static(distPath));
-    app.use(express.static(path.join(__dirname, 'public')));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
