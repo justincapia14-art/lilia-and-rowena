@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import crypto from 'crypto';
+import fs from 'fs';
 import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const PERSISTENT_STORE_PATH = path.join(__dirname, 'database', 'persistent_store.json');
 
 // ============================================================================
 // SERVER-AUTHORITATIVE DATABASE STATE (Matches 01_furniture_shop_schema.sql & 02_sample_data.sql)
@@ -107,10 +109,89 @@ const orderMessages = [
 let nextMessageId = 5;
 
 // ============================================================================
-// SERVER-SIDE SESSION STORE (Cryptographically Random Tokens -> Authenticated User)
+// SERVER-SIDE SESSION STORE & PERSISTENT DISK DATABASE
 // Never trusts client-submitted customer_id or conversation_id for authorization.
 // ============================================================================
 const activeSessions = new Map();
+
+function loadPersistentStore() {
+  try {
+    if (!fs.existsSync(PERSISTENT_STORE_PATH)) return;
+    const raw = fs.readFileSync(PERSISTENT_STORE_PATH, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed.customers)) {
+      for (const savedCust of parsed.customers) {
+        if (!savedCust || !savedCust.Email) continue;
+        const existingIdx = customers.findIndex(
+          (c) => String(c.Email).toLowerCase() === String(savedCust.Email).toLowerCase()
+        );
+        if (existingIdx === -1) {
+          customers.push({
+            CustomerID: Number(savedCust.CustomerID) || customers.length + 1,
+            FullName: String(savedCust.FullName || ''),
+            Email: String(savedCust.Email || '').toLowerCase(),
+            Password: String(savedCust.Password || ''),
+            PhoneNumber: String(savedCust.PhoneNumber || ''),
+            Address: String(savedCust.Address || ''),
+            DefaultOrderID: savedCust.DefaultOrderID || null
+          });
+        } else {
+          customers[existingIdx] = {
+            ...customers[existingIdx],
+            ...savedCust
+          };
+        }
+      }
+    }
+    if (Array.isArray(parsed.orderMessages) && parsed.orderMessages.length > 0) {
+      orderMessages.length = 0;
+      for (const m of parsed.orderMessages) {
+        orderMessages.push(m);
+      }
+      const maxId = orderMessages.reduce((max, m) => Math.max(max, Number(m.MessageID) || 0), 4);
+      nextMessageId = Math.max(Number(parsed.nextMessageId) || 5, maxId + 1);
+    }
+    if (Array.isArray(parsed.sessions)) {
+      for (const [tok, sess] of parsed.sessions) {
+        if (tok && sess && sess.isAuthenticated) {
+          activeSessions.set(tok, sess);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Notice: Could not load persistent store:', err.message);
+  }
+}
+
+function savePersistentStore() {
+  try {
+    const dir = path.dirname(PERSISTENT_STORE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const payload = {
+      customers,
+      orderMessages,
+      nextMessageId,
+      sessions: Array.from(activeSessions.entries())
+    };
+    fs.writeFileSync(PERSISTENT_STORE_PATH, JSON.stringify(payload, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Notice: Could not save persistent store:', err.message);
+  }
+}
+
+function getPublicCustomersList() {
+  return customers.map((c) => ({
+    id: Number(c.CustomerID),
+    fullName: c.FullName,
+    email: c.Email,
+    phone: c.PhoneNumber || '',
+    address: c.Address || ''
+  }));
+}
+
+loadPersistentStore();
 
 function generateSessionToken() {
   return crypto.randomBytes(24).toString('hex');
@@ -159,6 +240,7 @@ function createCustomerSession(customer) {
     activeCustomerId: Number(customer.CustomerID)
   };
   activeSessions.set(token, sessionData);
+  savePersistentStore();
   return sessionData;
 }
 
@@ -176,6 +258,7 @@ function createAdminSession(admin) {
     activeCustomerId: 1
   };
   activeSessions.set(token, sessionData);
+  savePersistentStore();
   return sessionData;
 }
 
@@ -634,6 +717,7 @@ async function startServer() {
           };
 
           orderMessages.push(newMsg);
+          savePersistentStore();
           dispatchPrivateMessageEvent(newMsg);
         }
       } catch (err) {
@@ -649,13 +733,19 @@ async function startServer() {
   // Retrieve or bootstrap current server-side session
   app.get('/api/auth/session', (req, res) => {
     const cookies = parseCookies(req.headers.cookie);
-    const token = String(req.headers['x-session-token'] || cookies.lr_session || '').trim();
+    const token = String(
+      req.headers['x-session-token'] ||
+      (req.query && req.query.session_token) ||
+      cookies.lr_session ||
+      ''
+    ).trim();
 
     if (token && activeSessions.has(token)) {
       const session = activeSessions.get(token);
       return res.json({
         status: 'ok',
         sessionToken: session.token,
+        customers: getPublicCustomersList(),
         user: {
           isLoggedIn: session.isAuthenticated,
           id: session.userId,
@@ -668,12 +758,31 @@ async function startServer() {
       });
     }
 
+    // If user explicitly logged out before refreshing, respect logged-out state
+    if (String(req.headers['x-logged-out'] || '') === '1') {
+      return res.json({
+        status: 'ok',
+        sessionToken: null,
+        customers: getPublicCustomersList(),
+        user: {
+          isLoggedIn: false,
+          id: null,
+          role: 'guest',
+          name: '',
+          email: '',
+          phone: '',
+          address: ''
+        }
+      });
+    }
+
     // Default initial session for Customer #1 (Maria Teresa Santos) so initial load has a real server session
     const defaultSession = createCustomerSession(customers[0]);
     setSessionCookie(res, defaultSession.token);
     return res.json({
       status: 'ok',
       sessionToken: defaultSession.token,
+      customers: getPublicCustomersList(),
       user: {
         isLoggedIn: true,
         id: defaultSession.userId,
@@ -714,6 +823,7 @@ async function startServer() {
         return res.json({
           status: 'ok',
           sessionToken: session.token,
+          customers: getPublicCustomersList(),
           user: {
             isLoggedIn: true,
             id: session.userId,
@@ -736,6 +846,7 @@ async function startServer() {
         return res.json({
           status: 'ok',
           sessionToken: session.token,
+          customers: getPublicCustomersList(),
           user: {
             isLoggedIn: true,
             id: session.userId,
@@ -778,8 +889,9 @@ async function startServer() {
       });
     }
 
+    const maxCustomerId = customers.reduce((max, c) => Math.max(max, Number(c.CustomerID) || 0), 0);
     const newCustomer = {
-      CustomerID: customers.length + 1,
+      CustomerID: maxCustomerId + 1,
       FullName: fullName,
       Email: email,
       Password: password,
@@ -788,6 +900,7 @@ async function startServer() {
       DefaultOrderID: null
     };
     customers.push(newCustomer);
+    savePersistentStore();
 
     const session = createCustomerSession(newCustomer);
     setSessionCookie(res, session.token);
@@ -795,6 +908,7 @@ async function startServer() {
     return res.json({
       status: 'ok',
       sessionToken: session.token,
+      customers: getPublicCustomersList(),
       user: {
         isLoggedIn: true,
         id: session.userId,
@@ -811,7 +925,10 @@ async function startServer() {
   app.post('/api/auth/logout', (req, res) => {
     const cookies = parseCookies(req.headers.cookie);
     const token = String(req.headers['x-session-token'] || cookies.lr_session || '').trim();
-    if (token) activeSessions.delete(token);
+    if (token) {
+      activeSessions.delete(token);
+      savePersistentStore();
+    }
     clearSessionCookie(res);
     return res.json({ status: 'ok' });
   });
@@ -967,6 +1084,7 @@ async function startServer() {
     };
 
     orderMessages.push(newMsg);
+    savePersistentStore();
     dispatchPrivateMessageEvent(newMsg);
 
     return res.json({
@@ -1013,6 +1131,7 @@ async function startServer() {
 
     if (action === 'delete') {
       orderMessages.splice(idx, 1);
+      savePersistentStore();
       return res.json({ status: 'ok', deleted_message_id: messageId });
     }
 
@@ -1021,6 +1140,7 @@ async function startServer() {
       return res.status(400).json({ status: 'error', code: 400, error: 'Updated message text is required.' });
     }
     targetMsg.MessageText = newText;
+    savePersistentStore();
     return res.json({ status: 'ok', message: targetMsg });
   }
 

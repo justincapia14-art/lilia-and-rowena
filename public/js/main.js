@@ -156,6 +156,134 @@ function scrollToSection(sectionId) {
 
 // --- 3. AUTHENTICATION: LOGIN, REGISTER, AND LOGOUT (Customer & Admin) ---
 var currentSessionToken = null;
+var isExplicitlyLoggedOut = false;
+var LOCAL_STORAGE_DB_KEY = 'lr_furniture_db_v1';
+
+function savePersistedClientDatabase() {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        var payload = {
+            registeredCustomers: registeredCustomers,
+            currentUserSession: currentUserSession,
+            currentSessionToken: currentSessionToken,
+            isExplicitlyLoggedOut: isExplicitlyLoggedOut,
+            shoppingCart: shoppingCart,
+            sampleOrders: sampleOrders,
+            staticFallbackMessagesStore: (typeof staticFallbackMessagesStore !== 'undefined') ? staticFallbackMessagesStore : []
+        };
+        window.localStorage.setItem(LOCAL_STORAGE_DB_KEY, JSON.stringify(payload));
+    } catch (e) {
+        // Ignore storage quota errors
+    }
+}
+
+function loadPersistedClientDatabase() {
+    try {
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        var raw = window.localStorage.getItem(LOCAL_STORAGE_DB_KEY);
+        if (!raw) return;
+        var parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return;
+
+        if (Array.isArray(parsed.registeredCustomers) && parsed.registeredCustomers.length > 0) {
+            for (var i = 0; i < parsed.registeredCustomers.length; i++) {
+                var sc = parsed.registeredCustomers[i];
+                if (!sc || !sc.email) continue;
+                var foundIdx = -1;
+                for (var j = 0; j < registeredCustomers.length; j++) {
+                    if (String(registeredCustomers[j].email).toLowerCase() === String(sc.email).toLowerCase()) {
+                        foundIdx = j;
+                        break;
+                    }
+                }
+                if (foundIdx === -1) {
+                    registeredCustomers.push({
+                        id: Number(sc.id) || (registeredCustomers.length + 1),
+                        fullName: sc.fullName || '',
+                        email: String(sc.email).toLowerCase(),
+                        password: sc.password || 'password123',
+                        phone: sc.phone || '',
+                        address: sc.address || ''
+                    });
+                } else if (sc.password) {
+                    registeredCustomers[foundIdx].password = sc.password;
+                    registeredCustomers[foundIdx].fullName = sc.fullName || registeredCustomers[foundIdx].fullName;
+                    registeredCustomers[foundIdx].phone = sc.phone || registeredCustomers[foundIdx].phone;
+                    registeredCustomers[foundIdx].address = sc.address || registeredCustomers[foundIdx].address;
+                }
+            }
+        }
+
+        if (parsed.currentSessionToken !== undefined) {
+            currentSessionToken = parsed.currentSessionToken;
+        }
+        if (parsed.isExplicitlyLoggedOut !== undefined) {
+            isExplicitlyLoggedOut = Boolean(parsed.isExplicitlyLoggedOut);
+        }
+        if (parsed.currentUserSession && typeof parsed.currentUserSession === 'object') {
+            currentUserSession = parsed.currentUserSession;
+        }
+        if (Array.isArray(parsed.shoppingCart)) {
+            shoppingCart = parsed.shoppingCart;
+        }
+        if (parsed.sampleOrders && typeof parsed.sampleOrders === 'object') {
+            var orderKeys = Object.keys(parsed.sampleOrders);
+            for (var k = 0; k < orderKeys.length; k++) {
+                sampleOrders[orderKeys[k]] = parsed.sampleOrders[orderKeys[k]];
+            }
+        }
+        if (Array.isArray(parsed.staticFallbackMessagesStore) && typeof staticFallbackMessagesStore !== 'undefined') {
+            for (var m = 0; m < parsed.staticFallbackMessagesStore.length; m++) {
+                var savedMsg = parsed.staticFallbackMessagesStore[m];
+                if (!savedMsg || !savedMsg.MessageID) continue;
+                var msgExists = false;
+                for (var ex = 0; ex < staticFallbackMessagesStore.length; ex++) {
+                    if (Number(staticFallbackMessagesStore[ex].MessageID) === Number(savedMsg.MessageID)) {
+                        msgExists = true;
+                        break;
+                    }
+                }
+                if (!msgExists) {
+                    staticFallbackMessagesStore.push(savedMsg);
+                }
+            }
+        }
+    } catch (e) {
+        // Ignore corrupt storage
+    }
+}
+
+function mergeServerCustomersIntoLocal(serverCustomers) {
+    if (!Array.isArray(serverCustomers)) return;
+    for (var i = 0; i < serverCustomers.length; i++) {
+        var sc = serverCustomers[i];
+        if (!sc || !sc.email) continue;
+        var normEmail = String(sc.email).toLowerCase();
+        var existing = null;
+        for (var j = 0; j < registeredCustomers.length; j++) {
+            if (String(registeredCustomers[j].email).toLowerCase() === normEmail) {
+                existing = registeredCustomers[j];
+                break;
+            }
+        }
+        if (!existing) {
+            registeredCustomers.push({
+                id: Number(sc.id || sc.CustomerID) || (registeredCustomers.length + 1),
+                fullName: sc.fullName || sc.FullName || '',
+                email: normEmail,
+                password: sc.password || 'password123',
+                phone: sc.phone || sc.PhoneNumber || '',
+                address: sc.address || sc.Address || ''
+            });
+        } else {
+            existing.id = Number(sc.id || sc.CustomerID) || existing.id;
+            existing.fullName = sc.fullName || sc.FullName || existing.fullName;
+            existing.phone = sc.phone || sc.PhoneNumber || existing.phone;
+            existing.address = sc.address || sc.Address || existing.address;
+        }
+    }
+    savePersistedClientDatabase();
+}
 
 function getAuthRequestHeaders() {
     var headers = {
@@ -163,6 +291,9 @@ function getAuthRequestHeaders() {
     };
     if (currentSessionToken) {
         headers['x-session-token'] = String(currentSessionToken);
+    }
+    if (isExplicitlyLoggedOut) {
+        headers['x-logged-out'] = '1';
     }
     return headers;
 }
@@ -208,6 +339,7 @@ function renderAuthHeaderState() {
     }
 
     showChatSecurityAlert('');
+    savePersistedClientDatabase();
 
     // Sync authenticated identity with WebSocket backend and re-render private conversation feed
     if (typeof syncSocketAuthIdentity === 'function') {
@@ -222,8 +354,11 @@ function handleUserLogout() {
     fetch('/api/auth/logout', {
         method: 'POST',
         headers: getAuthRequestHeaders()
-    }).catch(function () {});
+    }).catch(function () {
+        fetch('public/index.php?route=api_logout', { method: 'POST' }).catch(function () {});
+    });
 
+    isExplicitlyLoggedOut = true;
     currentSessionToken = null;
     liveOrderMessages = [];
     adminConversationsList = [];
@@ -236,53 +371,20 @@ function handleUserLogout() {
         phone: '',
         address: ''
     };
+    savePersistedClientDatabase();
     renderAuthHeaderState();
     closeModal('adminModal');
 }
 
-// Authenticate account via backend /api/auth/login (with local fallback when opened on static GitHub Pages / file://)
-function performServerLogin(email, password, role, openAdminOnSuccess) {
-    return fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            email: email,
-            password: password,
-            role: role || 'auto'
-        })
-    })
-    .then(function (res) {
-        return res.json().then(function (data) {
-            return { status: res.status, data: data };
-        });
-    })
-    .then(function (result) {
-        if (result.status === 200 && result.data && result.data.status === 'ok' && result.data.user) {
-            // Clear any previous user's messages from client memory before loading the new session's conversation
-            liveOrderMessages = [];
-            adminConversationsList = [];
-            currentSessionToken = result.data.sessionToken || null;
-            currentUserSession = result.data.user;
-            if (currentUserSession.role === 'admin') {
-                selectedAdminConversationCustomerId = 1;
-            }
-            renderAuthHeaderState();
-            fetchAuthorizedConversationMessages();
-            if (openAdminOnSuccess && currentUserSession.role === 'admin') {
-                renderAdminDashboard();
-                openModal('adminModal');
-            }
-            return true;
-        }
-        return false;
-    })
-    .catch(function () {
-        // Static GitHub Pages / file:// fallback when Node server.js is not running
-        var normEmail = String(email || '').trim().toLowerCase();
-        var selRole = String(role || 'auto').toLowerCase();
+function tryLocalOrPhpLogin(email, password, role, openAdminOnSuccess) {
+    var normEmail = String(email || '').trim().toLowerCase();
+    var selRole = String(role || 'auto').toLowerCase();
+
+    function finishLocalAuth() {
         if (selRole === 'admin' || selRole === 'auto') {
             for (var a = 0; a < databaseAdmins.length; a++) {
                 if (databaseAdmins[a].email.toLowerCase() === normEmail && databaseAdmins[a].password === password) {
+                    isExplicitlyLoggedOut = false;
                     currentUserSession = {
                         isLoggedIn: true,
                         id: databaseAdmins[a].adminId,
@@ -293,6 +395,7 @@ function performServerLogin(email, password, role, openAdminOnSuccess) {
                         address: 'MacArthur Highway, San Fernando, Pampanga'
                     };
                     selectedAdminConversationCustomerId = 1;
+                    savePersistedClientDatabase();
                     syncStaticFallbackMessages();
                     renderAuthHeaderState();
                     if (openAdminOnSuccess) {
@@ -306,6 +409,7 @@ function performServerLogin(email, password, role, openAdminOnSuccess) {
         if (selRole === 'customer' || selRole === 'auto') {
             for (var c = 0; c < registeredCustomers.length; c++) {
                 if (registeredCustomers[c].email.toLowerCase() === normEmail && registeredCustomers[c].password === password) {
+                    isExplicitlyLoggedOut = false;
                     currentUserSession = {
                         isLoggedIn: true,
                         id: registeredCustomers[c].id,
@@ -315,6 +419,7 @@ function performServerLogin(email, password, role, openAdminOnSuccess) {
                         phone: registeredCustomers[c].phone,
                         address: registeredCustomers[c].address
                     };
+                    savePersistedClientDatabase();
                     syncStaticFallbackMessages();
                     renderAuthHeaderState();
                     return true;
@@ -322,6 +427,120 @@ function performServerLogin(email, password, role, openAdminOnSuccess) {
             }
         }
         return false;
+    }
+
+    // Try XAMPP PHP + MySQL API bridge if available, else fall back to localStorage database
+    return fetch('public/index.php?route=api_login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normEmail, password: password, role: selRole })
+    })
+    .then(function (res) {
+        return res.json().then(function (data) {
+            return { status: res.status, data: data };
+        });
+    })
+    .then(function (phpRes) {
+        if (phpRes.status === 200 && phpRes.data && phpRes.data.status === 'ok' && phpRes.data.user) {
+            isExplicitlyLoggedOut = false;
+            if (Array.isArray(phpRes.data.customers)) {
+                mergeServerCustomersIntoLocal(phpRes.data.customers);
+            }
+            currentUserSession = phpRes.data.user;
+            savePersistedClientDatabase();
+            syncStaticFallbackMessages();
+            renderAuthHeaderState();
+            if (openAdminOnSuccess && currentUserSession.role === 'admin') {
+                renderAdminDashboard();
+                openModal('adminModal');
+            }
+            return true;
+        }
+        return finishLocalAuth();
+    })
+    .catch(function () {
+        return finishLocalAuth();
+    });
+}
+
+// Authenticate account via backend /api/auth/login (with XAMPP MySQL & localStorage fallback)
+function performServerLogin(email, password, role, openAdminOnSuccess) {
+    var normEmail = String(email || '').trim().toLowerCase();
+    return fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: normEmail,
+            password: password,
+            role: role || 'auto'
+        })
+    })
+    .then(function (res) {
+        return res.json().then(function (data) {
+            return { status: res.status, data: data };
+        });
+    })
+    .then(function (result) {
+        if (result.status === 200 && result.data && result.data.status === 'ok' && result.data.user) {
+            isExplicitlyLoggedOut = false;
+            liveOrderMessages = [];
+            adminConversationsList = [];
+            currentSessionToken = result.data.sessionToken || null;
+            currentUserSession = result.data.user;
+            if (Array.isArray(result.data.customers)) {
+                mergeServerCustomersIntoLocal(result.data.customers);
+            }
+            if (currentUserSession.role === 'admin') {
+                selectedAdminConversationCustomerId = 1;
+            }
+            savePersistedClientDatabase();
+            renderAuthHeaderState();
+            fetchAuthorizedConversationMessages();
+            if (openAdminOnSuccess && currentUserSession.role === 'admin') {
+                renderAdminDashboard();
+                openModal('adminModal');
+            }
+            return true;
+        }
+
+        // If account was created in localStorage before server synced, auto-sync it to /api/auth/register
+        for (var c = 0; c < registeredCustomers.length; c++) {
+            var localCust = registeredCustomers[c];
+            if (String(localCust.email).toLowerCase() === normEmail && localCust.password === password) {
+                return fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName: localCust.fullName,
+                        email: localCust.email,
+                        password: localCust.password,
+                        phone: localCust.phone,
+                        address: localCust.address
+                    })
+                })
+                .then(function (regRes) { return regRes.json(); })
+                .then(function (regData) {
+                    if (regData && regData.status === 'ok' && regData.user) {
+                        isExplicitlyLoggedOut = false;
+                        currentSessionToken = regData.sessionToken || null;
+                        currentUserSession = regData.user;
+                        localCust.id = regData.user.id;
+                        savePersistedClientDatabase();
+                        renderAuthHeaderState();
+                        fetchAuthorizedConversationMessages();
+                        return true;
+                    }
+                    return tryLocalOrPhpLogin(email, password, role, openAdminOnSuccess);
+                })
+                .catch(function () {
+                    return tryLocalOrPhpLogin(email, password, role, openAdminOnSuccess);
+                });
+            }
+        }
+        return false;
+    })
+    .catch(function () {
+        return tryLocalOrPhpLogin(email, password, role, openAdminOnSuccess);
     });
 }
 
@@ -435,6 +654,61 @@ function handleCustomerRegister(event) {
         return false;
     }
 
+    function finalizeClientRegistration(assignedId, tokenFromServer, serverCustomers) {
+        var numericId = Number(assignedId) || (registeredCustomers.length + 1);
+        var existingIdx = -1;
+        for (var i = 0; i < registeredCustomers.length; i++) {
+            if (String(registeredCustomers[i].email).toLowerCase() === email) {
+                existingIdx = i;
+                break;
+            }
+        }
+        var newCust = {
+            id: numericId,
+            fullName: fullName,
+            email: email,
+            password: password,
+            phone: phone,
+            address: address
+        };
+        if (existingIdx === -1) {
+            registeredCustomers.push(newCust);
+        } else {
+            registeredCustomers[existingIdx] = newCust;
+        }
+        if (Array.isArray(serverCustomers)) {
+            mergeServerCustomersIntoLocal(serverCustomers);
+        }
+
+        isExplicitlyLoggedOut = false;
+        liveOrderMessages = [];
+        adminConversationsList = [];
+        currentSessionToken = tokenFromServer || null;
+        currentUserSession = {
+            isLoggedIn: true,
+            id: numericId,
+            role: 'customer',
+            name: fullName,
+            email: email,
+            phone: phone,
+            address: address
+        };
+
+        savePersistedClientDatabase();
+        if (errEl) errEl.style.display = 'none';
+
+        // Clear registration inputs
+        document.getElementById('regFullName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('regPhone').value = '';
+        document.getElementById('regAddress').value = '';
+
+        renderAuthHeaderState();
+        fetchAuthorizedConversationMessages();
+        closeModal('authModal');
+    }
+
     fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -453,55 +727,64 @@ function handleCustomerRegister(event) {
     })
     .then(function (result) {
         if (result.status === 200 && result.data && result.data.status === 'ok' && result.data.user) {
-            var newCust = {
-                id: result.data.user.id,
-                fullName: fullName,
-                email: email,
-                password: password,
-                phone: phone,
-                address: address
-            };
-            registeredCustomers.push(newCust);
-
-            liveOrderMessages = [];
-            adminConversationsList = [];
-            currentSessionToken = result.data.sessionToken || null;
-            currentUserSession = result.data.user;
-
-            if (errEl) errEl.style.display = 'none';
-            renderAuthHeaderState();
-            fetchAuthorizedConversationMessages();
-            closeModal('authModal');
+            finalizeClientRegistration(result.data.user.id, result.data.sessionToken, result.data.customers);
         } else if (errEl) {
             errEl.style.display = 'block';
             errEl.textContent = (result.data && result.data.error) ? result.data.error : 'Unable to register customer account.';
         }
     })
     .catch(function () {
-        // Static GitHub Pages / file:// fallback when Node server.js is not running
-        var newId = registeredCustomers.length + 1;
-        var fallbackCust = {
-            id: newId,
-            fullName: fullName,
-            email: email,
-            password: password,
-            phone: phone,
-            address: address
-        };
-        registeredCustomers.push(fallbackCust);
-        currentUserSession = {
-            isLoggedIn: true,
-            id: newId,
-            role: 'customer',
-            name: fullName,
-            email: email,
-            phone: phone,
-            address: address
-        };
-        if (errEl) errEl.style.display = 'none';
-        syncStaticFallbackMessages();
-        renderAuthHeaderState();
-        closeModal('authModal');
+        // Check duplicate in localStorage first
+        for (var i = 0; i < registeredCustomers.length; i++) {
+            if (String(registeredCustomers[i].email).toLowerCase() === email) {
+                if (errEl) {
+                    errEl.style.display = 'block';
+                    errEl.textContent = 'An account with this email address already exists.';
+                }
+                return;
+            }
+        }
+
+        // Try XAMPP PHP + MySQL bridge (public/index.php?route=api_register), then fallback to localStorage
+        fetch('public/index.php?route=api_register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fullName: fullName,
+                email: email,
+                password: password,
+                phone: phone,
+                address: address
+            })
+        })
+        .then(function (phpRes) {
+            return phpRes.json().then(function (phpData) {
+                return { status: phpRes.status, data: phpData };
+            });
+        })
+        .then(function (phpResult) {
+            if (phpResult.status === 200 && phpResult.data && phpResult.data.status === 'ok' && phpResult.data.user) {
+                finalizeClientRegistration(phpResult.data.user.id, null, phpResult.data.customers);
+            } else if (phpResult.status === 409 && phpResult.data && phpResult.data.error) {
+                if (errEl) {
+                    errEl.style.display = 'block';
+                    errEl.textContent = phpResult.data.error;
+                }
+            } else {
+                var maxId = 2;
+                for (var k = 0; k < registeredCustomers.length; k++) {
+                    if (Number(registeredCustomers[k].id) > maxId) maxId = Number(registeredCustomers[k].id);
+                }
+                finalizeClientRegistration(maxId + 1, null, null);
+            }
+        })
+        .catch(function () {
+            var maxId = 2;
+            for (var k = 0; k < registeredCustomers.length; k++) {
+                if (Number(registeredCustomers[k].id) > maxId) maxId = Number(registeredCustomers[k].id);
+            }
+            finalizeClientRegistration(maxId + 1, null, null);
+        });
     });
 
     return false;
@@ -550,6 +833,7 @@ function updateAdminOrderStatus(orderId, newStatus) {
     record.status = newStatus;
     record.stepIndex = (idx !== -1) ? idx : 0;
 
+    savePersistedClientDatabase();
     renderAdminDashboard();
     lookupOrderById(orderId);
 
@@ -677,6 +961,7 @@ function quickAddToCart(id, name, basePrice, image) {
         image: image,
         specs: 'Standard Catalog Dimensions'
     });
+    savePersistedClientDatabase();
     renderCartDrawer();
     openModal('cartDrawerBackdrop');
 }
@@ -705,6 +990,7 @@ function addCustomizedToCart() {
         specs: specsText
     });
 
+    savePersistedClientDatabase();
     closeModal('customizerModal');
     renderCartDrawer();
     openModal('cartDrawerBackdrop');
@@ -716,11 +1002,13 @@ function changeCartQty(index, delta) {
     if (shoppingCart[index].qty <= 0) {
         shoppingCart.splice(index, 1);
     }
+    savePersistedClientDatabase();
     renderCartDrawer();
 }
 
 function removeCartItem(index) {
     shoppingCart.splice(index, 1);
+    savePersistedClientDatabase();
     renderCartDrawer();
 }
 
@@ -840,6 +1128,7 @@ function submitLiveOrder(event) {
     };
 
     shoppingCart = [];
+    savePersistedClientDatabase();
     renderCartDrawer();
     renderAdminDashboard();
     closeModal('checkoutModal');
@@ -1466,21 +1755,69 @@ function renderMessageFeeds() {
 
 // Connect to Real-Time WebSocket Server (/ws-chat) for instant private 1-on-1 messaging
 function initRealTimeMessaging() {
-    // 1. Bootstrap server-side session token and fetch strictly the authorized conversation
-    fetch('/api/auth/session')
+    // 1. Bootstrap server-side session token (sending saved session token from localStorage)
+    fetch('/api/auth/session', {
+        method: 'GET',
+        headers: getAuthRequestHeaders()
+    })
         .then(function (res) { return res.json(); })
         .then(function (data) {
-            if (data && data.status === 'ok' && data.user) {
-                currentSessionToken = data.sessionToken || null;
-                currentUserSession = data.user;
-                renderAuthHeaderState();
-                return fetchAuthorizedConversationMessages();
+            if (data && data.status === 'ok') {
+                if (Array.isArray(data.customers)) {
+                    mergeServerCustomersIntoLocal(data.customers);
+                }
+                if (data.user) {
+                    var savedEmail = (currentUserSession && currentUserSession.isLoggedIn && currentUserSession.email)
+                        ? String(currentUserSession.email).toLowerCase()
+                        : '';
+                    var serverEmail = String(data.user.email || '').toLowerCase();
+
+                    // If localStorage has a non-default logged-in user and server fell back to default Maria, sync the saved user to server
+                    if (savedEmail && savedEmail !== serverEmail && serverEmail === 'maria.santos@example.com') {
+                        var savedPass = 'password123';
+                        var savedRole = currentUserSession.role || 'customer';
+                        if (savedRole === 'admin') {
+                            savedPass = 'admin123';
+                        } else {
+                            for (var m = 0; m < registeredCustomers.length; m++) {
+                                if (String(registeredCustomers[m].email).toLowerCase() === savedEmail) {
+                                    savedPass = registeredCustomers[m].password || 'password123';
+                                    break;
+                                }
+                            }
+                        }
+                        return performServerLogin(savedEmail, savedPass, savedRole, false);
+                    }
+
+                    currentSessionToken = data.sessionToken || null;
+                    currentUserSession = data.user;
+                    savePersistedClientDatabase();
+                    renderAuthHeaderState();
+                    return fetchAuthorizedConversationMessages();
+                }
             }
             return null;
         })
         .catch(function () {
-            // Static GitHub Pages / file:// fallback when /api/auth/session is unavailable
-            syncStaticFallbackMessages();
+            // Try XAMPP PHP + MySQL session, otherwise use localStorage persisted session & messages
+            fetch('public/index.php?route=api_session')
+                .then(function (r) { return r.json(); })
+                .then(function (phpData) {
+                    if (phpData && phpData.status === 'ok') {
+                        if (Array.isArray(phpData.customers)) {
+                            mergeServerCustomersIntoLocal(phpData.customers);
+                        }
+                        if (phpData.user && phpData.user.isLoggedIn) {
+                            currentUserSession = phpData.user;
+                            savePersistedClientDatabase();
+                            renderAuthHeaderState();
+                        }
+                    }
+                    syncStaticFallbackMessages();
+                })
+                .catch(function () {
+                    syncStaticFallbackMessages();
+                });
         });
 
     try {
@@ -1629,6 +1966,7 @@ function sendLiveOrderMessage(payload) {
             CreatedAt: 'Just now'
         };
         staticFallbackMessagesStore.push(newFallbackMsg);
+        savePersistedClientDatabase();
         syncStaticFallbackMessages();
         return null;
     });
@@ -1715,6 +2053,8 @@ function handleAdminReplySubmit(event) {
 
 // Initialize listeners on page load
 document.addEventListener('DOMContentLoaded', function () {
+    loadPersistedClientDatabase();
+
     var lengthInput = document.getElementById('customLength');
     var widthInput = document.getElementById('customWidth');
     var heightInput = document.getElementById('customHeight');
