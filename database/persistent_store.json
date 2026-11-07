@@ -58,7 +58,7 @@
       "itemSummary": "Mahogany 6-Seater Dining Set (220L × 90W × 75H cm · Warm Walnut)",
       "quantity": 1,
       "status": "In Production",
-      "priority": "Urgent",
+      "priority": "High",
       "placed": "2026-10-28",
       "due": "2026-11-07",
       "deadlineTime": "08:00",
@@ -129,7 +129,7 @@
       "address": "Beverly Hills Subdivision, Antipolo, Rizal",
       "itemSummary": "Executive Ergonomic Oak Desk (Dovetail Drawers)",
       "quantity": 2,
-      "status": "Pending",
+      "status": "Order Confirmed",
       "priority": "Urgent",
       "placed": "2026-10-26",
       "due": "2026-11-04",
@@ -178,7 +178,7 @@
       "itemSummary": "Compact 4-Seater Breakfast Nook Set (100×100cm Custom)",
       "quantity": 1,
       "status": "In Production",
-      "priority": "Urgent",
+      "priority": "High",
       "placed": "2026-11-07",
       "due": "2026-11-07",
       "deadlineTime": "17:30",
@@ -201,7 +201,7 @@
       "address": "Villa Barosa, San Fernando, Pampanga",
       "itemSummary": "Mahogany 6-Seater Dining Set (Standard Catalog Dimensions)",
       "quantity": 1,
-      "status": "Completed",
+      "status": "Pending",
       "priority": "Normal",
       "placed": "2026-10-20",
       "due": "2026-11-02",
@@ -269,21 +269,6 @@
   "nextMessageId": 5,
   "sessions": [
     [
-      "0035cb3621d8cec1a262ce9769f10cee6c19f60488dace87",
-      {
-        "token": "0035cb3621d8cec1a262ce9769f10cee6c19f60488dace87",
-        "isAuthenticated": true,
-        "role": "admin",
-        "userId": 1,
-        "name": "Rowena & Lilia (Workshop Admin)",
-        "email": "admin@liliaandrowena.com",
-        "phone": "0917-889-4211",
-        "address": "MacArthur Highway, San Fernando, Pampanga",
-        "activeCustomerId": 1,
-        "csrfToken": "dd9af4375778607188087d365a399cd8d7e3f8358c91d741"
-      }
-    ],
-    [
       "d09001be9c031c4736b0cddb6bbcb5d3b892df339f1c3856",
       {
         "token": "d09001be9c031c4736b0cddb6bbcb5d3b892df339f1c3856",
@@ -303,6 +288,66 @@
       {
         "token": "21a2b5c7e435781cf105a8c0fb19811be026beaffd826007",
         "csrfToken": "e75ca07a2bb0eaae05eb4cf67c4332f8c8d55acb2a70c826",
+        "isAuthenticated": true,
+        "role": "admin",
+        "userId": 1,
+        "name": "Rowena & Lilia (Workshop Admin)",
+        "email": "admin@liliaandrowena.com",
+        "phone": "0917-889-4211",
+        "address": "MacArthur Highway, San Fernando, Pampanga",
+        "activeCustomerId": 1
+      }
+    ],
+    [
+      "f1b4d928972ad5947552a39fb84d1a0840a06b4f8b7efc68",
+      {
+        "token": "f1b4d928972ad5947552a39fb84d1a0840a06b4f8b7efc68",
+        "csrfToken": "4239e474f16a29378622b7ae7d16c546ab2eb4cd012170aa",
+        "isAuthenticated": true,
+        "role": "admin",
+        "userId": 1,
+        "name": "Rowena & Lilia (Workshop Admin)",
+        "email": "admin@liliaandrowena.com",
+        "phone": "0917-889-4211",
+        "address": "MacArthur Highway, San Fernando, Pampanga",
+        "activeCustomerId": 1
+      }
+    ],
+    [
+      "824c65324fb043d74418b1ac780055166e0987cd20ecbf75",
+      {
+        "token": "824c65324fb043d74418b1ac780055166e0987cd20ecbf75",
+        "csrfToken": "1668df327d6b960f6c8a3980b392f201fb088e685fe7de41",
+        "isAuthenticated": true,
+        "role": "admin",
+        "userId": 1,
+        "name": "Rowena & Lilia (Workshop Admin)",
+        "email": "admin@liliaandrowena.com",
+        "phone": "0917-889-4211",
+        "address": "MacArthur Highway, San Fernando, Pampanga",
+        "activeCustomerId": 1
+      }
+    ],
+    [
+      "5ff80e717c61625f5345ffdc193e9085f53189ba116428f6",
+      {
+        "token": "5ff80e717c61625f5345ffdc193e9085f53189ba116428f6",
+        "csrfToken": "1c33726bf76ea2b1f59159196813de396dc72911a7de3062",
+        "isAuthenticated": true,
+        "role": "admin",
+        "userId": 1,
+        "name": "Rowena & Lilia (Workshop Admin)",
+        "email": "admin@liliaandrowena.com",
+        "phone": "0917-889-4211",
+        "address": "MacArthur Highway, San Fernando, Pampanga",
+        "activeCustomerId": 4
+      }
+    ],
+    [
+      "9b019c72e5b35a9122fed00d3fa5abd3035f4b0a1628cdd2",
+      {
+        "token": "9b019c72e5b35a9122fed00d3fa5abd3035f4b0a1628cdd2",
+        "csrfToken": "9eb3387bdfd5e4ecff5fc384463a75d84984f393af53643d",
         "isAuthenticated": true,
         "role": "admin",
         "userId": 1,

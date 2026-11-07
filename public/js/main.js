@@ -1152,7 +1152,11 @@ function resetAdminOmsFilters() {
 
 function scrollToAdminSection(elementId) {
     var target = document.getElementById(elementId);
-    if (target) {
+    var container = document.getElementById('omsMainScrollContainer');
+    if (target && container) {
+        var topOffset = target.offsetTop - container.offsetTop - 12;
+        container.scrollTo({ top: Math.max(0, topOffset), behavior: 'smooth' });
+    } else if (target) {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
@@ -1659,7 +1663,7 @@ function renderAdminDashboard() {
                 // 5. Order Status
                 '<td>' +
                     '<div><span class="oms-status-badge ' + getStatusBadgeClassName(status) + '">' + escapeAdminHtml(status) + '</span></div>' +
-                    '<select aria-label="Status for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.25rem; padding:0.18rem 0.25rem; font-size:0.67rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:112px;">' +
+                    '<select aria-label="Status for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStatus(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.15rem 0.2rem; font-size:0.65rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:100px;">' +
                         statusOpts +
                     '</select>' +
                 '</td>' +
@@ -1673,20 +1677,20 @@ function renderAdminDashboard() {
                 // 7. Priority
                 '<td>' +
                     '<div><span class="oms-priority-badge ' + getPriorityBadgeClassName(priority) + '">' + getPriorityIconText(priority) + '</span></div>' +
-                    '<select aria-label="Priority for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderPriority(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.25rem; padding:0.18rem 0.25rem; font-size:0.67rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:82px;">' +
+                    '<select aria-label="Priority for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderPriority(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.15rem 0.2rem; font-size:0.65rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:74px;">' +
                         prioOpts +
                     '</select>' +
                 '</td>' +
                 // 8. Order Date
                 '<td>' +
-                    '<strong style="display:block; color:#0f172a; font-size:0.72rem; white-space:nowrap;">' + formatReadableDateManila(orderDate) + '</strong>' +
-                    '<span style="display:block; font-size:0.64rem; color:#64748b;">' + escapeAdminHtml(orderDate) + '</span>' +
-                    (isOrderedToday ? '<div><span style="display:inline-block; margin-top:0.15rem; background:#e0f2fe; color:#0369a1; font-size:0.59rem; font-weight:800; padding:0.08rem 0.32rem; border-radius:4px;">NEW TODAY</span></div>' : '') +
+                    '<strong style="display:block; color:#0f172a; font-size:0.7rem; white-space:nowrap;">' + formatReadableDateManila(orderDate) + '</strong>' +
+                    '<span style="display:block; font-size:0.62rem; color:#64748b;">' + escapeAdminHtml(orderDate) + '</span>' +
+                    (isOrderedToday ? '<div><span style="display:inline-block; margin-top:0.15rem; background:#e0f2fe; color:#0369a1; font-size:0.58rem; font-weight:800; padding:0.08rem 0.3rem; border-radius:4px;">NEW TODAY</span></div>' : '') +
                 '</td>' +
                 // 9. Assigned Staff
                 '<td>' +
                     '<div><span class="oms-staff-chip">👷 ' + escapeAdminHtml(currentStaff) + '</span></div>' +
-                    '<select aria-label="Staff for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStaff(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.25rem; padding:0.18rem 0.25rem; font-size:0.66rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:122px;">' +
+                    '<select aria-label="Staff for JO-' + escapeAdminHtml(oid) + '" onchange="quickUpdateJobOrderStaff(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.15rem 0.2rem; font-size:0.64rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:108px;">' +
                         staffOpts +
                     '</select>' +
                 '</td>' +
@@ -1695,7 +1699,7 @@ function renderAdminDashboard() {
                     '<span class="oms-deadline-date">' + formatReadableDateManila(dueDate) + '</span>' +
                     '<span class="oms-deadline-time">' + escapeAdminHtml(item.deadlineTime || '05:00 PM') + '</span>' +
                     '<div>' + deadlineBadgeHtml + '</div>' +
-                    '<input type="date" aria-label="Deadline for JO-' + escapeAdminHtml(oid) + '" value="' + escapeAdminHtml(dueDate) + '" onchange="quickUpdateJobOrderDeadline(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.22rem; padding:0.14rem 0.22rem; font-size:0.65rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:112px;">' +
+                    '<input type="date" aria-label="Deadline for JO-' + escapeAdminHtml(oid) + '" value="' + escapeAdminHtml(dueDate) + '" onchange="quickUpdateJobOrderDeadline(\'' + escapeAdminHtml(oid) + '\', this.value)" style="margin-top:0.2rem; padding:0.12rem 0.18rem; font-size:0.63rem; border:1px solid #cbd5e1; border-radius:5px; background:#fff; width:104px;">' +
                 '</td>' +
                 // 11. Actions
                 '<td>' +
@@ -1812,7 +1816,11 @@ function openAdminJobOrderDetail(orderId) {
     selectedAdminDetailOrderId = String(orderId);
     renderAdminJobOrderDetailContent(selectedAdminDetailOrderId);
     var panel = document.getElementById('adminJobOrderDetailPanel') || document.getElementById('adminOrderDetailPanel');
-    if (panel) {
+    var container = document.getElementById('omsMainScrollContainer');
+    if (panel && container) {
+        var topOffset = panel.offsetTop - container.offsetTop - 12;
+        container.scrollTo({ top: Math.max(0, topOffset), behavior: 'smooth' });
+    } else if (panel) {
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
